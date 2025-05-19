@@ -165,7 +165,7 @@ export const SidebarLayoutLeft = () => {
     navigate.push('/login');
   };
   return (
-    <aside className="hidden md:flex flex-col w-64 border-r border-app-border p-4">
+    <aside className="hidden lg:flex flex-col w-64 border-r border-app-border p-4">
       <div className="flex-1 space-y-4">
         {/* <div className="mb-6">
           <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
@@ -270,7 +270,7 @@ export const SidebarLayoutLeft = () => {
 
 export const SidebarLayoutRight = () => {
   return (
-    <aside className="hidden md:flex flex-col w-80 h-screen border-l border-app-border p-4">
+    <aside className="hidden lg:flex flex-col w-80 h-screen border-l border-app-border p-4">
       <div className="sticky top-4 space-y-4">
         `{' '}
         <div className="bg-app-hover rounded-lg p-4">

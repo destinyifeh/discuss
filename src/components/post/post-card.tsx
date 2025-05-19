@@ -77,7 +77,7 @@ export const PostCard = ({
     return newDate;
   };
 
-  const formatTimeAgo = (date: Date): string => {
+  const formatTimeAgo = (date: Date | string): string => {
     const distance = formatDistanceToNow(new Date(date), {addSuffix: false});
 
     return distance
@@ -135,7 +135,7 @@ export const PostCard = ({
   const shouldTruncate = post.content.length > 100;
   const displayContent =
     shouldTruncate && !expanded && !isInDetailView
-      ? post.content.slice(0, 50) + '...'
+      ? post.content.slice(0, 100) + '...'
       : post.content;
 
   const handleCopyLink = (e: React.MouseEvent) => {

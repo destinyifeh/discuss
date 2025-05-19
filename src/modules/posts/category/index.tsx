@@ -1,8 +1,8 @@
 'use client';
 
 import {AppSponsoredAd} from '@/components/ad/ad-card';
-import {AppBannerAd} from '@/components/ad/banner';
 import {PostCard} from '@/components/post/post-card';
+import {CategoryPostList} from '@/components/post/post-list';
 import {Button} from '@/components/ui/button';
 import {Categories, Posts} from '@/constants/data';
 import {ChevronLeft, PlusCircle} from 'lucide-react';
@@ -39,6 +39,8 @@ export const CategoryPage = () => {
 
   const isAdvertiseCategory = theCategory === 'advertise';
 
+  const show = false;
+
   return (
     <div>
       <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
@@ -59,9 +61,9 @@ export const CategoryPage = () => {
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <AppBannerAd category={category.name.toLowerCase()} />
-      </div>
+      </div> */}
 
       {isAdvertiseCategory && (
         <div className="p-6 border-b border-app-border bg-app-hover">
@@ -78,29 +80,38 @@ export const CategoryPage = () => {
           </Link>
         </div>
       )}
+      {show && (
+        <>
+          <div>
+            <AppSponsoredAd category={category.name.toLowerCase()} />
+          </div>
 
-      <div>
-        <AppSponsoredAd category="home" />
-      </div>
-
-      {sortedPosts.length > 0 ? (
-        <div className="divide-y divide-app-border">
-          {sortedPosts.map(post => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      ) : (
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">No posts yet</h2>
-          <p className="text-app-gray">
-            Be the first to post in this category!
-          </p>
-          <Button
-            className="mt-4 bg-app hover:bg-app/90"
-            onClick={() => navigate.push('/create')}>
-            Create Post
-          </Button>
-        </div>
+          {sortedPosts.length > 0 ? (
+            <div className="divide-y divide-app-border">
+              {sortedPosts.map(post => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <h2 className="text-xl font-bold mb-2">No posts yet</h2>
+              <p className="text-app-gray">
+                Be the first to post in this category!
+              </p>
+              <Button
+                className="mt-4 bg-app hover:bg-app/90"
+                onClick={() => navigate.push('/create')}>
+                Create Post
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+      {!show && (
+        <CategoryPostList
+          adCategory="home"
+          bannerAd={category.name.toLowerCase()}
+        />
       )}
     </div>
   );

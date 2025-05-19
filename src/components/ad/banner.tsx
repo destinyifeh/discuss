@@ -1,6 +1,8 @@
 'use client';
 
 import {mockAds} from '@/constants/data';
+import {useAdStore} from '@/hooks/stores/use-ad-store';
+import {shuffleArray} from '@/lib/helpers';
 import {cn} from '@/lib/utils';
 import {AdProps} from '@/types/ad-types';
 import {ExternalLink} from 'lucide-react';
@@ -90,9 +92,9 @@ export function BannerAd({
   );
 }
 
-export function AppBannerAd({category}: {category: string}) {
-  const bannerAds = mockAds.filter(
-    ad => ad.type === 'Banner' && ad.category === category,
+export function AppBannerAd3({category}: {category: string}) {
+  const bannerAds = shuffleArray(
+    mockAds.filter(ad => ad.type === 'Banner' && ad.category === category),
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -103,6 +105,33 @@ export function AppBannerAd({category}: {category: string}) {
 
     return () => clearInterval(interval);
   }, [bannerAds.length]);
+
+  if (bannerAds.length === 0) return null;
+
+  const currentAd = bannerAds[currentIndex];
+
+  return (
+    <div className="p-4 border-b border-app-border">
+      <BannerAd ad={currentAd} />
+    </div>
+  );
+}
+
+export function AppBannerAd({category}: {category: string}) {
+  const bannerAds = mockAds.filter(
+    ad => ad.type === 'Banner' && ad.category === category,
+  );
+
+  const currentIndex = useAdStore(
+    state => state.currentBannerIndex[category] || 0,
+  );
+  const startBannerRotation = useAdStore(state => state.startBannerRotation);
+
+  useEffect(() => {
+    if (bannerAds.length > 0) {
+      startBannerRotation(category, bannerAds.length);
+    }
+  }, [bannerAds.length, category, startBannerRotation]);
 
   if (bannerAds.length === 0) return null;
 

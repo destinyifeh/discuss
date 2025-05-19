@@ -25,7 +25,7 @@ export const MobileBottomTab = () => {
   return (
     <div>
       {!isPostDetail && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-app-border flex justify-around py-3 z-20 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-app-border flex justify-around py-3 z-20 lg:hidden">
           <Link
             href="/home"
             className={cn('p-2', isActive('/home') && 'text-app')}>

@@ -1,5 +1,7 @@
 'use client';
-import React, {useEffect, useState} from 'react';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {usePathname} from 'next/navigation';
+import React, {useState} from 'react';
 import {MobileBottomTab} from './mobile-bottom-tab';
 import MobileNavigation from './mobile-navigation';
 
@@ -8,34 +10,41 @@ type MainLayoutProps = {
 };
 
 export const MainLayout = ({children}: MainLayoutProps) => {
-  const [showBottomTab, setShowBottomTab] = useState(true);
+  const location = usePathname();
   const [lastScrollY, setLastScrollY] = useState(0);
+  const {showBottomTab} = useGlobalStore(state => state);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+  const isCategorySection =
+    location.includes('/discuss/') ||
+    (location.includes('/post/') && !location.includes('/reply'));
 
-      // If scrolling down, hide the bottom tab
-      if (currentScrollY > lastScrollY) {
-        setShowBottomTab(false);
-      } else {
-        // Scrolling up
-        setShowBottomTab(true);
-      }
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const currentScrollY = window.scrollY;
 
-      setLastScrollY(currentScrollY);
-    };
+  //     // If scrolling down, hide the bottom tab
+  //     if (currentScrollY > lastScrollY) {
+  //       setShowBottomTab(false);
+  //     } else {
+  //       // Scrolling up
+  //       setShowBottomTab(true);
+  //     }
 
-    window.addEventListener('scroll', handleScroll);
+  //     setLastScrollY(currentScrollY);
+  //   };
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  //   window.addEventListener('scroll', handleScroll);
+
+  //   return () => window.removeEventListener('scroll', handleScroll);
+  // }, [lastScrollY]);
 
   return (
     <React.Fragment>
-      <MobileNavigation />
+      {!isCategorySection && <MobileNavigation />}
       <main className="flex-1 flex flex-col max-w-3xl mx-auto border-x border-app-border ">
-        <div className="pt-14 md:pt-0">{children}</div>
+        <div className={`${isCategorySection ? 'pt-0' : 'pt-14'} md:pt-0`}>
+          {children}
+        </div>
         {showBottomTab && <MobileBottomTab />}
       </main>
     </React.Fragment>

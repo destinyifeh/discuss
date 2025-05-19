@@ -34,8 +34,8 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     username: 'johndoe',
   });
   // Check if we're on a post details page
-  const isPostDetail =
-    location.includes('/post/') && !location.includes('/reply');
+  const isCategorySection =
+    location.includes('/discuss/') && !location.includes('/reply');
 
   const isActive = (path: string) => location === path;
 
@@ -83,7 +83,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex md:hidden">
+    <div className="min-h-screen bg-white dark:bg-black flex lg:hidden">
       <div className="fixed top-0 left-0 right-0 bg-white border-b border-app-border flex justify-between items-center p-3 z-30">
         <Sheet>
           <SheetTrigger asChild>

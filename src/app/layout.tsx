@@ -5,7 +5,6 @@ import {
   Lato,
   Nunito,
   Oswald,
-  Poppins,
   Roboto,
 } from 'next/font/google';
 import './globals.css';
@@ -20,24 +19,18 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const poppinsFont = Poppins({
-  weight: '400',
-  variable: '--font-poppins',
-  subsets: ['latin'],
-});
-
-export const robotoFont = Roboto({
+const robotoFont = Roboto({
   //weight: '400',
   subsets: ['latin'],
 });
 
-export const nunitoFont = Nunito({
+const nunitoFont = Nunito({
   //weight: '400',
   variable: '--font-nunito',
   subsets: ['latin'],
 });
 
-export const latoFont = Lato({
+const latoFont = Lato({
   weight: '400',
   subsets: ['latin'],
 });

@@ -477,7 +477,7 @@ export const AdminDashboardPage = () => {
                     value={filterCategory}
                     onValueChange={setFilterCategory}>
                     <SelectTrigger id="filter-category">
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Select section" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>

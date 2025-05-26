@@ -8,7 +8,7 @@ const CommunityGuidelines = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-app-hover rounded-lg p-4 mb-4">
+    <div className="bg-white rounded-lg p-4 mb-4">
       <div className="flex items-start gap-2">
         <Info className="text-app mt-0.5" size={18} />
         <div className="flex-1">

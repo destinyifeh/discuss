@@ -28,12 +28,12 @@ import {
 } from 'lucide-react';
 import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
-import {Virtuoso} from 'react-virtuoso';
+import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
 
 export const PostDetailPage = () => {
   const {postId} = useParams<{postId: string}>();
-
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
   const isMobile = useMediaQuery({maxWidth: 767});
   const [comment, setComment] = useState('');
@@ -112,6 +112,7 @@ export const PostDetailPage = () => {
       const formattedQuote = `> ${commentToQuote.username}: ${contentToQuote}`;
       setQuoteContent(formattedQuote);
       setQuotedUser(commentToQuote.username);
+      setShowMobileComment(true);
 
       if (isMobile) {
         setShowMobileComment(true);
@@ -198,6 +199,8 @@ export const PostDetailPage = () => {
     }
   };
 
+  const allowInlineCom = false;
+
   const sponsoredAd = mockAds.filter(
     ad => ad.type === 'Sponsored' && ad.category === 'home',
   );
@@ -225,6 +228,7 @@ export const PostDetailPage = () => {
         <Virtuoso
           className="custom-scrollbar hide-scrollbar overflow-y-auto"
           style={{height: '100vh'}}
+          ref={virtuosoRef}
           // onScroll={handleScroll}
           // initialTopMostItemIndex={0}
           // data={sortedComments}
@@ -243,7 +247,13 @@ export const PostDetailPage = () => {
             if (item.type === 'ad') {
               return <AdCard ad={item.data} />;
             }
-            return <CommentCard comment={item.data} key={item.data.id} />;
+            return (
+              <CommentCard
+                comment={item.data}
+                key={item.data.id}
+                onQuote={() => handleQuoteComment(item.data.id)}
+              />
+            );
           }}
           // computeItemKey={(index, item) => {
           //   // Ensure unique & stable keys
@@ -252,7 +262,7 @@ export const PostDetailPage = () => {
           // }}
           components={{
             Header: () => (
-              <Fragment>
+              <div dir="ltr">
                 <div>
                   <AppBannerAd category="home" />
                 </div>
@@ -307,6 +317,7 @@ export const PostDetailPage = () => {
                             </Button>
                           </div>
                         )}
+
                         <Textarea
                           placeholder="Add your comment..."
                           value={comment}
@@ -367,7 +378,7 @@ export const PostDetailPage = () => {
                     </div>
                   </form>
                 </div>
-              </Fragment>
+              </div>
             ),
 
             EmptyPlaceholder: () => <CommentPlaceholder />,
@@ -394,7 +405,7 @@ export const PostDetailPage = () => {
 
       {/* Mobile comment section - slides up from bottom */}
 
-      <div className="md:hidden">
+      <div className="lg:hidden">
         {/* Comment button for mobile */}
         <Button
           className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90"
@@ -465,6 +476,124 @@ export const PostDetailPage = () => {
                     src={imagePreview}
                     alt="Preview"
                     className="w-full max-h-60 object-contain"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={removeImage}
+                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                    <X size={16} />
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center mt-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  ref={fileInputRef}
+                  id="image-upload"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-app"
+                  onClick={() => fileInputRef.current?.click()}>
+                  <ImagePlus size={18} />
+                </Button>
+                <Button
+                  onClick={handleSubmitComment}
+                  className="rounded-full bg-app hover:bg-app/90"
+                  disabled={isSubmitting || (!comment.trim() && !imagePreview)}>
+                  <Reply size={16} className="mr-2" />
+                  Reply
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="hidden lg:block">
+        {/* Comment button for mobile */}
+        <Button
+          className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 z-1"
+          size="icon"
+          onClick={() => {
+            setShowMobileComment(true);
+            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+          }}>
+          <MessageSquare size={24} />
+        </Button>
+
+        {/* Mobile inline comment section that slides up from bottom */}
+        <div
+          className={`max-w-3xl mx-auto fixed left-0 right-16 bottom-0 bg-app-hover border-t border-app-border transition-transform duration-300 ease-in-out transform ${
+            showMobileComment ? 'translate-y-0' : 'translate-y-full'
+          } z-50`}>
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-3">
+              <p className="font-semibold">Add a comment</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowMobileComment(false);
+                  setQuoteContent('');
+                  setQuotedUser('');
+                  setComment('');
+                  setImagePreview(null);
+                  virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                }}>
+                Cancel
+              </Button>
+            </div>
+
+            <div className="mt-1">
+              {/* User info with community guidelines */}
+              <div className="flex items-center mb-3">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src={user.avatar} />
+                  <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                {/* <div className="text-sm text-app">
+                  <span>Community Guidelines</span>
+                  <span className="mx-1">•</span>
+                  <span className="text-[#666]">
+                    Be respectful and constructive in your comments.
+                  </span>
+                </div> */}
+                <CommunityGuidelines />
+              </div>
+
+              {quotedUser && (
+                <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app">
+                  <div className="font-semibold mb-1 text-app">
+                    @{quotedUser}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                  </div>
+                </div>
+              )}
+
+              <Textarea
+                placeholder="Add a comment..."
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+              />
+
+              {imagePreview && (
+                <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200 py-1">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full max-h-30 object-contain"
                   />
                   <Button
                     type="button"

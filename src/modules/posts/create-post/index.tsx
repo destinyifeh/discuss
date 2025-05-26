@@ -290,7 +290,7 @@ export const CreatePostPage = () => {
                   value={selectedCategory}
                   onValueChange={setSelectedCategory}>
                   <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm">
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder="Select section" />
                   </SelectTrigger>
                   <SelectContent>
                     {Categories.map(category => (

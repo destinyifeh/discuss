@@ -132,7 +132,7 @@ export const AdCard = ({
         <Avatar
           className="w-10 h-10 cursor-pointer"
           onClick={navigateToUserProfile}>
-          <AvatarImage src={ad?.author.avatar} />
+          <AvatarImage src={ad?.author?.avatar} />
           <AvatarFallback>D</AvatarFallback>
         </Avatar>
 
@@ -142,7 +142,7 @@ export const AdCard = ({
               <div className="flex items-center gap-1 overflow-hidden">
                 <div className="font-bold hover:underline truncate cursor-pointer">
                   <Link href={`/user/dee`} className="">
-                    {ad?.author.name}
+                    {ad?.author?.name}
                   </Link>
                 </div>
 

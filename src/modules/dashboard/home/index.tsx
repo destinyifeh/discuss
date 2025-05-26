@@ -3,7 +3,7 @@
 import {AppSponsoredAd} from '@/components/ad/ad-card';
 import {AppBannerAd} from '@/components/ad/banner';
 import {PostCard} from '@/components/post/post-card';
-import {HomePostList, PostList} from '@/components/post/post-list';
+import {HomePostList} from '@/components/post/post-list';
 import {Badge} from '@/components/ui/badge';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Categories, Posts} from '@/constants/data';
@@ -98,8 +98,6 @@ export const HomePage = () => {
               <p className="text-app-gray">Be the first to post!</p>
             </div>
           )} */}
-
-            <PostList />
           </TabsContent>
 
           {/* Following tab content */}

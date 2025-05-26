@@ -1,2 +1,17 @@
+export const BASIC_AD_PRICE_FOR_7_DAYS = '₦10,500';
 
+export const BASIC_AD_PRICE_FOR__14_DAYS = '₦17,010.';
 
+export const BASIC_AD_PRICE_FOR__30_DAYS = '₦33,600';
+
+export const PROFESSIONAL_AD_PRICE_FOR_7_DAYS = '₦18,900';
+
+export const PROFESSIONAL_AD_PRICE_FOR__14_DAYS = '₦34,020';
+
+export const PROFESSIONAL_AD_PRICE_FOR__30_DAYS = '₦60,480';
+
+export const ENTERPRISE_AD_PRICE_FOR_7_DAYS = '₦34,020';
+
+export const ENTERPRISE_AD_PRICE_FOR__14_DAYS = '₦61,236';
+
+export const ENTERPRISE_AD_PRICE_FOR__30_DAYS = '₦108,864';

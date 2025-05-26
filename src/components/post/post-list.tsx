@@ -1,6 +1,5 @@
 'use client';
 import {Categories, mockAds, Posts} from '@/constants/data';
-import {useVirtualizer} from '@tanstack/react-virtual';
 import {Fragment, useMemo, useRef, useState} from 'react';
 //import {VariableSizeList as List} from 'react-window';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
@@ -20,80 +19,6 @@ import {AppBannerAd} from '../ad/banner';
 import {Badge} from '../ui/badge';
 import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import {PostCard} from './post-card';
-
-export const PostList45 = () => {
-  const sortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
-
-  // The scrollable element for your list
-  //const parentRef = useRef(null);
-
-  // The virtualizer
-  //   const rowVirtualizer = useVirtualizer({
-  //     count: 10000,
-  //     getScrollElement: () => parentRef.current,
-  //     estimateSize: () => 35,
-  //   });
-
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: sortedPosts.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 150, // adjust if your card is taller or shorter
-  });
-
-  return (
-    <>
-      {/* The scrollable element for your list */}
-      {sortedPosts.length > 0 ? (
-        <div
-          ref={parentRef}
-          style={{
-            height: `800px`,
-            overflow: 'auto', // Make it scroll!
-          }}>
-          {/* The large inner element to hold all of the items */}
-          <div
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}>
-            {/* Only the visible items in the virtualizer, manually positioned to be in view */}
-            {rowVirtualizer.getVirtualItems().map(virtualItem => {
-              const post = sortedPosts[virtualItem.index];
-
-              console.log(post, 'myyyous');
-
-              return (
-                <div
-                  key={virtualItem.key}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    width: '100%',
-                    height: '100%',
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}>
-                  <PostCard post={post} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">No posts yet</h2>
-          <p className="text-app-gray">Be the first to post!</p>
-        </div>
-      )}
-    </>
-  );
-};
 
 type MergedItem = {type: 'post'; data: PostProps} | {type: 'ad'; data: AdProps};
 export const CategoryPostList = ({
@@ -289,42 +214,6 @@ export const CategoryPostList = ({
   );
 };
 
-// export const PostList6 = () => {
-//   const sortedPosts = [...Posts].sort(
-//     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-//   );
-
-//   const ITEM_HEIGHT = 380; // Assume all PostCards are 180px tall
-
-//   // Function that returns the height of each item
-//   const getItemSize = () => ITEM_HEIGHT;
-
-//   // Row renderer
-//   const Row = ({index, style}: {index: number; style: React.CSSProperties}) => {
-//     const post = sortedPosts[index];
-//     return (
-//       <div
-//         style={{
-//           ...style,
-//           boxSizing: 'border-box',
-//           padding: '12px',
-//         }}>
-//         <PostCard post={post} />
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <List
-//       height={800} // height of visible area
-//       itemCount={sortedPosts.length}
-//       itemSize={getItemSize}
-//       width="100%">
-//       {Row}
-//     </List>
-//   );
-// };
-
 export const HomePostList = () => {
   const {setShowBottomTab} = useGlobalStore(state => state);
   const [activeTab, setActiveTab] = useState('for-you');
@@ -448,7 +337,7 @@ export const HomePostList = () => {
           onClick={() => {
             virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
           }}
-          className="fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
           <ArrowUp size={20} />
         </button>
       )}

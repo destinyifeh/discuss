@@ -1,0 +1,137 @@
+'use client';
+
+import {Button} from '@/components/ui/button';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {CheckCircle, ChevronLeft} from 'lucide-react';
+import {useState} from 'react';
+
+import {pricingTiers} from '@/fixtures/ad';
+import {useRouter} from 'next/navigation';
+
+export const AdvertisePage = () => {
+  const navigate = useRouter();
+
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState('pricing');
+  const [selectedDuration, setSelectedDuration] = useState('7');
+
+  const onPlanSelected = (plan: string) => {
+    console.log(plan, 'planooo');
+    setSelectedPlan(plan);
+    //navigate.push(`/create-ad/${plan.toLowerCase()}`);
+
+    navigate.push(`/advertise/create-ad?plan=${plan.toLowerCase()}`);
+  };
+
+  return (
+    <div>
+      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
+        <div className="px-4 py-3 flex items-center">
+          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
+            <ChevronLeft />
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold">Advertise with Us</h1>
+            <p className="text-sm text-app-gray">
+              Reach our engaged community with targeted advertising
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4">
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-4">
+            Choose Your Advertising Plan
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {pricingTiers.map(tier => (
+              <Card
+                key={tier.name}
+                className={`relative transition-all cursor-pointer ${
+                  selectedPlan === tier.name
+                    ? 'border-app ring-2 ring-app ring-opacity-50'
+                    : ''
+                } ${tier.featured ? 'border-app' : ''}`}
+                onClick={() => setSelectedPlan(tier.name)}>
+                {tier.featured && (
+                  <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-app text-white rounded-full text-xs font-medium">
+                    Popular
+                  </div>
+                )}
+                {selectedPlan === tier.name && (
+                  <div className="absolute top-2 left-2 bg-app text-white rounded-full p-1">
+                    <CheckCircle size={16} />
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle>{tier.name}</CardTitle>
+                  <div className="mt-2">
+                    <span className="text-2xl font-bold">{tier.price}</span>
+                    <span className="text-sm text-app-gray"> {tier.unit}</span>
+                  </div>
+                  <p className="text-sm text-app-gray">{tier.description}</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {tier.features.map(feature => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <CheckCircle size={16} className="text-green-500" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                    {tier.limitations?.map(limitation => (
+                      <li key={limitation} className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full bg-gray-200 flex-shrink-0"></span>
+                        <span className="text-sm text-app-gray">
+                          {limitation}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    className={`w-full mt-6 ${
+                      tier.featured || selectedPlan === tier.name
+                        ? 'bg-app hover:bg-app/90'
+                        : ''
+                    }`}
+                    onClick={() => {
+                      onPlanSelected(tier.name);
+                    }}>
+                    {selectedPlan === tier.name ? 'Selected' : 'Select'}{' '}
+                    {tier.name}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-lg font-bold mb-2">Why Advertise Here?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-app-hover p-4 rounded-lg">
+              <h3 className="font-bold mb-1">Engaged Audience</h3>
+              <p className="text-sm text-app-gray">
+                Our community is active and engaged, with high interaction
+                rates.
+              </p>
+            </div>
+            <div className="bg-app-hover p-4 rounded-lg">
+              <h3 className="font-bold mb-1">Targeted Reach</h3>
+              <p className="text-sm text-app-gray">
+                Reach users based on interests, categories, and engagement.
+              </p>
+            </div>
+            <div className="bg-app-hover p-4 rounded-lg">
+              <h3 className="font-bold mb-1">Multiple Formats</h3>
+              <p className="text-sm text-app-gray">
+                Choose from banners and sponsored posts.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

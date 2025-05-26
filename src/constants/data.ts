@@ -1,4 +1,4 @@
-import {AdProps} from '@/types/ad-types';
+import {AdCTA, AdProps} from '@/types/ad-types';
 import {Category} from '@/types/category';
 import {CommentProps, PostProps} from '@/types/post-item.type';
 import {UserTypes} from '@/types/user.types';
@@ -18,13 +18,13 @@ export const mockAds: AdProps[] = [
     content: `Don't miss out on our massive summer sale! Enjoy up to 50% off on selected items including electronics, fashion, and home essentials. Hurry, offers valid while stock lasts.`,
     imageUrl:
       'https://images.ctfassets.net/hrltx12pl8hq/4kzWG72Pi925q9Gtc6hBQh/6bdbb560251e188bab5d3ea1ad195d6b/1.jpg',
-    plan: 'Professional',
+    plan: 'professional',
     category: 'home',
     price: 30,
     status: 'pending',
     submittedDate: '2023-06-15T10:30:00Z',
     targetUrl: 'https://example.com/fitness-program',
-    callToAction: 'Get Started',
+    callToAction: AdCTA.GetStarted,
   },
 
   {
@@ -40,13 +40,13 @@ export const mockAds: AdProps[] = [
     content: `Don't miss out on our massive summer sale! Enjoy up to 50% off on selected items including electronics, fashion, and home essentials. Hurry, offers valid while stock lasts.`,
     imageUrl:
       'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
-    plan: 'Professional',
+    plan: 'professional',
     category: 'sports',
     price: 30,
     status: 'pending',
     submittedDate: '2023-06-15T10:30:00Z',
     targetUrl: 'https://example.com/fitness-program',
-    callToAction: 'Get Started',
+    callToAction: AdCTA.GetStarted,
   },
 
   {
@@ -62,13 +62,13 @@ export const mockAds: AdProps[] = [
     content: `Don't miss out on our massive summer sale! Enjoy up to 50% off on selected items including electronics, fashion, and home essentials. Hurry, offers valid while stock lasts.`,
     imageUrl:
       'https://media.istockphoto.com/id/1265024528/photo/no-better-adventure-buddy.jpg?s=2048x2048&w=is&k=20&c=MWC1kpj44knI78injFyQOW7wGnTixFQbzUuTy7NmDVo=',
-    plan: 'Professional',
+    plan: 'professional',
     category: 'sports',
     price: 30,
     status: 'pending',
     submittedDate: '2023-06-15T10:30:00Z',
     targetUrl: 'https://example.com/fitness-program',
-    callToAction: 'Get Started',
+    callToAction: AdCTA.GetStarted,
   },
   {
     id: 'new-product',
@@ -82,7 +82,7 @@ export const mockAds: AdProps[] = [
     type: 'Banner',
     imageUrl:
       'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
-    plan: 'Enterprise',
+    plan: 'enterprise',
     category: 'home',
     price: 100,
     status: 'pending',
@@ -101,13 +101,13 @@ export const mockAds: AdProps[] = [
     type: 'Sponsored',
     title: ' Leveraging AI to improve customer experience - MTN ',
     content: `Escape the stress and unwind with our exclusive holiday packages! Get discounts on flights, hotels, and guided tours to breathtaking destinations across the globe.`,
-    plan: 'Basic',
+    plan: 'basic',
     category: 'home',
     price: 10,
     status: 'approved',
     submittedDate: '2023-06-10T09:15:00Z',
     approvedDate: '2023-06-11T11:20:00Z',
-    callToAction: 'Sign Up',
+    callToAction: AdCTA.SignUp,
     targetUrl: 'https://example.com/fitness-program',
   },
   {
@@ -123,7 +123,7 @@ export const mockAds: AdProps[] = [
     title: 'firnessing',
     imageUrl:
       'https://media.istockphoto.com/id/1316524516/photo/modern-large-luxury-dark-gray-kitchen-closeup.jpg?s=612x612&w=0&k=20&c=FtLMlE9VzOx5o8Vq0H_5xMZ8dDj5MsG0q5NVWSPlVzU=',
-    plan: 'Professional',
+    plan: 'professional',
     category: 'home',
     price: 30,
     status: 'rejected',
@@ -146,13 +146,13 @@ export const mockAds: AdProps[] = [
     content: `Join our free live webinar on "The Role of AI in Modern Education". Learn how artificial intelligence is shaping classrooms of the future, improving outcomes, and redefining learning experiences.`,
     imageUrl:
       'https://media.istockphoto.com/id/1316524516/photo/modern-large-luxury-dark-gray-kitchen-closeup.jpg?s=612x612&w=0&k=20&c=FtLMlE9VzOx5o8Vq0H_5xMZ8dDj5MsG0q5NVWSPlVzU=',
-    plan: 'Basic',
+    plan: 'basic',
     category: 'home',
     price: 10,
     status: 'approved',
     submittedDate: '2023-06-05T11:20:00Z',
     approvedDate: '2023-06-06T14:10:00Z',
-    callToAction: 'Learn More',
+    callToAction: AdCTA.LearnMore,
     targetUrl: 'https://example.com/fitness-program',
   },
 ];

@@ -220,3 +220,17 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
 }
+
+
+@media (width: 1024px){
+.fixedBottomBtn{
+ right: 30%;
+}
+}
+
+
+@media (width: 1280px){
+  .fixedBottomBtn{
+   right: 24%;
+  }
+  }

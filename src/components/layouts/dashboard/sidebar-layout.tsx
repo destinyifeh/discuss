@@ -108,7 +108,7 @@ export const SidebarLayoutLeft = () => {
     {
       label: 'Ad View',
       icon: <BarChart2 size={24} className="mr-4" />,
-      path: '/ad-performance',
+      path: '/advertise/ad-performance',
     },
 
     {

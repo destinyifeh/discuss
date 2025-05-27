@@ -2,9 +2,10 @@
 
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {CheckCircle, ChevronLeft} from 'lucide-react';
+import {CheckCircle} from 'lucide-react';
 import {useState} from 'react';
 
+import {PageHeader} from '@/components/app-headers';
 import {pricingTiers} from '@/fixtures/ad';
 import {useRouter} from 'next/navigation';
 
@@ -25,19 +26,10 @@ export const AdvertisePage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Advertise with Us</h1>
-            <p className="text-sm text-app-gray">
-              Reach our engaged community with targeted advertising
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Advertise with Us"
+        description="Reach our engaged community with targeted advertising"
+      />
 
       <div className="p-4">
         <div className="mb-8">

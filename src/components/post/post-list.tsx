@@ -17,6 +17,7 @@ import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {AdCard} from '../ad/ad-card';
 import {AppBannerAd} from '../ad/banner';
 import {Badge} from '../ui/badge';
+import {Button} from '../ui/button';
 import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import {PostCard} from './post-card';
 
@@ -176,7 +177,7 @@ export const CategoryPostList = ({
               <AppBannerAd category={bannerAd} />
             </div>
           ),
-          EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
+          EmptyPlaceholder: () => <SectionPlaceholder />,
         }}
         //endReached={fetchMore}
         // data={mergedPosts}
@@ -268,6 +269,14 @@ export const HomePostList = () => {
   const handleGoToTop = () => {
     scrollRef.current?.scrollTo({top: 0});
   };
+
+  const onSectionNavigate = (section: string) => {
+    if (section === 'Create Ad') {
+      navigate.push('/advertise');
+      return;
+    }
+    navigate.push(`/discuss/${section.toLowerCase()}`);
+  };
   return (
     <div>
       <Virtuoso
@@ -301,7 +310,7 @@ export const HomePostList = () => {
                 </div>
               </Tabs>
 
-              <div className="px-4 py-3 border-b border-app-border md:hidden">
+              <div className="px-4 py-3 border-b border-app-border lg:hidden md:mt-7">
                 <h2 className="font-semibold mb-2 text-black">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {Categories.map(category => (
@@ -309,9 +318,7 @@ export const HomePostList = () => {
                       key={category.id}
                       variant="outline"
                       className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-black"
-                      onClick={() =>
-                        navigate.push(`/discuss/${category.name.toLowerCase()}`)
-                      }>
+                      onClick={() => onSectionNavigate(category.name)}>
                       {category.name}
                     </Badge>
                   ))}
@@ -367,6 +374,21 @@ export const PostPlaceholder = ({tab}: {tab: string}) => {
           </button>
         </>
       )}
+    </div>
+  );
+};
+
+export const SectionPlaceholder = () => {
+  const navigate = useRouter();
+  return (
+    <div className="p-8 text-center">
+      <h2 className="text-xl font-bold mb-2">No posts yet</h2>
+      <p className="text-app-gray">Be the first to post in this section!</p>
+      <Button
+        className="mt-4 bg-app hover:bg-app/90"
+        onClick={() => navigate.push('/create')}>
+        Create Post
+      </Button>
     </div>
   );
 };

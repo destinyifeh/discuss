@@ -95,20 +95,6 @@ export const AdPreviewPage = ({
 
   return (
     <div className="pb-20">
-      {/* <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Advertise with Us</h1>
-            <p className="text-sm text-app-gray">
-              Reach our engaged community with targeted advertising
-            </p>
-          </div>
-        </div>
-      </div> */}
-
       {isAdSubmitted && <AdSubmitMessage />}
       {!isAdSubmitted && (
         <div className="p-4">

@@ -4,6 +4,7 @@ import {
   AdPerformanceCard,
   AdPerformancePlaceholder,
 } from '@/components/ad/ad-performace-card';
+import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {AdPerformanceData} from '@/types/ad-types';
 import {
@@ -11,12 +12,12 @@ import {
   AlertCircle,
   ArrowRight,
   CheckCircle,
-  ChevronLeft,
   Clock,
 } from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {CSSProperties, forwardRef, ReactNode, useState} from 'react';
 import {VirtuosoGrid} from 'react-virtuoso';
+import {AdPerformanceNav} from './components/ad-performance-nav';
 
 type AdStatus = 'pending' | 'approved' | 'rejected' | 'active' | 'expired';
 
@@ -165,12 +166,6 @@ const gridComponents = {
       </div>
     ),
   ),
-
-  //   Item: ({children, className, style, ...props}: ItemProps) => (
-  //     <div {...props} className={`h-full ${className ?? ''}`} style={{...style}}>
-  //       {children}
-  //     </div>
-  //   ),
 };
 
 export const AdPerformancePage = () => {
@@ -191,67 +186,15 @@ export const AdPerformancePage = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Ad Performance</h1>
-            <p className="text-sm text-app-gray">
-              Manage and track your advertisements
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Ad Performance"
+        description="Manage and track your advertisements"
+      />
 
-      <div className="mb-6 flex flex-wrap gap-2 mt-6 px-3">
-        <Button
-          variant={filteredStatus === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilteredStatus('all')}
-          className={`flex items-center text-black gap-1 ${
-            filteredStatus === 'all' && 'bg-app text-white hover:bg-app/90'
-          }`}>
-          All
-        </Button>
-        <Button
-          variant={filteredStatus === 'pending' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilteredStatus('pending')}
-          className={`flex items-center text-black gap-1 ${
-            filteredStatus === 'pending' && 'bg-app text-white hover:bg-app/90'
-          }`}>
-          <Clock size={16} /> Pending
-        </Button>
-        <Button
-          variant={filteredStatus === 'approved' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilteredStatus('approved')}
-          className={`flex items-center text-black gap-1 ${
-            filteredStatus === 'approved' && 'bg-app text-white hover:bg-app/90'
-          }`}>
-          <CheckCircle size={16} /> Approved
-        </Button>
-        <Button
-          variant={filteredStatus === 'active' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilteredStatus('active')}
-          className={`flex items-center text-black gap-1 ${
-            filteredStatus === 'active' && 'bg-app text-white hover:bg-app/90'
-          }`}>
-          <Activity size={16} /> Active
-        </Button>
-        <Button
-          variant={filteredStatus === 'rejected' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilteredStatus('rejected')}
-          className={`flex items-center text-black gap-1 ${
-            filteredStatus === 'rejected' && 'bg-app text-white hover:bg-app/90'
-          }`}>
-          <AlertCircle size={16} /> Rejected
-        </Button>
-      </div>
+      <AdPerformanceNav
+        filteredStatus={filteredStatus}
+        setFilteredStatus={setFilteredStatus}
+      />
 
       <div className="flex-1 overflow-hidden">
         {filteredAds.length === 0 ? (
@@ -276,7 +219,7 @@ export const AdPerformancePage = () => {
         )}
       </div>
 
-      <div className="mt-10 text-center">
+      <div className="mt-10 mb-20 md:mb-5 text-center">
         <Button
           onClick={() => navigate.push('/advertise')}
           className="bg-app hover:bg-app/90">

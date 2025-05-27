@@ -1,5 +1,6 @@
 'use client';
 
+import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent} from '@/components/ui/card';
 import {
@@ -21,7 +22,7 @@ import {
 } from '@/fixtures/ad';
 import {useAdStore} from '@/hooks/stores/use-ad-store';
 import {AdCTA, AdPlan, AdProps, AdType, DurationValue} from '@/types/ad-types';
-import {ArrowRight, CheckCircle, ChevronLeft, Upload} from 'lucide-react';
+import {ArrowRight, CheckCircle, Upload} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {ChangeEvent, Fragment, useRef, useState} from 'react';
 import {AdPreviewPage} from '../preview';
@@ -139,19 +140,10 @@ export const AdPlanPage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Advertise with Us</h1>
-            <p className="text-sm text-app-gray">
-              Reach our engaged community with targeted advertising
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Advertise with Us"
+        description="Reach our engaged community with targeted advertising"
+      />
 
       <div className="p-4">
         <p className="text-sm text-app-gray mt-2">{planDescription}</p>

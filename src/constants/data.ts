@@ -232,6 +232,12 @@ export const Categories: Category[] = [
     description: 'Celebrity gossip, news, and public appearances',
     ch: 'celeb',
   },
+
+  {
+    id: '13',
+    name: 'Create Ad',
+    description: 'Create your ad',
+  },
 ];
 
 // export const Posts: PostProps[] = [

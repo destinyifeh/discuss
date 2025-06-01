@@ -74,7 +74,7 @@ export const ContactSupportPage = () => {
     }, 1500);
   };
 
-  const supportCategories = [
+  const supportSections = [
     {
       icon: <MessageSquare className="h-5 w-5" />,
       title: 'General Inquiries',
@@ -114,15 +114,13 @@ export const ContactSupportPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {supportCategories.map((category, index) => (
+          {supportSections.map((section, index) => (
             <Card key={index} className="transition-all hover:shadow-md">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="p-2 bg-app/10 rounded-full">
-                  {category.icon}
-                </div>
+                <div className="p-2 bg-app/10 rounded-full">{section.icon}</div>
                 <div>
-                  <CardTitle className="text-lg">{category.title}</CardTitle>
-                  <CardDescription>{category.description}</CardDescription>
+                  <CardTitle className="text-lg">{section.title}</CardTitle>
+                  <CardDescription>{section.description}</CardDescription>
                 </div>
               </CardHeader>
             </Card>

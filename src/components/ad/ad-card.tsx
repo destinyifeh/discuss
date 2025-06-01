@@ -365,9 +365,9 @@ export const AdCard = ({
   );
 };
 
-export function AppSponsoredAd({category}: {category: string}) {
+export function AppSponsoredAd({section}: {section: string}) {
   const sponsoredAds = mockAds.filter(
-    ad => ad.type === 'Sponsored' && ad.category === category,
+    ad => ad.type === 'Sponsored' && ad.section === section,
   );
   if (sponsoredAds.length === 0) return null;
   return (

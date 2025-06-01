@@ -1,4 +1,4 @@
-export interface Category {
+export interface Section {
   id: string;
   name: string;
   description?: string;

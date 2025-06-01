@@ -1,4 +1,15 @@
 'use client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import {Button} from '@/components/ui/button';
 import {
   Dialog,
@@ -11,6 +22,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
+import {Separator} from '@/components/ui/separator';
 import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
 import {
@@ -34,6 +46,8 @@ export const SettingsPage = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   if (!user) return null;
 
@@ -244,9 +258,84 @@ export const SettingsPage = () => {
           </div>
         </div>
 
-        <div className="p-4 text-center text-app-gray text-sm">
-          <p>Forum App v1.0.0</p>
-          <p className="mt-1">© 2025 Forum App. All rights reserved.</p>
+        <Separator />
+
+        {/* Danger Zone */}
+        <div className="p-4">
+          <h2 className="text-lg font-semibold mb-4 text-red-500">
+            Danger Zone
+          </h2>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">Deactivate Account</h3>
+                <p className="text-sm text-muted-foreground">
+                  Temporarily disable your account
+                </p>
+              </div>
+              <AlertDialog
+                open={showDeactivateDialog}
+                onOpenChange={setShowDeactivateDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="text-red-500 border-red-500 hover:bg-red-50">
+                    Deactivate
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Deactivate Account</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to deactivate your account? This
+                      will temporarily disable your account and hide your
+                      profile from other users. You can reactivate it anytime by
+                      logging back in.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-600">
+                      Yes, Deactivate
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium">Delete Account</h3>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete your account and all data
+                </p>
+              </div>
+              <AlertDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">Delete</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Account</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to permanently delete your account?
+                      This action cannot be undone. All your posts, comments,
+                      followers, and personal data will be permanently removed
+                      from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-600">
+                      Yes, Delete Forever
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
         </div>
       </div>
     </div>

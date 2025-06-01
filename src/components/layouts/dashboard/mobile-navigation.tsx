@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import {Categories} from '@/constants/data';
+import {Sections} from '@/constants/data';
 import {cn} from '@/lib/utils';
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden';
 import {Bell, BookmarkIcon, Home, LogOut, Search, User} from 'lucide-react';
@@ -34,7 +34,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     username: 'johndoe',
   });
   // Check if we're on a post details page
-  const isCategorySection =
+  const isSection =
     location.includes('/discuss/') && !location.includes('/reply');
 
   const isActive = (path: string) => location === path;
@@ -56,18 +56,18 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     return null;
   }
 
-  // Get Technology category for the resources section
-  const techCategory = Categories.find(cat => cat.name === 'Technology');
+  // Get Technology section for the resources section
+  const techSection = Sections.find(cat => cat.name === 'Technology');
 
-  // Add the "Advertise" category
-  const advertiseCategory = {
+  // Add the "Advertise" section
+  const advertiseSection = {
     id: 'advertise',
     name: 'How to Advertise',
     description: 'Learn about advertising opportunities on our platform',
   };
 
   // Resources categories with only tech and advertise
-  const resourceCategories = [techCategory, advertiseCategory].filter(Boolean);
+  const resourceCategories = [techSection, advertiseSection].filter(Boolean);
 
   const navItems = [
     {icon: <Home size={24} />, label: 'Home', path: '/home'},

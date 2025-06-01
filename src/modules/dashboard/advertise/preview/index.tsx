@@ -142,7 +142,7 @@ export const AdPreviewPage = ({
                     Target {previewAdData.plan === 'basic' && 'Section'}
                   </span>
                   <p className="font-medium">
-                    {previewAdData.category || 'Multiple sections'}
+                    {previewAdData.section || 'Multiple sections'}
                   </p>
                 </div>
                 <div className="bg-app-hover p-3 rounded-lg">

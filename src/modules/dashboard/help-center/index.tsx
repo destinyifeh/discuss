@@ -30,7 +30,7 @@ import {useState} from 'react';
 export const HelpCenterPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories = [
+  const sections = [
     {
       icon: <Book className="h-8 w-8" />,
       title: 'Getting Started',
@@ -57,7 +57,7 @@ export const HelpCenterPage = () => {
     {
       question: 'How do I create a new post?',
       answer:
-        "To create a new post, click on the 'Create Post' button on the home page or in the sidebar. Fill in the title, content, and select a category for your post. You can also add images if needed. Once you're done, click 'Post' to publish your content.",
+        "To create a new post, click on the 'Create Post' button on the home page or in the sidebar. Fill in the title, content, and select a section for your post. You can also add images if needed. Once you're done, click 'Post' to publish your content.",
     },
     {
       question: 'How do I follow other users?',
@@ -120,14 +120,14 @@ export const HelpCenterPage = () => {
 
       {!searchQuery && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {categories.map((category, index) => (
+          {sections.map((section, index) => (
             <Card key={index} className="transition-all hover:shadow-md">
               <CardHeader className="flex flex-col items-center text-center">
                 <div className="p-2 bg-primary/10 rounded-full mb-2">
-                  {category.icon}
+                  {section.icon}
                 </div>
-                <CardTitle>{category.title}</CardTitle>
-                <CardDescription>{category.description}</CardDescription>
+                <CardTitle>{section.title}</CardTitle>
+                <CardDescription>{section.description}</CardDescription>
               </CardHeader>
             </Card>
           ))}

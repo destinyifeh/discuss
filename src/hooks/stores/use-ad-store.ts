@@ -7,9 +7,9 @@ type States = {
 };
 
 type Actions = {
-  setCurrentBannerIndex: (category: string, index: number) => void;
+  setCurrentBannerIndex: (section: string, index: number) => void;
   setPreviewAdData: (data: AdProps) => void;
-  startBannerRotation: (category: string, adsLength: number) => void;
+  startBannerRotation: (section: string, adsLength: number) => void;
 };
 
 const initialState: States = {
@@ -26,7 +26,7 @@ const initialState: States = {
     content: '',
     imageUrl: '',
     plan: 'professional',
-    category: '',
+    section: '',
     price: '',
     status: 'pending',
     targetUrl: '',
@@ -43,29 +43,29 @@ export const useAdStore = create<States & Actions>(set => ({
   setPreviewAdData(data) {
     set({previewAdData: data});
   },
-  setCurrentBannerIndex: (category, index) => {
-    // console.log(category, 'ad cat');
+  setCurrentBannerIndex: (section, index) => {
+    // console.log(section, 'ad cat');
     set(state => ({
       currentBannerIndex: {
         ...state.currentBannerIndex,
-        [category]: index,
+        [section]: index,
       },
     }));
   },
-  startBannerRotation: (category, adsLength) => {
-    console.log(category, 'ad cat');
-    if (intervals[category]) return; // already running
+  startBannerRotation: (section, adsLength) => {
+    console.log(section, 'ad cat');
+    if (intervals[section]) return; // already running
 
-    intervals[category] = setInterval(() => {
-      console.log(category, 'ad cat22');
+    intervals[section] = setInterval(() => {
+      console.log(section, 'ad cat22');
       set(state => {
-        const prevIndex = state.currentBannerIndex[category] || 0;
+        const prevIndex = state.currentBannerIndex[section] || 0;
         const nextIndex = (prevIndex + 1) % adsLength;
 
         return {
           currentBannerIndex: {
             ...state.currentBannerIndex,
-            [category]: nextIndex,
+            [section]: nextIndex,
           },
         };
       });

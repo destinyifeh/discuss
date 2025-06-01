@@ -78,8 +78,8 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
             <p className="font-medium">{ad.plan}</p>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded-lg">
-            <p className="text-xs text-app-gray">Category</p>
-            <p className="font-medium">{ad.category}</p>
+            <p className="text-xs text-app-gray">Section</p>
+            <p className="font-medium">{ad.section}</p>
           </div>
         </div>
 

@@ -12,11 +12,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Comments, mockAds, Posts} from '@/constants/data';
-import {
-  insertAdsAtRandomCommentsPositions,
-  mergeCommentsWithAds,
-  shuffleArray,
-} from '@/lib/helpers';
+import {insertAdsAtRandomCommentsPositions} from '@/lib/helpers';
 import {CommentProps} from '@/types/post-item.type';
 import {
   ChevronLeft,
@@ -202,12 +198,12 @@ export const PostDetailPage = () => {
   const allowInlineCom = false;
 
   const sponsoredAd = mockAds.filter(
-    ad => ad.type === 'Sponsored' && ad.category === 'home',
+    ad => ad.type === 'Sponsored' && ad.section === 'home',
   );
 
-  const mergedItems2 = useMemo(() => {
-    return mergeCommentsWithAds(sortedComments, shuffleArray(sponsoredAd));
-  }, [Comments, mockAds]);
+  // const mergedItems2 = useMemo(() => {
+  //   return mergeCommentsWithAds(sortedComments, shuffleArray(sponsoredAd));
+  // }, [Comments, mockAds]);
 
   const mergedItems = useMemo(() => {
     return insertAdsAtRandomCommentsPositions(sortedComments, sponsoredAd);
@@ -264,7 +260,7 @@ export const PostDetailPage = () => {
             Header: () => (
               <div dir="ltr">
                 <div>
-                  <AppBannerAd category="home" />
+                  <AppBannerAd section="home" />
                 </div>
                 <div className="pb-2 border-b border-app-border">
                   <PostCard
@@ -280,104 +276,105 @@ export const PostDetailPage = () => {
                 </div>
 
                 {/* Web view comment input area */}
-
-                <div className="hidden md:block px-4 py-4 border-b border-app-border">
-                  <CommunityGuidelines />
-                  <form
-                    onSubmit={handleSubmitComment}
-                    className="mt-4 space-y-4">
-                    <div className="flex gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar} />
-                        <AvatarFallback>
-                          {user.displayName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        {quotedUser && (
-                          <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app flex flex-row justify-between">
-                            <div>
-                              <div className="font-semibold mb-1 text-app">
-                                @{quotedUser}
+                {allowInlineCom && (
+                  <div className="hidden md:block px-4 py-4 border-b border-app-border">
+                    <CommunityGuidelines />
+                    <form
+                      onSubmit={handleSubmitComment}
+                      className="mt-4 space-y-4">
+                      <div className="flex gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={user.avatar} />
+                          <AvatarFallback>
+                            {user.displayName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          {quotedUser && (
+                            <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app flex flex-row justify-between">
+                              <div>
+                                <div className="font-semibold mb-1 text-app">
+                                  @{quotedUser}
+                                </div>
+                                <div className="text-gray-700">
+                                  {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                                </div>
                               </div>
-                              <div className="text-gray-700">
-                                {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setQuoteContent('');
+                                  setQuotedUser('');
+                                  setComment('');
+                                  setImagePreview(null);
+                                }}>
+                                <X />
+                              </Button>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setQuoteContent('');
-                                setQuotedUser('');
-                                setComment('');
-                                setImagePreview(null);
-                              }}>
-                              <X />
-                            </Button>
-                          </div>
-                        )}
+                          )}
 
-                        <Textarea
-                          placeholder="Add your comment..."
-                          value={comment}
-                          onChange={e => setComment(e.target.value)}
-                          className="min-h-[120px] resize-none form-input"
-                          autoFocus
-                        />
-
-                        {imagePreview && (
-                          <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
-                            <img
-                              src={imagePreview}
-                              alt="Preview"
-                              className="w-full max-h-60 object-contain"
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              onClick={removeImage}
-                              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                              <X size={16} />
-                            </Button>
-                          </div>
-                        )}
-
-                        <div className="mt-3 flex justify-end items-center">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            ref={fileInputRef}
-                            id="image-upload"
+                          <Textarea
+                            placeholder="Add your comment..."
+                            value={comment}
+                            onChange={e => setComment(e.target.value)}
+                            className="min-h-[120px] resize-none form-input"
+                            autoFocus
                           />
-                          <div className="flex gap-3">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="text-app"
-                              onClick={() => fileInputRef.current?.click()}>
-                              <ImagePlus size={18} />
-                            </Button>
-                            <Button
-                              type="submit"
-                              className="bg-app hover:bg-app/90"
-                              disabled={
-                                isSubmitting ||
-                                (!comment.trim() && !imagePreview)
-                              }>
-                              <Send size={16} className="mr-2" />
-                              Post Reply
-                            </Button>
+
+                          {imagePreview && (
+                            <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
+                              <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="w-full max-h-60 object-contain"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                onClick={removeImage}
+                                className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                                <X size={16} />
+                              </Button>
+                            </div>
+                          )}
+
+                          <div className="mt-3 flex justify-end items-center">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                              ref={fileInputRef}
+                              id="image-upload"
+                            />
+                            <div className="flex gap-3">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="text-app"
+                                onClick={() => fileInputRef.current?.click()}>
+                                <ImagePlus size={18} />
+                              </Button>
+                              <Button
+                                type="submit"
+                                className="bg-app hover:bg-app/90"
+                                disabled={
+                                  isSubmitting ||
+                                  (!comment.trim() && !imagePreview)
+                                }>
+                                <Send size={16} className="mr-2" />
+                                Post Reply
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </form>
-                </div>
+                    </form>
+                  </div>
+                )}
               </div>
             ),
 

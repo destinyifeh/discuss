@@ -4,7 +4,7 @@ import {Input} from '@/components/ui/input';
 
 import {PostCard} from '@/components/post/post-card';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {Categories, Posts} from '@/constants/data';
+import {Posts, Sections} from '@/constants/data';
 import {Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 
@@ -60,13 +60,13 @@ export const ExplorePage = () => {
             <div className="px-4 pb-3 mb-3 border-b border-app-border">
               <h2 className="text-xl font-bold">Discuss</h2>
               <div className="flex flex-wrap gap-2 mt-3">
-                {Categories.map(category => (
+                {Sections.map(section => (
                   <Badge
-                    key={category.id}
+                    key={section.id}
                     variant="outline"
                     className="py-2 px-4 cursor-pointer hover:bg-app-hover rounded-full font-bold"
-                    onClick={() => navigate.push(`/category/${category.id}`)}>
-                    {category.name}
+                    onClick={() => navigate.push(`/section/${section.id}`)}>
+                    {section.name}
                   </Badge>
                 ))}
               </div>

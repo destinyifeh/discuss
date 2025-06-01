@@ -54,6 +54,7 @@
     "react-quill-new": "^3.4.6",
     "react-resizable-panels": "^3.0.1",
     "react-responsive": "^10.0.1",
+    "react-share": "^5.2.2",
     "react-virtuoso": "^4.12.7",
     "react-window": "^1.8.11",
     "recharts": "^2.15.3",

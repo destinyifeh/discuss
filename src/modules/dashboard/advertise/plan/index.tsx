@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {Categories} from '@/constants/data';
+import {Sections} from '@/constants/data';
 import {
   basicAdTypes,
   basicDurations,
@@ -42,7 +42,7 @@ export const AdPlanPage = () => {
     sponsor: 'Your Brand',
     type: 'Sponsored',
     imageUrl: '',
-    category: '',
+    section: '',
     callToAction: AdCTA.LearnMore,
     duration: '7' as DurationValue,
     plan: plan,
@@ -94,14 +94,14 @@ export const AdPlanPage = () => {
       duration,
       content,
       callToAction,
-      category,
+      section,
       type,
     } = previewData;
 
-    // Only the basic plan requires category
-    const requiresCategory = plan === 'basic';
+    // Only the basic plan requires section
+    const requiresSection = plan === 'basic';
     const isCommonInvalid =
-      !title || !targetUrl || !duration || (requiresCategory && !category);
+      !title || !targetUrl || !duration || (requiresSection && !section);
 
     if (type === 'Sponsored') {
       if (!content || !callToAction || isCommonInvalid) {
@@ -259,7 +259,7 @@ export const AdPlanPage = () => {
                   <SelectValue placeholder="Select section" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Categories.map(category => (
+                  {Sections.map(category => (
                     <SelectItem key={category.id} value={category.name}>
                       {category.name}
                     </SelectItem>
@@ -460,17 +460,17 @@ export const AdPlanPage = () => {
                 <div className="mb-5 md:mb-0">
                   <h2 className="text-lg font-bold mb-4">Target Section</h2>
                   <Select
-                    value={previewData.category}
+                    value={previewData.section}
                     onValueChange={value => {
-                      setPreviewData(prev => ({...prev, category: value}));
+                      setPreviewData(prev => ({...prev, section: value}));
                     }}>
                     <SelectTrigger className="w-full md:w-[300px] form-input">
                       <SelectValue placeholder="Select section" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Categories.map(category => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
+                      {Sections.map(section => (
+                        <SelectItem key={section.id} value={section.name}>
+                          {section.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -716,17 +716,17 @@ export const AdPlanPage = () => {
                 <div className="mb-5 md:mb-0">
                   <h2 className="text-lg font-bold mb-4">Target Section</h2>
                   <Select
-                    value={previewData.category}
+                    value={previewData.section}
                     onValueChange={value => {
-                      setPreviewData(prev => ({...prev, category: value}));
+                      setPreviewData(prev => ({...prev, section: value}));
                     }}>
                     <SelectTrigger className="w-full md:w-[300px] form-input">
                       <SelectValue placeholder="Select section" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Categories.map(category => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
+                      {Sections.map(section => (
+                        <SelectItem key={section.id} value={section.name}>
+                          {section.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

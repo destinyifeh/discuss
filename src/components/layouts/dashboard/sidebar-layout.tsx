@@ -1,6 +1,6 @@
 'use client';
 
-import {Categories} from '@/constants/data';
+import {resourceItems, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {
@@ -171,7 +171,7 @@ export const SidebarLayoutLeft = () => {
           <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
         </div> */}
         <div className="p-2 flex items-center justify-between">
-          <h1 className="text-xl font-bold">Discuss</h1>
+          <h1 className="text-xl font-bold">Discussday</h1>
           <Button variant="ghost" size="icon" onClick={() => {}}>
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
@@ -276,12 +276,16 @@ export const SidebarLayoutRight = () => {
         <div className="bg-app-hover rounded-lg p-4">
           <h2 className="font-bold text-xl mb-4">Discuss</h2>
           <div className="flex flex-row flex-wrap items-center">
-            {Categories.map(category => (
+            {Sections.map(section => (
               <Link
-                key={category.id}
-                href={`/discuss/${category.name.toLowerCase()}`}
+                key={section.id}
+                href={
+                  section.name === 'Create Ad'
+                    ? '/advertise'
+                    : `/discuss/${section.name.toLowerCase()}`
+                }
                 className="flex items-center justify-between p-2 hover:bg-white rounded-md">
-                <span>{category.name}</span>
+                <span className="text-app font-semibold">{section.name}</span>
               </Link>
             ))}
           </div>
@@ -327,12 +331,12 @@ export const SidebarLayoutRight = () => {
         <div className="bg-app-hover rounded-lg p-4">
           <h2 className="font-bold text-xl mb-4">Resources</h2>
           <div className="flex flex-row flex-wrap items-center">
-            {Categories.map(category => (
+            {resourceItems.map(resource => (
               <Link
-                key={category.id}
-                href={`/${category.name}`}
+                key={resource.label}
+                href={`${resource.path}`}
                 className="flex items-center justify-between p-2 hover:bg-white rounded-md">
-                <span className="text-app font-semibold">{category.name}</span>
+                <span className="text-app font-semibold">{resource.label}</span>
               </Link>
             ))}
           </div>

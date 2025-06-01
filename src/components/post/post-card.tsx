@@ -1,5 +1,5 @@
 'use client';
-import {Categories} from '@/constants/data';
+import {Sections} from '@/constants/data';
 import {cn} from '@/lib/utils';
 import {PostProps} from '@/types/post-item.type';
 import copy from 'copy-to-clipboard';
@@ -128,8 +128,8 @@ export const PostCard = ({
     navigate.push(`/profile/${post.username}`);
   };
 
-  const category = post.categoryId
-    ? Categories.find(cat => cat.id === post.categoryId)
+  const section = post.sectionId
+    ? Sections.find(cat => cat.id === post.sectionId)
     : null;
 
   const shouldTruncate = post.content.length > 100;
@@ -179,12 +179,12 @@ export const PostCard = ({
 
                 <span className="text-app-gray">·</span>
 
-                {category && (
+                {section && (
                   <Link
-                    href={`/discuss/${category.name.toLowerCase()}`}
+                    href={`/discuss/${section.name.toLowerCase()}`}
                     className="text-app hover:underline truncate"
                     onClick={e => e.stopPropagation()}>
-                    {category.name}
+                    {section.name}
                   </Link>
                 )}
 

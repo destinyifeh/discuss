@@ -42,7 +42,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {Textarea} from '@/components/ui/textarea';
-import {Categories, Comments, Posts} from '@/constants/data';
+import {Comments, Posts, Sections} from '@/constants/data';
 import {useRouter} from 'next/navigation';
 import {
   Bar,
@@ -67,7 +67,7 @@ const pendingAds = [
     description: 'Transform your body in 30 days with our proven program',
     sponsor: 'FitLife Inc',
     type: 'banner',
-    category: '5',
+    section: '5',
     duration: '30',
     submitted: new Date(2023, 4, 1),
     status: 'pending',
@@ -78,7 +78,7 @@ const pendingAds = [
     description: 'Huge discounts on all electronic devices this summer',
     sponsor: 'TechWorld',
     type: 'post',
-    category: '1',
+    section: '1',
     duration: '14',
     submitted: new Date(2023, 4, 2),
     status: 'pending',
@@ -136,7 +136,7 @@ export const AdminDashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentTab, setCurrentTab] = useState('overview');
   const [filterIsOpen, setFilterIsOpen] = useState(false);
-  const [filterCategory, setFilterCategory] = useState('all');
+  const [filterSection, setFilterSection] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterDateRange, setFilterDateRange] = useState('all');
 
@@ -180,11 +180,11 @@ export const AdminDashboardPage = () => {
       ad.sponsor.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ad.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
-      filterCategory === 'all' || ad.category === filterCategory;
+    const matchesSection =
+      filterSection === 'all' || ad.section === filterSection;
     const matchesStatus = filterStatus === 'all' || ad.status === filterStatus;
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesSection && matchesStatus;
   });
 
   const filteredUsers = [
@@ -244,10 +244,10 @@ export const AdminDashboardPage = () => {
   const isAdmin = user?.username === 'johndoe'; // Temporary condition for demo
 
   // Mock data for charts
-  const categoryData = Categories.map(cat => ({
+  const sectionData = Sections.map(cat => ({
     name: cat.ch,
-    posts: Posts.filter(post => post.categoryId === cat.id).length,
-    comments: Posts.filter(post => post.categoryId === cat.id).reduce(
+    posts: Posts.filter(post => post.sectionId === cat.id).length,
+    comments: Posts.filter(post => post.sectionId === cat.id).reduce(
       (acc, post) => {
         const postComments = Comments.filter(c => c.postId === post.id).length;
         return acc + postComments;
@@ -472,18 +472,18 @@ export const AdminDashboardPage = () => {
             <Card className="mb-4">
               <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="filter-category">Category</Label>
+                  <Label htmlFor="filter-section">section</Label>
                   <Select
-                    value={filterCategory}
-                    onValueChange={setFilterCategory}>
-                    <SelectTrigger id="filter-category">
+                    value={filterSection}
+                    onValueChange={setFilterSection}>
+                    <SelectTrigger id="filter-section">
                       <SelectValue placeholder="Select section" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {Categories.map(category => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                      {Sections.map(section => (
+                        <SelectItem key={section.id} value={section.id}>
+                          {section.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -527,7 +527,7 @@ export const AdminDashboardPage = () => {
                     variant="outline"
                     className="mr-2"
                     onClick={() => {
-                      setFilterCategory('all');
+                      setFilterSection('all');
                       setFilterStatus('all');
                       setFilterDateRange('all');
                     }}>
@@ -590,12 +590,12 @@ export const AdminDashboardPage = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Category Activity</CardTitle>
+                <CardTitle>section Activity</CardTitle>
               </CardHeader>
               <CardContent className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={categoryData}
+                    data={sectionData}
                     margin={{top: 20, right: 30, left: 20, bottom: 5}}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />

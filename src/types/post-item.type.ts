@@ -5,7 +5,7 @@ export interface PostProps {
   displayName: string;
   avatar: string;
   verified: boolean;
-  categoryId: string;
+  sectionId: string;
   title: string;
   content: string;
   timestamp: Date | string;
@@ -20,7 +20,7 @@ export interface PostProps {
   isSponsored?: boolean;
   allowComments?: boolean;
   sponsor?: string;
-  category?: string;
+  section?: string;
 }
 
 export interface CommentProps {

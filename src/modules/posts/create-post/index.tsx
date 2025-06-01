@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {Textarea} from '@/components/ui/textarea';
-import {Categories, Posts} from '@/constants/data';
+import {Posts, Sections} from '@/constants/data';
 import {PostProps} from '@/types/post-item.type';
 import {FileImage, SmileIcon, Trash2, Video} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
@@ -20,7 +20,7 @@ import {toast} from 'sonner';
 
 export const CreatePostPage = () => {
   const [content, setContent] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
   const [showVideoInput, setShowVideoInput] = useState(false);
@@ -37,7 +37,6 @@ export const CreatePostPage = () => {
 
   // Check if we're editing an existing post
   useEffect(() => {
-    // const postId = location.state?.postId;
     const postId = location.get('postId');
     if (postId) {
       const post = Posts.find(p => p.id === postId);
@@ -45,7 +44,7 @@ export const CreatePostPage = () => {
         setIsEditing(true);
         setPostToEdit(post);
         setContent(post.content);
-        setSelectedCategory(post.categoryId);
+        setSelectedSection(post.sectionId);
         setImageUrls(post.images || []);
         setVideoUrls(post.links || []);
       }
@@ -122,8 +121,8 @@ export const CreatePostPage = () => {
   };
 
   const handleSubmitPost = () => {
-    if (!content.trim() || !selectedCategory) {
-      toast.error('Please enter content and select a category.');
+    if (!content.trim() || !selectedSection) {
+      toast.error('Please enter content and select a section.');
       return;
     }
 
@@ -132,7 +131,7 @@ export const CreatePostPage = () => {
       updatePost({
         ...postToEdit,
         content: content,
-        categoryId: selectedCategory,
+        sectionId: selectedSection,
         images: imageUrls,
         links: videoUrls,
       });
@@ -148,7 +147,7 @@ export const CreatePostPage = () => {
         verified: user!.verified,
         content: content,
         title: content.split(' ').slice(0, 5).join(' ') + '...', // Generate title from content
-        categoryId: selectedCategory,
+        sectionId: selectedSection,
         images: imageUrls,
         links: videoUrls,
       });
@@ -172,7 +171,7 @@ export const CreatePostPage = () => {
           <Button
             className="rounded-full bg-app hover:bg-app/90 md:hidden"
             onClick={handleSubmitPost}
-            disabled={!content.trim() || !selectedCategory}>
+            disabled={!content.trim() || !selectedSection}>
             {isEditing ? 'Update' : 'Post'}
           </Button>
         </div>
@@ -287,15 +286,15 @@ export const CreatePostPage = () => {
                 </Button>
 
                 <Select
-                  value={selectedCategory}
-                  onValueChange={setSelectedCategory}>
+                  value={selectedSection}
+                  onValueChange={setSelectedSection}>
                   <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm">
                     <SelectValue placeholder="Select section" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Categories.map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
+                    {Sections.map(section => (
+                      <SelectItem key={section.id} value={section.id}>
+                        {section.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -304,7 +303,7 @@ export const CreatePostPage = () => {
                 <Button
                   className="hidden md:block rounded-full bg-app hover:bg-app/90"
                   onClick={handleSubmitPost}
-                  disabled={!content.trim() || !selectedCategory}>
+                  disabled={!content.trim() || !selectedSection}>
                   {isEditing ? 'Update' : 'Post'}
                 </Button>
               </div>

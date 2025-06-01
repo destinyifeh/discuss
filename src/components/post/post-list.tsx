@@ -1,5 +1,5 @@
 'use client';
-import {Categories, mockAds, Posts} from '@/constants/data';
+import {mockAds, Posts, Sections} from '@/constants/data';
 import {Fragment, useMemo, useRef, useState} from 'react';
 //import {VariableSizeList as List} from 'react-window';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
@@ -22,11 +22,11 @@ import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import {PostCard} from './post-card';
 
 type MergedItem = {type: 'post'; data: PostProps} | {type: 'ad'; data: AdProps};
-export const CategoryPostList = ({
-  adCategory,
+export const SectionPostList = ({
+  adSection,
   bannerAd,
 }: {
-  adCategory: string;
+  adSection: string;
   bannerAd: string;
 }) => {
   const stortedPosts = [...Posts].sort(
@@ -49,7 +49,7 @@ export const CategoryPostList = ({
   const data = activeTab === 'for-you' ? sortedPosts : sortedPosts2;
 
   const sponsoredAd = mockAds.filter(
-    ad => ad.type === 'Sponsored' && ad.category === adCategory,
+    ad => ad.type === 'Sponsored' && ad.section === adSection,
   );
 
   //   const [posts, setPosts] = useState([]);
@@ -116,7 +116,7 @@ export const CategoryPostList = ({
 
       const shuffledSponsoredAds = shuffleArray(
         mockAds.filter(
-          ad => ad.type === 'Sponsored' && ad.category === adCategory,
+          ad => ad.type === 'Sponsored' && ad.section === adSection,
         ),
       );
 
@@ -142,7 +142,7 @@ export const CategoryPostList = ({
       }
 
       return merged;
-    }, [Posts, mockAds, adCategory]);
+    }, [Posts, mockAds, adSection]);
   }
 
   const mergedPosts = useMemo(() => {
@@ -152,15 +152,15 @@ export const CategoryPostList = ({
     );
 
     const sponsoredAds = mockAds.filter(
-      ad => ad.type === 'Sponsored' && ad.category === adCategory,
+      ad => ad.type === 'Sponsored' && ad.section === adSection,
     );
 
     return insertAdsAtRandomPositions(sortedPosts, sponsoredAds);
-  }, [Posts, mockAds, adCategory]);
+  }, [Posts, mockAds, adSection]);
 
   const mergedItems = useMemo(() => {
     return mergePostsWithAds(sortedPosts, shuffleArray(sponsoredAd));
-  }, [Posts, mockAds, adCategory]);
+  }, [Posts, mockAds, adSection]);
 
   return (
     <div>
@@ -174,7 +174,7 @@ export const CategoryPostList = ({
         components={{
           Header: () => (
             <div>
-              <AppBannerAd category={bannerAd} />
+              <AppBannerAd section={bannerAd} />
             </div>
           ),
           EmptyPlaceholder: () => <SectionPlaceholder />,
@@ -311,22 +311,22 @@ export const HomePostList = () => {
               </Tabs>
 
               <div className="px-4 py-3 border-b border-app-border lg:hidden md:mt-7">
-                <h2 className="font-semibold mb-2 text-black">Discuss</h2>
+                <h2 className="font-semibold my-2 text-black">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {Categories.map(category => (
+                  {Sections.map(section => (
                     <Badge
-                      key={category.id}
+                      key={section.id}
                       variant="outline"
-                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-black"
-                      onClick={() => onSectionNavigate(category.name)}>
-                      {category.name}
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app"
+                      onClick={() => onSectionNavigate(section.name)}>
+                      {section.name}
                     </Badge>
                   ))}
                 </div>
               </div>
 
               <div>
-                <AppBannerAd category="home" />
+                <AppBannerAd section="home" />
               </div>
             </Fragment>
           ),

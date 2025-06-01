@@ -1,7 +1,7 @@
 'use client';
 
+import {AppFooter} from '@/components/app-footer';
 import {Button} from '@/components/ui/button';
-import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
 export const LandingPage = () => {
@@ -109,50 +109,7 @@ export const LandingPage = () => {
         </div>
       </div>
 
-      <footer className="py-8 px-4 text-center text-app-gray border-t">
-        <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto mb-4">
-          <Link href="#" className="hover:underline text-sm">
-            About
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Help Center
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Terms of Service
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Privacy Policy
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Cookie Policy
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Accessibility
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Ads info
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Blog
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Status
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Careers
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Brand Resources
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Advertising
-          </Link>
-          <Link href="#" className="hover:underline text-sm">
-            Marketing
-          </Link>
-        </div>
-        <p className="text-sm">© 2025 app App. All rights reserved.</p>
-      </footer>
+      <AppFooter />
     </div>
   );
 };

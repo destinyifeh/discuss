@@ -14,7 +14,7 @@ export const MainLayout = ({children}: MainLayoutProps) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const {showBottomTab} = useGlobalStore(state => state);
 
-  const isCategorySection =
+  const isSection =
     location.includes('/discuss/') ||
     (location.includes('/post/') && !location.includes('/reply'));
 
@@ -40,9 +40,9 @@ export const MainLayout = ({children}: MainLayoutProps) => {
 
   return (
     <React.Fragment>
-      {!isCategorySection && <MobileNavigation />}
+      {!isSection && <MobileNavigation />}
       <main className="flex-1 flex flex-col max-w-3xl mx-auto border-x border-app-border ">
-        <div className={`${isCategorySection ? 'pt-0' : 'pt-14'} md:pt-0`}>
+        <div className={`${isSection ? 'pt-0' : 'pt-14'} md:pt-0`}>
           {children}
         </div>
         {showBottomTab && <MobileBottomTab />}

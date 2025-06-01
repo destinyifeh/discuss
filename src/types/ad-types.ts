@@ -73,7 +73,7 @@ export interface AdProps {
   imageUrl?: string; // for banner ads
   callToAction?: AdCTA;
   title: string;
-  category: string;
+  section: string;
   duration?: string;
   sponsor?: string;
 }
@@ -93,7 +93,7 @@ export interface AdPerformanceData {
   description: string;
   plan: string;
   adType: string;
-  category: string;
+  section: string;
   status: AdStatus;
   impressions: number;
   clicks: number;

@@ -92,9 +92,9 @@ export function BannerAd({
   );
 }
 
-export function AppBannerAd3({category}: {category: string}) {
+export function AppBannerAd3({section}: {section: string}) {
   const bannerAds = shuffleArray(
-    mockAds.filter(ad => ad.type === 'Banner' && ad.category === category),
+    mockAds.filter(ad => ad.type === 'Banner' && ad.section === section),
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -117,21 +117,21 @@ export function AppBannerAd3({category}: {category: string}) {
   );
 }
 
-export function AppBannerAd({category}: {category: string}) {
+export function AppBannerAd({section}: {section: string}) {
   const bannerAds = mockAds.filter(
-    ad => ad.type === 'Banner' && ad.category === category,
+    ad => ad.type === 'Banner' && ad.section === section,
   );
 
   const currentIndex = useAdStore(
-    state => state.currentBannerIndex[category] || 0,
+    state => state.currentBannerIndex[section] || 0,
   );
   const startBannerRotation = useAdStore(state => state.startBannerRotation);
 
   useEffect(() => {
     if (bannerAds.length > 0) {
-      startBannerRotation(category, bannerAds.length);
+      startBannerRotation(section, bannerAds.length);
     }
-  }, [bannerAds.length, category, startBannerRotation]);
+  }, [bannerAds.length, section, startBannerRotation]);
 
   if (bannerAds.length === 0) return null;
 

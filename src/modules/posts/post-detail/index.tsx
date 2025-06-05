@@ -12,8 +12,10 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Comments, mockAds, Posts} from '@/constants/data';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {insertAdsAtRandomCommentsPositions} from '@/lib/helpers';
 import {CommentProps} from '@/types/post-item.type';
+import clsx from 'clsx';
 import {
   ChevronLeft,
   ImagePlus,
@@ -28,6 +30,7 @@ import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
 
 export const PostDetailPage = () => {
+  const {theme} = useGlobalStore(state => state);
   const {postId} = useParams<{postId: string}>();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
@@ -36,6 +39,7 @@ export const PostDetailPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quoteContent, setQuoteContent] = useState('');
   const [quotedUser, setQuotedUser] = useState('');
+  const [showWebComment, setShowWebComment] = useState(false);
   const [showMobileComment, setShowMobileComment] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -109,6 +113,7 @@ export const PostDetailPage = () => {
       setQuoteContent(formattedQuote);
       setQuotedUser(commentToQuote.username);
       setShowMobileComment(true);
+      setShowWebComment(true);
 
       if (isMobile) {
         setShowMobileComment(true);
@@ -210,7 +215,11 @@ export const PostDetailPage = () => {
   }, [Comments, mockAds]);
   return (
     <Fragment>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
+      <div
+        className={clsx('sticky top-0 backdrop-blur-sm z-10 border-b', {
+          'bg-white/80 border-app-border': theme.type === 'default',
+          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
+        })}>
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
@@ -262,7 +271,8 @@ export const PostDetailPage = () => {
                 <div>
                   <AppBannerAd section="home" />
                 </div>
-                <div className="pb-2 border-b border-app-border">
+                {/* <div className="pb-2 border-b border-app-border"> */}
+                <div className="pb-2">
                   <PostCard
                     post={post}
                     showActions={true}
@@ -271,7 +281,14 @@ export const PostDetailPage = () => {
                 </div>
 
                 {/* All replies header with add comment button for web */}
-                <div className="px-4 py-3 border-b border-app-border flex justify-between items-center">
+                <div
+                  className={clsx(
+                    'px-4 py-3 border-b flex justify-between items-center',
+                    {
+                      ' border-app-border': theme.type === 'default',
+                      'border-app-dark-border': theme.type === 'dark',
+                    },
+                  )}>
                   <h2 className="font-bold text-lg">All replies</h2>
                 </div>
 
@@ -518,10 +535,16 @@ export const PostDetailPage = () => {
       <div className="hidden lg:block">
         {/* Comment button for mobile */}
         <Button
-          className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 z-1"
+          className={clsx(
+            'fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1',
+            {
+              'bg-app hover:bg-app/90': theme.type === 'default',
+              'hover:bg-app bg-app/90': theme.type === 'dark',
+            },
+          )}
           size="icon"
           onClick={() => {
-            setShowMobileComment(true);
+            setShowWebComment(!showWebComment);
             virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
           }}>
           <MessageSquare size={24} />
@@ -529,9 +552,15 @@ export const PostDetailPage = () => {
 
         {/* Mobile inline comment section that slides up from bottom */}
         <div
-          className={`max-w-3xl mx-auto fixed left-0 right-16 bottom-0 bg-app-hover border-t border-app-border transition-transform duration-300 ease-in-out transform ${
-            showMobileComment ? 'translate-y-0' : 'translate-y-full'
-          } z-50`}>
+          className={clsx(
+            'max-w-3xl mx-auto fixed left-0 right-16 bottom-0  border-t transition-transform duration-300 ease-in-out transform z-50',
+            {
+              'translate-y-0': showWebComment === true,
+              'translate-y-full': showWebComment === false,
+              'bg-app-hover border-app-border': theme.type === 'default',
+              'bg-app-dark border-app-dark-border': theme.type === 'dark',
+            },
+          )}>
           <div className="p-4">
             <div className="flex justify-between items-center mb-3">
               <p className="font-semibold">Add a comment</p>
@@ -539,7 +568,7 @@ export const PostDetailPage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setShowMobileComment(false);
+                  setShowWebComment(false);
                   setQuoteContent('');
                   setQuotedUser('');
                   setComment('');
@@ -586,7 +615,14 @@ export const PostDetailPage = () => {
               />
 
               {imagePreview && (
-                <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200 py-1">
+                <div
+                  className={clsx(
+                    'relative mt-3 rounded-md overflow-hidden border py-1',
+                    {
+                      'border-gray-200': theme.type === 'default',
+                      'border-app-dark-border': theme.type === 'dark',
+                    },
+                  )}>
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -616,7 +652,10 @@ export const PostDetailPage = () => {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="text-app"
+                  className={clsx('text-app', {
+                    'hover:bg-app-dark-bg/10 hover:text-app':
+                      theme.type === 'dark',
+                  })}
                   onClick={() => fileInputRef.current?.click()}>
                   <ImagePlus size={18} />
                 </Button>

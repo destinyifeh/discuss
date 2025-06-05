@@ -1,5 +1,6 @@
 'use client';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {usePathname} from 'next/navigation';
 import React, {useState} from 'react';
 import {MobileBottomTab} from './mobile-bottom-tab';
@@ -11,12 +12,15 @@ type MainLayoutProps = {
 
 export const MainLayout = ({children}: MainLayoutProps) => {
   const location = usePathname();
+  const {theme} = useGlobalStore(state => state);
   const [lastScrollY, setLastScrollY] = useState(0);
   const {showBottomTab} = useGlobalStore(state => state);
 
   const isSection =
     location.includes('/discuss/') ||
-    (location.includes('/post/') && !location.includes('/reply'));
+    (location.includes('/post/') && !location.includes('/reply')) ||
+    location.includes('/user/') ||
+    location.includes('/profile/');
 
   // useEffect(() => {
   //   const handleScroll = () => {
@@ -41,7 +45,11 @@ export const MainLayout = ({children}: MainLayoutProps) => {
   return (
     <React.Fragment>
       {!isSection && <MobileNavigation />}
-      <main className="flex-1 flex flex-col max-w-3xl mx-auto border-x border-app-border ">
+      <main
+        className={clsx('flex-1 flex flex-col max-w-3xl mx-auto border-x', {
+          'border-app-border ': theme.type === 'default',
+          'border-app-dark-border': theme.type === 'dark',
+        })}>
         <div className={`${isSection ? 'pt-0' : 'pt-14'} md:pt-0`}>
           {children}
         </div>

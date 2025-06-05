@@ -1,3 +1,4 @@
+import {ThemeProps} from '@/types/global-types';
 import {
   Lato,
   Nunito,
@@ -45,17 +46,18 @@ export const latoFont = Lato({
   weight: '400',
   subsets: ['latin'],
 });
-// export const appDefaultTheme: ThemeColorProps = {
-//   type: 'default',
-//   text: '#000000',
-//   background: '#fff',
-// };
 
-// export const appDarkTheme: ThemeColorProps = {
-//   type: 'dark',
-//   text: '#57657A',
-//   background: '#151718',
-// };
+export const defaultTheme: ThemeProps = {
+  type: 'default',
+  text: '#000000',
+  background: '#fff',
+};
+
+export const darkTheme: ThemeProps = {
+  type: 'dark',
+  text: '#57657A',
+  background: '#151718',
+};
 
 export const ISDEFAULT_THEME = 'default';
 export const ISDARK_THEME = 'dark';

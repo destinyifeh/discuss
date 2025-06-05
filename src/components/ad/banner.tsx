@@ -2,9 +2,11 @@
 
 import {mockAds} from '@/constants/data';
 import {useAdStore} from '@/hooks/stores/use-ad-store';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {shuffleArray} from '@/lib/helpers';
 import {cn} from '@/lib/utils';
 import {AdProps} from '@/types/ad-types';
+import clsx from 'clsx';
 import {ExternalLink} from 'lucide-react';
 import Image from 'next/image';
 import {useEffect, useState} from 'react';
@@ -54,6 +56,7 @@ export function BannerAd({
   position,
   className,
 }: BannerAdProps) {
+  const {theme} = useGlobalStore(state => state);
   const sizeClasses = {
     small: 'h-[90px]',
     medium: 'h-[120px]',
@@ -63,9 +66,13 @@ export function BannerAd({
   return (
     <div
       className={cn(
-        'relative mx-auto w-full overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950',
+        'relative mx-auto w-full overflow-hidden rounded-lg border ',
         sizeClasses[size],
         className,
+        {
+          'bg-white border-gray-200': theme.type === 'default',
+          'border-app-dark-border bg-app-dark-bg': theme.type === 'dark',
+        },
       )}>
       <div className="absolute right-2 top-2 z-10 rounded bg-black/70 px-2 py-1 text-xs text-white">
         Sponsored
@@ -118,6 +125,7 @@ export function AppBannerAd3({section}: {section: string}) {
 }
 
 export function AppBannerAd({section}: {section: string}) {
+  const {theme} = useGlobalStore(state => state);
   const bannerAds = mockAds.filter(
     ad => ad.type === 'Banner' && ad.section === section,
   );
@@ -138,7 +146,11 @@ export function AppBannerAd({section}: {section: string}) {
   const currentAd = bannerAds[currentIndex];
 
   return (
-    <div className="p-4 border-b border-app-border">
+    <div
+      className={clsx('p-4 border-b', {
+        'border-app-border': theme.type === 'default',
+        'border-app-dark-border': theme.type === 'dark',
+      })}>
       <BannerAd ad={currentAd} />
     </div>
   );

@@ -23,7 +23,7 @@ export const TermsOfServicePage = () => {
               </CardHeader>
               <CardContent className="prose max-w-none">
                 <p>
-                  By accessing and using Discuss, you accept and agree to be
+                  By accessing and using Discussday, you accept and agree to be
                   bound by the terms and provision of this agreement. If you do
                   not agree to abide by the above, please do not use this
                   service.
@@ -177,7 +177,7 @@ export const TermsOfServicePage = () => {
               <CardContent className="prose max-w-none">
                 <p>
                   If you have any questions about these Terms of Service, please
-                  contact us at legal@discuss.com
+                  contact us at legal@discussday.com
                 </p>
               </CardContent>
             </Card>

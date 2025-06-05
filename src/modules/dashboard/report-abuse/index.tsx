@@ -48,7 +48,7 @@ export default function ReportAbusePage() {
       <div className="sticky top-0 z-10 bg-white backdrop-blur-sm border-b border-gray-200 md:top-0 top-[57px] p-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href={contentId ? `/post/${contentId}` : '/'}>
+            <Link href={'/home'}>
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>

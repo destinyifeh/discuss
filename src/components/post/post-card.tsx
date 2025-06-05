@@ -1,7 +1,9 @@
 'use client';
 import {Sections} from '@/constants/data';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {PostProps} from '@/types/post-item.type';
+import clsx from 'clsx';
 import copy from 'copy-to-clipboard';
 import {formatDistanceToNow} from 'date-fns';
 import {
@@ -45,6 +47,7 @@ export const PostCard = ({
   showActions = true,
   isInDetailView = false,
 }: PostCardProps) => {
+  const {theme} = useGlobalStore(state => state);
   const [user] = useState({id: '2', following: ['2']});
   const [expanded, setExpanded] = useState(false);
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
@@ -158,7 +161,11 @@ export const PostCard = ({
   };
 
   return (
-    <div className="border-b border-app-border p-4 hover:bg-app-hover transition-colors">
+    <div
+      className={clsx('border-b p-4 h transition-colors', {
+        'hover:bg-app-hover border-app-border': theme.type === 'default',
+        'border-app-dark-border text-app-dark-text': theme.type === 'dark',
+      })}>
       <div className="flex gap-3">
         <Avatar
           className="w-10 h-10 cursor-pointer"
@@ -195,14 +202,24 @@ export const PostCard = ({
               </div>
 
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger
+                  asChild
+                  className={clsx({
+                    'hover:bg-app-dark-bg/10 hover:text-white':
+                      theme.type === 'dark',
+                  })}>
                   <Button variant="ghost" size="sm" className="h-8 w-8">
                     <MoreHorizontal size={16} className="hidden md:block" />
                     <EllipsisVertical size={16} className="md:hidden" />
                     <span className="sr-only">Post menu</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent
+                  align="end"
+                  className={clsx({
+                    'bg-app-dark-bg/10 border-app-dark-border text-white':
+                      theme.type === 'dark',
+                  })}>
                   {post.userId === user?.id && (
                     <>
                       <DropdownMenuItem
@@ -248,7 +265,7 @@ export const PostCard = ({
 
           <Link href={`/post/${post.id}`} className="block">
             <div className="mt-1">
-              <p className="whitespace-pre-wrap text-black">{displayContent}</p>
+              <p className="whitespace-pre-wrap">{displayContent}</p>
 
               {shouldTruncate && !isInDetailView && (
                 <Button
@@ -279,7 +296,9 @@ export const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app"
+                  className={clsx('text-app-gray hover:text-app', {
+                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                  })}
                   onClick={handleCommentClick}>
                   <div className="flex items-center gap-1">
                     <MessageSquare size={18} />
@@ -311,6 +330,7 @@ export const PostCard = ({
                   className={cn(
                     'text-app-gray hover:text-red-500',
                     liked && 'text-red-500',
+                    theme.type === 'dark' && 'hover:bg-app-dark-bg/10',
                   )}
                   onClick={e => {
                     e.preventDefault();
@@ -326,7 +346,9 @@ export const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app"
+                  className={clsx('text-app-gray hover:text-app', {
+                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                  })}
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -342,7 +364,9 @@ export const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app"
+                  className={clsx('text-app-gray hover:text-app', {
+                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                  })}
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -357,7 +381,9 @@ export const PostCard = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-app-gray hover:text-app"
+                      className={clsx('text-app-gray hover:text-app', {
+                        'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                      })}
                       onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();

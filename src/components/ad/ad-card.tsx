@@ -1,7 +1,9 @@
 'use client';
 import {mockAds} from '@/constants/data';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {AdProps} from '@/types/ad-types';
+import clsx from 'clsx';
 import copy from 'copy-to-clipboard';
 import {
   BarChart3,
@@ -42,6 +44,7 @@ export const AdCard = ({
   showActions = true,
   isInDetailView = false,
 }: AdCardProps) => {
+  const {theme} = useGlobalStore(state => state);
   const [user] = useState({id: '2', following: ['2']});
   const [expanded, setExpanded] = useState(false);
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
@@ -127,7 +130,11 @@ export const AdCard = ({
     shouldTruncate && !expanded && !isInDetailView ? sliceContent : ad?.content;
 
   return (
-    <div className="border-b border-app-border p-4 hover:bg-app-hover transition-colors">
+    <div
+      className={clsx('border-b border-app-border p-4 transition-colors', {
+        'hover:bg-app-hover': theme.type === 'default',
+        'hover:bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
+      })}>
       <div className="flex gap-3">
         <Avatar
           className="w-10 h-10 cursor-pointer"
@@ -148,19 +155,14 @@ export const AdCard = ({
 
                 <span className="text-app-gray">·</span>
 
-                <Link
-                  href={`#`}
-                  className="text-black hover:underline truncate"
-                  onClick={e => e.stopPropagation()}>
-                  {ad?.type}
-                </Link>
+                <span className="truncate">{ad?.type}</span>
 
                 {/* <span className="text-app-gray">·</span>
                 <span className="text-app-gray truncate">
                   {formatTimeAgo(post.timestamp)}
                 </span> */}
               </div>
-              {!isInDetailView && (
+              {isInDetailView && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8">
@@ -194,7 +196,7 @@ export const AdCard = ({
 
           <div className="block">
             <div className="mt-1">
-              <p className="whitespace-pre-wrap text-black">{displayContent}</p>
+              <p className="whitespace-pre-wrap">{displayContent}</p>
 
               {shouldTruncate && !isInDetailView && !expanded && (
                 <Button
@@ -345,7 +347,7 @@ export const AdCard = ({
               </div>
             )}
             <div className="flex justify-between items-center mt-3">
-              <h1 className="font-bold text-black">{ad?.title}</h1>
+              <h1 className="font-bold">{ad?.title}</h1>
               <Button
                 variant="ghost"
                 size="sm"

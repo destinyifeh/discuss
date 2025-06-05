@@ -1,5 +1,7 @@
 'use client';
 
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {ChevronLeft} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {Button} from './ui/button';
@@ -35,9 +37,14 @@ export const SectionHeader = ({
   description: string | undefined;
 }) => {
   const navigate = useRouter();
+  const {theme} = useGlobalStore(state => state);
 
   return (
-    <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
+    <div
+      className={clsx('sticky top-0  backdrop-blur-sm z-10 border-b', {
+        'bg-white/80 border-app-border': theme.type === 'default',
+        'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
+      })}>
       <div className="px-4 py-3 flex flex-col">
         <div className="flex items-start gap-6">
           <Button

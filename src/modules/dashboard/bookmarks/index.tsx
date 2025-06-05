@@ -1,12 +1,15 @@
 'use client';
 import {PostCard} from '@/components/post/post-card';
 import {Posts} from '@/constants/data';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 
 import {BookmarkIcon} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 
 export const BookmarksPage = () => {
   const navigate = useRouter();
+  const {theme} = useGlobalStore(state => state);
 
   // Mock bookmarked posts - in a real app, this would come from user data
   const bookmarkedPostIds = ['1', '3']; // Example IDs
@@ -16,7 +19,11 @@ export const BookmarksPage = () => {
 
   return (
     <div>
-      <div className="border-b border-app-border p-4">
+      <div
+        className={clsx('border-b p-4', {
+          'border-app-border': theme.type === 'default',
+          'border-app-dark-border': theme.type === 'dark',
+        })}>
         <h1 className="text-xl font-bold">Bookmarks</h1>
       </div>
 

@@ -15,6 +15,9 @@
     --app-border: #eff3f4;
     --app-hover: #f7f9f9;
     --app-dark: #0f1419;
+    --app-dark-bg: #536471;
+    --app-dark-text: #536471;
+    --app-dark-border: #536471;
   }
 
   .dark {
@@ -29,6 +32,9 @@
     --app-hover: #f7f9f9;
     --app-dark: #0f1419;
     --app-blue: #0a66c2;
+    --app-dark-bg: #536471;
+    --app-dark-text: #536471;
+    --app-dark-border: #536471;
   }
 }
 
@@ -47,6 +53,9 @@
   --color-app-background: var(--background-color)
   --color-app-foreground: var(--foreground-color)
   --color-app-blue: var(--app-blue);
+  --color-app-dark-bg: var(--app-dark-bg);
+  --color-app-dark-text: var(--app-dark-text);
+  --color-app-dark-border: var(--app-dark-border);
 }
 
 
@@ -181,6 +190,13 @@
    .form-input{
     @apply focus:!border-app focus:!outline-none focus:!ring-0
    }
+
+   .default-theme{
+    @apply bg-white text-black
+   }
+   .dark-theme{
+    @apply bg-[#0f1419] text-app-dark-text
+   }
    
 }
 
@@ -220,6 +236,7 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
 }
+
 
 
 @media (width: 1024px){

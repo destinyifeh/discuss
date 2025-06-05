@@ -1,8 +1,18 @@
 'use client';
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {resourceItems, Sections} from '@/constants/data';
+import {darkTheme, defaultTheme} from '@/constants/styles';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
+import clsx from 'clsx';
 import {
   BarChart2,
   Bell,
@@ -67,7 +77,7 @@ export const SidebarLayoutLeft = () => {
   const location = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isActive = (path: string) => location === path;
-
+  const {theme, setTheme} = useGlobalStore(state => state);
   const {logout} = useAuthStore(state => state);
   const mainNavItems = [
     {
@@ -164,16 +174,34 @@ export const SidebarLayoutLeft = () => {
     logout();
     navigate.push('/login');
   };
+
+  const onToggleTheme = () => {
+    if (theme.type === 'default') {
+      setTheme(darkTheme);
+    } else {
+      setTheme(defaultTheme);
+    }
+  };
   return (
-    <aside className="hidden lg:flex flex-col w-64 border-r border-app-border p-4">
+    <aside
+      className={clsx('hidden lg:flex flex-col w-64 border-r p-4', {
+        'border-app-border': theme.type === 'default',
+        'border-app-dark-border': theme.type === 'dark',
+      })}>
       <div className="flex-1 space-y-4">
         {/* <div className="mb-6">
           <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
         </div> */}
         <div className="p-2 flex items-center justify-between">
           <h1 className="text-xl font-bold">Discussday</h1>
-          <Button variant="ghost" size="icon" onClick={() => {}}>
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleTheme}
+            className={clsx({
+              'hover:bg-app-dark-bg/10 hover:text-white': theme.type === 'dark',
+            })}>
+            {theme.type === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
         </div>
 
@@ -197,6 +225,10 @@ export const SidebarLayoutLeft = () => {
               className={cn(
                 'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition',
                 isActive(item.path) ? 'font-bold' : 'font-normal',
+                {
+                  'hover:bg-app-hover': theme.type === 'default',
+                  'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                },
               )}>
               <div className="flex items-center w-full">
                 {item.icon}
@@ -211,14 +243,22 @@ export const SidebarLayoutLeft = () => {
           ))}
         </nav>
 
-        <div className="mt-6 pt-6 border-t border-app-border space-y-2">
+        <div
+          className={clsx('mt-6 pt-6 border-t space-y-2', {
+            'border-app-border': theme.type === 'default',
+            'border-app-dark-border': theme.type === 'dark',
+          })}>
           {secondaryNavItems.map(item => (
             <Link
               key={item.path}
               href={item.path}
               className={cn(
-                'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition',
+                'flex items-center gap-4 p-3 rounded-full transition',
                 isActive(item.path) ? 'font-bold' : 'font-normal',
+                {
+                  'hover:bg-app-hover': theme.type === 'default',
+                  'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                },
               )}>
               {item.icon}
               <span className="text-lg">{item.label}</span>
@@ -234,14 +274,19 @@ export const SidebarLayoutLeft = () => {
             New Post
           </Button>
         </div> */}
-        <Button
-          className="bg-app hover:bg-app/90 text-white rounded-full py-6 w-full mt-4"
-          onClick={() => navigate.push('/create-post')}>
-          Post
-        </Button>
+        <div className="mb-10">
+          <Button
+            className={clsx('text-white rounded-full py-6 w-full mt-4', {
+              'hover:bg-app/90 bg-app': theme.type === 'default',
+              'hover:bg-app bg-app/90': theme.type === 'dark',
+            })}
+            onClick={() => navigate.push('/create-post')}>
+            Post
+          </Button>
+        </div>
 
         <div className="mt-auto space-y-4">
-          <div className="flex items-center gap-2 p-4 rounded-full hover:bg-app-hover cursor-pointer">
+          {/* <div className="flex items-center gap-2 p-4 rounded-full hover:bg-app-hover cursor-pointer">
             <Avatar>
               <AvatarImage
                 src={'https://api.dicebear.com/7.x/avataaars/svg?seed=mercy'}
@@ -261,7 +306,79 @@ export const SidebarLayoutLeft = () => {
               }}>
               <LogOut size={18} />
             </Button>
-          </div>
+          </div> */}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div
+                className={clsx(
+                  'flex items-center gap-3 cursor-pointer p-2 rounded-full ',
+                  {
+                    'hover:bg-app-hover': theme.type === 'default',
+                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                  },
+                )}>
+                <Avatar>
+                  <AvatarImage
+                    src="/placeholder.svg?height=40&width=40"
+                    alt="@johndoe"
+                  />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium">John Doe</span>
+                </div>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className={clsx('w-56', {
+                'bg-app-dark-bg/10 border-app-dark-border':
+                  theme.type === 'dark',
+              })}>
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  <span
+                    className={cn(
+                      theme.type === 'dark' && 'text-app-dark-text',
+                    )}>
+                    Profile
+                  </span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="">
+                <Link href="/profile/edit">
+                  <span
+                    className={cn(
+                      theme.type === 'dark' && 'text-app-dark-text',
+                    )}>
+                    Edit Profile
+                  </span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <span
+                    className={cn(
+                      theme.type === 'dark' && 'text-app-dark-text',
+                    )}>
+                    Settings
+                  </span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator
+                className={cn(theme.type === 'dark' && 'bg-app-dark-bg')}
+              />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span
+                  className={cn(theme.type === 'dark' && 'text-app-dark-text')}>
+                  Log out
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </aside>
@@ -269,11 +386,20 @@ export const SidebarLayoutLeft = () => {
 };
 
 export const SidebarLayoutRight = () => {
+  const {theme} = useGlobalStore(state => state);
   return (
-    <aside className="hidden lg:flex flex-col w-80 h-screen border-l border-app-border p-4">
+    <aside
+      className={clsx('hidden lg:flex flex-col w-80 h-screen border-l p-4', {
+        'border-app-border': theme.type === 'default',
+        'border-app-dark-border': theme.type === 'dark',
+      })}>
       <div className="sticky top-4 space-y-4">
         `{' '}
-        <div className="bg-app-hover rounded-lg p-4">
+        <div
+          className={clsx('rounded-lg p-4', {
+            'bg-app-hover': theme.type === 'default',
+            'bg-app-dark-bg/10': theme.type === 'dark',
+          })}>
           <h2 className="font-bold text-xl mb-4">Discuss</h2>
           <div className="flex flex-row flex-wrap items-center">
             {Sections.map(section => (
@@ -284,14 +410,24 @@ export const SidebarLayoutRight = () => {
                     ? '/advertise'
                     : `/discuss/${section.name.toLowerCase()}`
                 }
-                className="flex items-center justify-between p-2 hover:bg-white rounded-md">
+                className={clsx(
+                  'flex items-center justify-between p-2 rounded-md',
+                  {
+                    'hover:bg-white': theme.type === 'default',
+                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                  },
+                )}>
                 <span className="text-app font-semibold">{section.name}</span>
               </Link>
             ))}
           </div>
         </div>
         `{/* Who to follow  */}
-        <div className="bg-app-hover rounded-lg p-4">
+        <div
+          className={clsx('rounded-lg p-4', {
+            'bg-app-hover ': theme.type === 'default',
+            'bg-app-dark-bg/10': theme.type === 'dark',
+          })}>
           <h2 className="font-bold text-xl mb-4">Who to follow</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -305,37 +441,37 @@ export const SidebarLayoutRight = () => {
                   <p className="text-app-gray">God is goood</p>
                 </div>
               </div>
-              <Button size="sm" className="rounded-full bg-black text-white">
-                Follow
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-between mt-5">
-              <div className="flex gap-3">
-                <Avatar>
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" />
-                  <AvatarFallback>A</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-bold">Alex Johnson</p>
-                  <p className="text-app-gray">God is goood</p>
-                </div>
-              </div>
-              <Button size="sm" className="rounded-full bg-black text-white">
+              <Button
+                size="sm"
+                className={clsx('rounded-full text-white', {
+                  'bg-black ': theme.type === 'default',
+                  'bg-app-dark-bg/10 hover:bg-app-dark-bg':
+                    theme.type === 'dark',
+                })}>
                 Follow
               </Button>
             </div>
           </div>
         </div>
         {/* Other resources  */}
-        <div className="bg-app-hover rounded-lg p-4">
+        <div
+          className={clsx('rounded-lg p-4', {
+            'bg-app-hover ': theme.type === 'default',
+            'bg-app-dark-bg/10': theme.type === 'dark',
+          })}>
           <h2 className="font-bold text-xl mb-4">Resources</h2>
           <div className="flex flex-row flex-wrap items-center">
             {resourceItems.map(resource => (
               <Link
                 key={resource.label}
                 href={`${resource.path}`}
-                className="flex items-center justify-between p-2 hover:bg-white rounded-md">
+                className={clsx(
+                  'flex items-center justify-between p-2 rounded-md',
+                  {
+                    'hover:bg-white': theme.type === 'default',
+                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
+                  },
+                )}>
                 <span className="text-app font-semibold">{resource.label}</span>
               </Link>
             ))}

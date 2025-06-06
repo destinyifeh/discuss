@@ -1,6 +1,8 @@
 'use client';
 
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {AdPerformanceData, AdStatus} from '@/types/ad-types';
+import clsx from 'clsx';
 import {
   Activity,
   AlertCircle,
@@ -46,11 +48,17 @@ const getStatusColor = (status: AdStatus) => {
 
 export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
   const navigate = useRouter();
+  const {theme} = useGlobalStore(state => state);
   const handleMakePayment = (adId: string) => {
     navigate.push(`/payment/${adId}`);
   };
   return (
-    <Card key={ad.id} className="overflow-hidden">
+    <Card
+      key={ad.id}
+      className={clsx('verflow-hidden', {
+        'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+          theme.type === 'dark',
+      })}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -58,7 +66,13 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
             <p className="text-sm text-app-gray mb-1">{ad.description}</p>
           </div>
           <Badge
-            className={`${getStatusColor(ad.status)} flex items-center gap-1`}>
+            className={clsx(
+              `${getStatusColor(ad.status)} flex items-center gap-1`,
+              {
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                  theme.type === 'dark',
+              },
+            )}>
             {getStatusIcon(ad.status)}{' '}
             {ad.status.charAt(0).toUpperCase() + ad.status.slice(1)}
           </Badge>
@@ -67,17 +81,29 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
 
       <CardContent className="pb-4">
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
+          <div
+            className={clsx('text-center p-2 rounded-lg', {
+              'bg-gray-50': theme.type === 'default',
+              'bg-app-dark-bg/10': theme.type === 'dark',
+            })}>
             <p className="text-xs text-app-gray">Type</p>
             <p className="font-medium">
               {ad.adType.charAt(0).toUpperCase() + ad.adType.slice(1)}
             </p>
           </div>
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
+          <div
+            className={clsx('text-center p-2 rounded-lg', {
+              'bg-gray-50': theme.type === 'default',
+              'bg-app-dark-bg/10': theme.type === 'dark',
+            })}>
             <p className="text-xs text-app-gray">Plan</p>
             <p className="font-medium">{ad.plan}</p>
           </div>
-          <div className="text-center p-2 bg-gray-50 rounded-lg">
+          <div
+            className={clsx('text-center p-2 rounded-lg', {
+              'bg-gray-50': theme.type === 'default',
+              'bg-app-dark-bg/10': theme.type === 'dark',
+            })}>
             <p className="text-xs text-app-gray">Section</p>
             <p className="font-medium">{ad.section}</p>
           </div>

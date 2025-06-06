@@ -1,4 +1,4 @@
-import {defaultTheme} from '@/constants/styles';
+import {darkTheme, defaultTheme} from '@/constants/styles';
 import {ThemeProps} from '@/types/global-types';
 import {create} from 'zustand';
 
@@ -10,6 +10,7 @@ type States = {
 type Actions = {
   setShowBottomTab: (state: boolean) => void;
   setTheme: (theme: ThemeProps) => void;
+  getStoredTheme: () => ThemeProps;
 };
 
 const initialState: States = {
@@ -25,7 +26,17 @@ export const useGlobalStore = create<States & Actions>(set => ({
   },
   setTheme: (theme: ThemeProps) => {
     console.log('themeColor:', theme);
-    //localStorage.setItem('theme', theme.type);
+    localStorage.setItem('theme', theme.type);
     set({theme: theme});
+  },
+  getStoredTheme() {
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme) {
+      return storedTheme === 'default' ? defaultTheme : darkTheme;
+    }
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    ).matches;
+    return prefersDark ? darkTheme : defaultTheme;
   },
 }));

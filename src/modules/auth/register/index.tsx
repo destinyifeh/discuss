@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {Camera} from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
@@ -28,6 +30,7 @@ export const RegisterPage = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const {register, loginWithGoogle} = useAuthStore(state => state);
   const navigate = useRouter();
+  const {theme, setTheme} = useGlobalStore(state => state);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,9 +83,16 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
-        <div className="hidden md:flex flex-1 bg-app items-center justify-center rounded-l-lg p-8 text-white">
+        <div
+          className={clsx(
+            'hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white',
+            {
+              'bg-app/90': theme.type === 'dark',
+              ' bg-app': theme.type === 'default',
+            },
+          )}>
           <div>
             {/* <svg
                 viewBox="0 0 24 24"
@@ -126,7 +136,11 @@ export const RegisterPage = () => {
         </div>
 
         <div className="w-full md:flex-1">
-          <Card className="border-0 shadow-none">
+          <Card
+            className={clsx('border-0 shadow-none', {
+              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                theme.type === 'dark',
+            })}>
             <CardHeader>
               <div className="flex justify-center mb-4">
                 {/* <svg
@@ -186,7 +200,12 @@ export const RegisterPage = () => {
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-300" />
+                  <span
+                    className={clsx('w-full border-t ', {
+                      'border-app-dark-border': theme.type === 'dark',
+                      'border-gray-300': theme.type === 'default',
+                    })}
+                  />
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-gray-500">
@@ -223,16 +242,18 @@ export const RegisterPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="displayName">
-                    Display Name
+                  <label className="text-sm font-medium" htmlFor="email">
+                    Email
                   </label>
                   <Input
-                    id="displayName"
-                    type="text"
+                    id="email"
+                    type="email"
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
-                    placeholder="John Doe"
-                    className="form-input"
+                    placeholder="Johndoe@mail.com"
+                    className={clsx('form-input', {
+                      'border-app-dark-border': theme.type === 'dark',
+                    })}
                     required
                   />
                 </div>
@@ -248,7 +269,9 @@ export const RegisterPage = () => {
                     onChange={e => setUsername(e.target.value)}
                     placeholder="johndoe"
                     autoComplete="username"
-                    className="form-input"
+                    className={clsx('form-input', {
+                      'border-app-dark-border': theme.type === 'dark',
+                    })}
                     required
                   />
                 </div>
@@ -264,7 +287,9 @@ export const RegisterPage = () => {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
-                    className="form-input"
+                    className={clsx('form-input', {
+                      'border-app-dark-border': theme.type === 'dark',
+                    })}
                     required
                   />
                 </div>
@@ -282,7 +307,9 @@ export const RegisterPage = () => {
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
-                    className="form-input"
+                    className={clsx('form-input', {
+                      'border-app-dark-border': theme.type === 'dark',
+                    })}
                     required
                   />
                 </div>

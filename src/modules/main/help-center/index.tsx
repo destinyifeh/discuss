@@ -8,12 +8,19 @@ import {
 } from '@/components/ui/accordion';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 
 export const PublicHelpCenterPage = () => {
+  const {theme} = useGlobalStore(state => state);
   return (
     <div>
       <div className="max-w-6xl mx-auto px-4">
-        <div className="py-8 border-b border-gray-200">
+        <div
+          className={clsx('py-8 border-b ', {
+            'border-gray-200': theme.type === 'default',
+            'border-app-dark-border': theme.type === 'dark',
+          })}>
           <h1 className="text-3xl font-bold">Help Center</h1>
           <p className="text-gray-600 mt-2">
             Find answers to your questions and learn how to use Discussday
@@ -27,10 +34,34 @@ export const PublicHelpCenterPage = () => {
               Frequently Asked Questions
             </h2>
             <Tabs defaultValue="account" className="max-w-3xl">
-              <TabsList className="w-full grid grid-cols-3 mb-4">
-                <TabsTrigger value="account">Account</TabsTrigger>
-                <TabsTrigger value="features">Features</TabsTrigger>
-                <TabsTrigger value="privacy">Privacy</TabsTrigger>
+              <TabsList
+                className={clsx('w-full grid grid-cols-3 mb-4', {
+                  'text-white bg-app-dark-bg/10': theme.type === 'dark',
+                })}>
+                <TabsTrigger
+                  value="account"
+                  className={clsx({
+                    'text-white data-[state=active]:text-app-dark-text':
+                      theme.type === 'dark',
+                  })}>
+                  Account
+                </TabsTrigger>
+                <TabsTrigger
+                  value="features"
+                  className={clsx({
+                    'text-white data-[state=active]:text-app-dark-text':
+                      theme.type === 'dark',
+                  })}>
+                  Features
+                </TabsTrigger>
+                <TabsTrigger
+                  value="privacy"
+                  className={clsx({
+                    'text-white data-[state=active]:text-app-dark-text':
+                      theme.type === 'dark',
+                  })}>
+                  Privacy
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="account">
@@ -169,10 +200,20 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* User Guide Section */}
-          <div id="user-guide" className="mb-12 pt-8 border-t border-gray-200">
+          <div
+            id="user-guide"
+            className={clsx('mb-12 pt-8 border-t', {
+              'border-gray-200': theme.type === 'default',
+              'border-app-dark-border': theme.type === 'dark',
+            })}>
             <h2 className="text-xl font-semibold mb-6">User Guide</h2>
             <div className="space-y-6 max-w-3xl">
-              <div className="bg-muted/30 p-6 rounded-lg">
+              <div
+                className={clsx('p-6 rounded-lg max-w-3xl', {
+                  'bg-muted/30': theme.type === 'default',
+                  'border-app-dark-border bg-app-dark-bg/10':
+                    theme.type === 'dark',
+                })}>
                 <h3 className="font-medium text-lg mb-3">Getting Started</h3>
                 <p className="text-gray-600 mb-4">
                   Welcome to Discussday! This guide will help you navigate our
@@ -189,7 +230,12 @@ export const PublicHelpCenterPage = () => {
                 </ul>
               </div>
 
-              <div className="bg-muted/30 p-6 rounded-lg">
+              <div
+                className={clsx('p-6 rounded-lg max-w-3xl', {
+                  'bg-muted/30': theme.type === 'default',
+                  'border-app-dark-border bg-app-dark-bg/10':
+                    theme.type === 'dark',
+                })}>
                 <h3 className="font-medium text-lg mb-3">Creating Posts</h3>
                 <p className="text-gray-600 mb-4">
                   Sharing your thoughts and starting discussions is easy on
@@ -209,10 +255,20 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Privacy & Safety Section */}
-          <div id="privacy" className="mb-12 pt-8 border-t border-gray-200">
+          <div
+            id="privacy"
+            className={clsx('mb-12 pt-8 border-t', {
+              'border-gray-200': theme.type === 'default',
+              'border-app-dark-border': theme.type === 'dark',
+            })}>
             <h2 className="text-xl font-semibold mb-6">Privacy & Safety</h2>
             <div className="space-y-6 max-w-3xl">
-              <div className="bg-muted/30 p-6 rounded-lg">
+              <div
+                className={clsx('p-6 rounded-lg max-w-3xl', {
+                  'bg-muted/30': theme.type === 'default',
+                  'border-app-dark-border bg-app-dark-bg/10':
+                    theme.type === 'dark',
+                })}>
                 <h3 className="font-medium text-lg mb-3">Privacy Settings</h3>
                 <p className="text-gray-600 mb-4">
                   Control who can see your content and how your information is
@@ -226,7 +282,12 @@ export const PublicHelpCenterPage = () => {
                 </ul>
               </div>
 
-              <div className="bg-muted/30 p-6 rounded-lg">
+              <div
+                className={clsx('p-6 rounded-lg max-w-3xl', {
+                  'bg-muted/30': theme.type === 'default',
+                  'border-app-dark-border bg-app-dark-bg/10':
+                    theme.type === 'dark',
+                })}>
                 <h3 className="font-medium text-lg mb-3">Staying Safe</h3>
                 <p className="text-gray-600 mb-4">
                   Tips for maintaining your safety and security on Discussday.
@@ -247,9 +308,19 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Community Guidelines Section */}
-          <div id="community" className="mb-12 pt-8 border-t border-gray-200">
+          <div
+            id="community"
+            className={clsx('mb-12 pt-8 border-t', {
+              'border-gray-200': theme.type === 'default',
+              'border-app-dark-border': theme.type === 'dark',
+            })}>
             <h2 className="text-xl font-semibold mb-6">Community Guidelines</h2>
-            <div className="bg-muted/30 p-6 rounded-lg max-w-3xl">
+            <div
+              className={clsx('p-6 rounded-lg max-w-3xl', {
+                'bg-muted/30': theme.type === 'default',
+                'border-app-dark-border bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <p className="text-gray-600 mb-6">
                 Our community guidelines are designed to ensure Discuss remains
                 a respectful, inclusive, and constructive platform for everyone.
@@ -292,9 +363,19 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Contact Support Section */}
-          <div id="contact" className="mb-12 pt-8 border-t border-gray-200">
+          <div
+            id="contact"
+            className={clsx('mb-12 pt-8 border-t', {
+              'border-gray-200': theme.type === 'default',
+              'border-app-dark-border': theme.type === 'dark',
+            })}>
             <h2 className="text-xl font-semibold mb-6">Contact Support</h2>
-            <div className="bg-muted/30 p-6 rounded-lg max-w-3xl">
+            <div
+              className={clsx('p-6 rounded-lg max-w-3xl', {
+                'bg-muted/30': theme.type === 'default',
+                'border-app-dark-border bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <p className="text-gray-600 mb-6">
                 Need help with something specific? Our support team is here to
                 assist you.
@@ -321,7 +402,12 @@ export const PublicHelpCenterPage = () => {
                     For immediate assistance, our live chat is available Monday
                     through Friday, 9am-5pm EST.
                   </p>
-                  <Button className="bg-[#0A66C2] hover:bg-[#084e96]">
+                  <Button
+                    className={clsx('', {
+                      'bg-[#084e96] hover:bg-[#0A66C2]': theme.type === 'dark',
+                      'bg-[#0A66C2] hover:bg-[#084e96]':
+                        theme.type === 'default',
+                    })}>
                     Start Live Chat
                   </Button>
                 </div>

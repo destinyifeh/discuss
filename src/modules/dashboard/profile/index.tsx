@@ -1,5 +1,6 @@
 'use client';
 
+import {PageHeader} from '@/components/app-headers';
 import {PostCard} from '@/components/post/post-card';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
@@ -10,7 +11,6 @@ import clsx from 'clsx';
 import {
   ArrowUp,
   Calendar,
-  ChevronLeft,
   Link as LinkIcon,
   MapPin,
   Settings,
@@ -159,21 +159,10 @@ export const ProfilePage = () => {
 
   return (
     <div>
-      <div
-        className={clsx('sticky top-0  backdrop-blur-sm z-10 border-b', {
-          'bg-white/80 border-app-border': theme.type === 'default',
-          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-        })}>
-        <div className="px-4 py-3 flex items-center gap-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">{profileUser.displayName}</h1>
-            <p className="text-sm text-app-gray">{userPosts.length} posts</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={profileUser.displayName}
+        description={`${userPosts.length} posts`}
+      />
 
       <Virtuoso
         className="custom-scrollbar"

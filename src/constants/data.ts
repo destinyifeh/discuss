@@ -2517,6 +2517,32 @@ export const notificationData: NotificationItemProps[] = [
     timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
     read: true,
   },
+  {
+    id: '4',
+    type: 'like',
+    user: {
+      username: 'janedoe',
+      displayName: 'Jane Doe',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
+    },
+    content: 'liked your post',
+    postId: '2',
+    timestamp: new Date().toISOString(),
+    read: false,
+  },
+  {
+    id: '5',
+    type: 'like',
+    user: {
+      username: 'janedoe',
+      displayName: 'Jane Doe',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
+    },
+    content: 'liked your post',
+    postId: '2',
+    timestamp: new Date().toISOString(),
+    read: false,
+  },
 ];
 
 export const resourceItems = [

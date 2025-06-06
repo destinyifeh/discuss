@@ -2,10 +2,13 @@
 
 import {useState} from 'react';
 
+import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {AlertTriangle, ChevronLeft, Send} from 'lucide-react';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
+import {AlertTriangle, Send} from 'lucide-react';
 import {useParams, useRouter} from 'next/navigation';
 import {toast} from 'sonner';
 
@@ -13,7 +16,7 @@ export const EmailMessage = () => {
   const {user} = useParams<{user: string}>();
   const [username] = useState('deee');
   const navigate = useRouter();
-
+  const {theme} = useGlobalStore(state => state);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -81,19 +84,14 @@ export const EmailMessage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center gap-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <h1 className="text-xl font-bold">
-            Email {recipientUser.displayName}
-          </h1>
-        </div>
-      </div>
+      <PageHeader title={`Email ${recipientUser.displayName}`} />
 
       <div className="p-4">
-        <div className="bg-white rounded-lg border border-app-border p-4">
+        <div
+          className={clsx('rounded-lg border p-4', {
+            'border-app-dark-border bg-app-dark': theme.type === 'dark',
+            'border-app-border bg-white': theme.type === 'default',
+          })}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
@@ -105,6 +103,9 @@ export const EmailMessage = () => {
                 id="to"
                 value={`${recipientUser.displayName} <${recipientUser.email}>`}
                 disabled
+                className={clsx('form-input', {
+                  'border-app-dark-border': theme.type === 'dark',
+                })}
               />
             </div>
 
@@ -127,7 +128,9 @@ export const EmailMessage = () => {
                 Subject:
               </label>
               <Input
-                className="form-input"
+                className={clsx('form-input', {
+                  'border-app-dark-border': theme.type === 'dark',
+                })}
                 id="subject"
                 placeholder="Enter subject"
                 value={subject}
@@ -146,7 +149,9 @@ export const EmailMessage = () => {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={e => setMessage(e.target.value)}
-                className="min-h-[200px] resize-none form-input"
+                className={clsx('min-h-[200px] resize-none form-input', {
+                  'border-app-dark-border': theme.type === 'dark',
+                })}
               />
             </div>
 

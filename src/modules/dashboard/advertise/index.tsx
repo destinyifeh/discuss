@@ -7,10 +7,13 @@ import {useState} from 'react';
 
 import {PageHeader} from '@/components/app-headers';
 import {pricingTiers} from '@/fixtures/ad';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {useRouter} from 'next/navigation';
 
 export const AdvertisePage = () => {
   const navigate = useRouter();
+  const {theme} = useGlobalStore(state => state);
 
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState('pricing');
@@ -40,11 +43,18 @@ export const AdvertisePage = () => {
             {pricingTiers.map(tier => (
               <Card
                 key={tier.name}
-                className={`relative transition-all cursor-pointer ${
+                className={clsx(
+                  'relative transition-all cursor-pointer',
                   selectedPlan === tier.name
                     ? 'border-app ring-2 ring-app ring-opacity-50'
-                    : ''
-                } ${tier.featured ? 'border-app' : ''}`}
+                    : '',
+                  selectedPlan === tier.name && theme.type === 'dark'
+                    ? 'border-app ring-2 ring-app ring-opacity-50'
+                    : 'border-app-dark-border',
+                  tier.featured ? 'border-app' : '',
+                  theme.type === 'dark' &&
+                    'text-app-dark-text bg-app-dark-bg/10 hover:bg-app-dark-bg/10',
+                )}
                 onClick={() => setSelectedPlan(tier.name)}>
                 {tier.featured && (
                   <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-app text-white rounded-full text-xs font-medium">
@@ -102,20 +112,32 @@ export const AdvertisePage = () => {
         <div className="mb-8">
           <h2 className="text-lg font-bold mb-2">Why Advertise Here?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-app-hover p-4 rounded-lg">
+            <div
+              className={clsx('p-4 rounded-lg', {
+                'bg-app-hover': theme.type === 'default',
+                'bg-app-dark-bg/10': theme.type === 'dark',
+              })}>
               <h3 className="font-bold mb-1">Engaged Audience</h3>
               <p className="text-sm text-app-gray">
                 Our community is active and engaged, with high interaction
                 rates.
               </p>
             </div>
-            <div className="bg-app-hover p-4 rounded-lg">
+            <div
+              className={clsx('p-4 rounded-lg', {
+                'bg-app-hover': theme.type === 'default',
+                'bg-app-dark-bg/10': theme.type === 'dark',
+              })}>
               <h3 className="font-bold mb-1">Targeted Reach</h3>
               <p className="text-sm text-app-gray">
                 Reach users based on interests, categories, and engagement.
               </p>
             </div>
-            <div className="bg-app-hover p-4 rounded-lg">
+            <div
+              className={clsx('p-4 rounded-lg', {
+                'bg-app-hover': theme.type === 'default',
+                'bg-app-dark-bg/10': theme.type === 'dark',
+              })}>
               <h3 className="font-bold mb-1">Multiple Formats</h3>
               <p className="text-sm text-app-gray">
                 Choose from banners and sponsored posts.

@@ -2,17 +2,24 @@
 
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {Globe, Heart, Target, Users} from 'lucide-react';
 import Link from 'next/link';
 
 export const AboutPage = () => {
+  const {theme} = useGlobalStore(state => state);
   return (
     <div>
-      <div className="bg-gray-50">
+      <div className="">
         <div className="max-w-4xl mx-auto px-4 py-8">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1
+              className={clsx('text-4xl font-bold mb-4', {
+                'text-app-dark-text': theme.type === 'dark',
+                'text-gray-900': theme.type === 'default',
+              })}>
               About Discussday
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -22,7 +29,11 @@ export const AboutPage = () => {
           </div>
 
           {/* Mission Section */}
-          <Card className="mb-8">
+          <Card
+            className={clsx('mb-8', {
+              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                theme.type === 'dark',
+            })}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-6 w-6 text-[#0A66C2]" />
@@ -42,7 +53,11 @@ export const AboutPage = () => {
 
           {/* Values Section */}
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-[#0A66C2]" />
@@ -57,7 +72,11 @@ export const AboutPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="h-5 w-5 text-[#0A66C2]" />
@@ -72,7 +91,11 @@ export const AboutPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5 text-[#0A66C2]" />
@@ -87,7 +110,11 @@ export const AboutPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-[#0A66C2]" />
@@ -104,7 +131,11 @@ export const AboutPage = () => {
           </div>
 
           {/* Team Section */}
-          <Card className="mb-8">
+          <Card
+            className={clsx('mb-8', {
+              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                theme.type === 'dark',
+            })}>
             <CardHeader>
               <CardTitle>Our Team</CardTitle>
             </CardHeader>
@@ -135,7 +166,11 @@ export const AboutPage = () => {
           </Card>
 
           {/* Contact Section */}
-          <Card>
+          <Card
+            className={clsx({
+              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                theme.type === 'dark',
+            })}>
             <CardHeader>
               <CardTitle>Get in Touch</CardTitle>
             </CardHeader>
@@ -145,8 +180,13 @@ export const AboutPage = () => {
                 to hear from you.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button asChild className="bg-app hover:bg-app/90 text-white">
-                  <Link href="/register">Join Discussday</Link>
+                <Button
+                  asChild
+                  className={clsx('text-white', {
+                    'bg-app hover:bg-app/90': theme.type === 'default',
+                    'bg-app/90 hover:bg-app': theme.type === 'dark',
+                  })}>
+                  <Link href="/help-center">Ask a Question</Link>
                 </Button>
                 {/* <Button variant="outline" asChild>
                   <Link href="/careers">Join Our Team</Link>

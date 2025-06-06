@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {
   Book,
   FileText,
@@ -29,6 +31,7 @@ import {useState} from 'react';
 
 export const HelpCenterPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const {theme} = useGlobalStore(state => state);
 
   const sections = [
     {
@@ -111,7 +114,9 @@ export const HelpCenterPage = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search for help topics..."
-            className="pl-10 py-6 text-base form-input"
+            className={clsx('pl-10 py-6 text-base form-input', {
+              'border-app-dark-border': theme.type === 'dark',
+            })}
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -121,7 +126,12 @@ export const HelpCenterPage = () => {
       {!searchQuery && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {sections.map((section, index) => (
-            <Card key={index} className="transition-all hover:shadow-md">
+            <Card
+              key={index}
+              className={clsx('transition-all hover:shadow-md', {
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                  theme.type === 'dark',
+              })}>
               <CardHeader className="flex flex-col items-center text-center">
                 <div className="p-2 bg-primary/10 rounded-full mb-2">
                   {section.icon}
@@ -139,7 +149,12 @@ export const HelpCenterPage = () => {
         <Accordion type="single" collapsible className="w-full">
           {filteredFaqs.length > 0 ? (
             filteredFaqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className={clsx({
+                  'border-app-dark-border': theme.type === 'dark',
+                })}>
                 <AccordionTrigger className="text-left">
                   {faq.question}
                 </AccordionTrigger>
@@ -149,17 +164,26 @@ export const HelpCenterPage = () => {
               </AccordionItem>
             ))
           ) : (
-            <Card className="p-6 text-center">
+            <Card
+              className={clsx('p-6 text-center', {
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                  theme.type === 'dark',
+              })}>
               <p className="text-muted-foreground mb-2">
                 No results found for "{searchQuery}"
               </p>
-              <p>Please try different keywords or browse our categories.</p>
+              <p>Please try different keywords or browse our sections.</p>
             </Card>
           )}
         </Accordion>
       </div>
 
-      <Card className="mb-12 border-primary/20">
+      <Card
+        className={clsx('mb-12 ', {
+          'border-primary/20': theme.type === 'default',
+          'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text':
+            theme.type === 'dark',
+        })}>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-4 md:mb-0">
@@ -169,7 +193,12 @@ export const HelpCenterPage = () => {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className={clsx('flex items-center gap-2', {
+                  'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text hover:bg-app-dark-bg/10 hover:text-white':
+                    theme.type === 'dark',
+                })}>
                 <MessageCircle className="h-4 w-4" />
                 Live Chat
               </Button>

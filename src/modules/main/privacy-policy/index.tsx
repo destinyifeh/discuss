@@ -1,21 +1,36 @@
 'use client';
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 
 export const PrivacyPolicyPage = () => {
+  const {theme} = useGlobalStore(state => state);
   return (
     <div>
-      <div className="bg-gray-50">
+      <div
+        className={clsx({
+          'bg-app-dark': theme.type === 'dark',
+          'bg-gray-50': theme.type === 'default',
+        })}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1
+              className={clsx('text-4xl font-bold mb-4', {
+                'text-app-dark-text': theme.type === 'dark',
+                'text-gray-900': theme.type === 'default',
+              })}>
               Privacy Policy
             </h1>
             <p className="text-gray-600">Last updated: December 1, 2025</p>
           </div>
 
           <div className="space-y-6">
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Information We Collect
@@ -26,14 +41,14 @@ export const PrivacyPolicyPage = () => {
                   We collect information you provide directly to us, such as
                   when you:
                 </p>
-                <ul className="list-disc pl-6 mt-4 gap-2 flex flex-col text-black">
+                <ul className="list-disc pl-6 mt-4 gap-2 flex flex-col">
                   <li>Create an account</li>
                   <li>Post content or comments</li>
                   <li>Send us messages or feedback</li>
                   <li>Participate in surveys or promotions</li>
                 </ul>
                 <p className="mt-4">This information may include:</p>
-                <ul className="list-disc pl-6 mt-2 flex flex-col gap-2 text-black">
+                <ul className="list-disc pl-6 mt-2 flex flex-col gap-2">
                   <li>Name and email address</li>
                   <li>Profile information</li>
                   <li>Posts, comments, and other content</li>
@@ -42,7 +57,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   How We Use Your Information
@@ -50,7 +69,7 @@ export const PrivacyPolicyPage = () => {
               </CardHeader>
               <CardContent className="prose max-w-none">
                 <p>We use the information we collect to:</p>
-                <ul className="list-disc pl-6 mt-4 flex flex-col gap-2 text-black">
+                <ul className="list-disc pl-6 mt-4 flex flex-col gap-2">
                   <li>Provide, maintain, and improve our services</li>
                   <li>Process transactions and send related information</li>
                   <li>Send technical notices and support messages</li>
@@ -66,7 +85,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Information Sharing
@@ -76,7 +99,7 @@ export const PrivacyPolicyPage = () => {
                 <p>
                   We may share your information in the following situations:
                 </p>
-                <ul className="list-disc pl-6 mt-4 flex flex-col gap-2 text-black">
+                <ul className="list-disc pl-6 mt-4 flex flex-col gap-2">
                   <li>
                     <strong>With your consent:</strong> We may share your
                     information with your consent
@@ -97,7 +120,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Data Security
@@ -113,7 +140,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Your Rights
@@ -121,7 +152,7 @@ export const PrivacyPolicyPage = () => {
               </CardHeader>
               <CardContent className="prose max-w-none">
                 <p>You have the right to:</p>
-                <ul className="list-disc pl-6 mt-4 flex flex-col gap-2 text-black">
+                <ul className="list-disc pl-6 mt-4 flex flex-col gap-2">
                   <li>Access and update your personal information</li>
                   <li>Delete your account and personal information</li>
                   <li>Object to processing of your personal information</li>
@@ -131,7 +162,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Cookies and Tracking
@@ -147,7 +182,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Children's Privacy
@@ -162,7 +201,11 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className={clsx({
+                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                  theme.type === 'dark',
+              })}>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">Contact Us</CardTitle>
               </CardHeader>

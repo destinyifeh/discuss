@@ -1,4 +1,5 @@
 'use client';
+import {PageHeader} from '@/components/app-headers';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,14 +26,10 @@ import {Input} from '@/components/ui/input';
 import {Separator} from '@/components/ui/separator';
 import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
-import {
-  AlertTriangle,
-  ChevronLeft,
-  HelpCircle,
-  Lock,
-  Moon,
-  Sun,
-} from 'lucide-react';
+import {darkTheme, defaultTheme} from '@/constants/styles';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
+import {AlertTriangle, HelpCircle, Lock, Moon, Sun} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {toast} from 'sonner';
@@ -40,7 +37,7 @@ import {toast} from 'sonner';
 export const SettingsPage = () => {
   const [user] = useState('dez');
   const navigate = useRouter();
-
+  const {theme, setTheme} = useGlobalStore(state => state);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -53,6 +50,11 @@ export const SettingsPage = () => {
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
+    if (theme.type === 'default') {
+      setTheme(darkTheme);
+    } else {
+      setTheme(defaultTheme);
+    }
     toast.success(`${!darkMode ? 'Dark' : 'Light'} mode activated`);
   };
 
@@ -92,27 +94,28 @@ export const SettingsPage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center gap-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <h1 className="text-xl font-bold">Settings</h1>
-        </div>
-      </div>
+      <PageHeader title="Settings" />
 
-      <div className="divide-y divide-app-border">
+      <div
+        className={clsx('divide-y', {
+          'divide-app-border': theme.type === 'default',
+          'divide-app-dark-border': theme.type === 'dark',
+        })}>
         {/* Theme Settings */}
         <div className="p-4">
           <h2 className="font-semibold text-lg mb-4">Appearance</h2>
 
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
-              {darkMode ? <Moon size={20} /> : <Sun size={20} />}
+              {theme.type === 'default' ? (
+                <Moon size={20} />
+              ) : (
+                <Sun size={20} />
+              )}
               <span>Dark Mode</span>
             </div>
             <Switch
-              checked={darkMode}
+              checked={theme.type === 'dark'}
               onCheckedChange={toggleDarkMode}
               className="data-[state=checked]:bg-app"
             />
@@ -140,7 +143,9 @@ export const SettingsPage = () => {
                 Current Password
               </label>
               <Input
-                className="form-input"
+                className={clsx('form-input', {
+                  'border-app-dark-border': theme.type === 'dark',
+                })}
                 id="current-password"
                 type="password"
                 value={currentPassword}
@@ -155,7 +160,9 @@ export const SettingsPage = () => {
                 New Password
               </label>
               <Input
-                className="form-input"
+                className={clsx('form-input', {
+                  'border-app-dark-border': theme.type === 'dark',
+                })}
                 id="new-password"
                 type="password"
                 value={newPassword}
@@ -170,7 +177,9 @@ export const SettingsPage = () => {
                 Confirm New Password
               </label>
               <Input
-                className="form-input"
+                className={clsx('form-input', {
+                  'border-app-dark-border': theme.type === 'dark',
+                })}
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
@@ -192,7 +201,10 @@ export const SettingsPage = () => {
           <div className="space-y-4">
             <Button
               variant="outline"
-              className="flex items-center gap-2 w-full justify-start"
+              className={clsx('flex items-center gap-2 w-full justify-start', {
+                'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                  theme.type === 'dark',
+              })}
               onClick={() => navigate.push('/help')}>
               <HelpCircle size={18} />
               Help Center
@@ -202,12 +214,24 @@ export const SettingsPage = () => {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="flex items-center gap-2 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700">
+                  className={clsx(
+                    'flex items-center gap-2 w-full justify-start',
+                    {
+                      'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10  text-red-700 hover:text-red-600':
+                        theme.type === 'dark',
+                      'text-red-600 hover:bg-red-50 hover:text-red-700':
+                        theme.type === 'default',
+                    },
+                  )}>
                   <AlertTriangle size={18} />
                   Report Abuse
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent
+                className={clsx({
+                  'bg-app-dark border-app-dark-border text-app-dark-text':
+                    theme.type === 'dark',
+                })}>
                 <DialogHeader>
                   <DialogTitle>Report Abuse</DialogTitle>
                   <DialogDescription>
@@ -249,7 +273,12 @@ export const SettingsPage = () => {
 
                   <Button
                     onClick={handleReportAbuse}
-                    className="bg-red-600 hover:bg-red-700 text-white">
+                    className={clsx({
+                      'hover:bg-red bg-red-700 text-white':
+                        theme.type === 'dark',
+                      'bg-red-600 hover:bg-red-700 text-white':
+                        theme.type === 'default',
+                    })}>
                     Submit Report
                   </Button>
                 </DialogFooter>
@@ -279,11 +308,20 @@ export const SettingsPage = () => {
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
-                    className="text-red-500 border-red-500 hover:bg-red-50">
+                    className={clsx({
+                      'text-red-500 border-red-500 hover:bg-red-50':
+                        theme.type === 'default',
+                      'text-red-500 border-red-500  bg-app-dark-bg/10 hover:bg-app-dark-bg/10 hover:text-app-dark-text':
+                        theme.type === 'dark',
+                    })}>
                     Deactivate
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent
+                  className={clsx({
+                    'border-app-dark-border bg-app-dark text-app-dark-text':
+                      theme.type === 'dark',
+                  })}>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Deactivate Account</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -316,7 +354,11 @@ export const SettingsPage = () => {
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive">Delete</Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent
+                  className={clsx({
+                    'border-app-dark-border bg-app-dark text-app-dark-text':
+                      theme.type === 'dark',
+                  })}>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Account</AlertDialogTitle>
                     <AlertDialogDescription>

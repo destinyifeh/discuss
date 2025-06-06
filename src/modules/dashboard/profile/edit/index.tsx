@@ -2,6 +2,7 @@
 
 import {useState} from 'react';
 
+import {PageHeader} from '@/components/app-headers';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {
@@ -16,7 +17,9 @@ import {
 import {Input} from '@/components/ui/input';
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {Textarea} from '@/components/ui/textarea';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {zodResolver} from '@hookform/resolvers/zod';
+import clsx from 'clsx';
 import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
@@ -41,6 +44,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export const EditProfilePage = () => {
+  const {theme} = useGlobalStore(state => state);
   const [user] = useState({
     displayName: 'john doe',
     username: 'johnny',
@@ -73,19 +77,25 @@ export const EditProfilePage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <h1 className="text-xl font-bold p-4">Edit Profile</h1>
-      </div>
+      <PageHeader title={'Edit Profile'} />
 
       <ScrollArea className="h-[calc(100vh-60px)]">
         <div className="p-4">
           <div className="mb-6 relative">
             {/* Cover photo */}
-            <div className="h-32 bg-app-hover rounded-lg mb-16"></div>
+            <div
+              className={clsx('h-32 rounded-lg mb-16', {
+                'bg-app-hover': theme.type === 'default',
+                'bg-app-dark-bg/10': theme.type === 'dark',
+              })}></div>
 
             {/* Avatar */}
             <div className="absolute left-4 bottom-0 transform translate-y-1/2">
-              <Avatar className="h-20 w-20 border-4 border-white">
+              <Avatar
+                className={clsx('h-20 w-20 border-4', {
+                  ' border-white': theme.type === 'default',
+                  'border-app-dark-bg/10': theme.type === 'dark',
+                })}>
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
               </Avatar>
@@ -93,10 +103,22 @@ export const EditProfilePage = () => {
 
             {/* Upload buttons */}
             <div className="absolute right-4 bottom-4 flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className={clsx({
+                  'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                    theme.type === 'dark',
+                })}>
                 Change cover
               </Button>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className={clsx({
+                  'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                    theme.type === 'dark',
+                })}>
                 Change avatar
               </Button>
             </div>
@@ -188,12 +210,19 @@ export const EditProfilePage = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate.push(`/profile/${user.username}`)}>
+                  onClick={() => navigate.push(`/profile/${user.username}`)}
+                  className={clsx({
+                    'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                      theme.type === 'dark',
+                  })}>
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-app hover:bg-app/90"
+                  className={clsx({
+                    'hover:bg-app bg-app/90': theme.type === 'dark',
+                    'bg-app hover:bg-app/90': theme.type === 'default',
+                  })}
                   disabled={isSubmitting}>
                   {isSubmitting ? 'Saving...' : 'Save changes'}
                 </Button>

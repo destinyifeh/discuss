@@ -2,9 +2,12 @@
 
 import {AppFooter} from '@/components/app-footer';
 import {Button} from '@/components/ui/button';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {useRouter} from 'next/navigation';
 
 export const LandingPage = () => {
+  const {theme, setTheme} = useGlobalStore(state => state);
   // const { isAuthenticated } = useAuth();
   const navigate = useRouter();
 
@@ -18,7 +21,14 @@ export const LandingPage = () => {
     <div className="flex flex-col min-h-screen">
       {/* <div className="flex-1 flex flex-col items-center justify-center p-8"> */}
       <div className="flex flex-1 flex-col md:flex-row">
-        <div className="hidden md:flex flex-1 bg-app flex items-center justify-center p-6">
+        <div
+          className={clsx(
+            'hidden md:flex flex-1 flex items-center justify-center p-6',
+            {
+              'bg-app/90': theme.type === 'dark',
+              ' bg-app': theme.type === 'default',
+            },
+          )}>
           <div className="max-w-md">
             {/* <svg
                 viewBox="0 0 24 24"
@@ -79,7 +89,7 @@ export const LandingPage = () => {
             Happening now
           </h1> */}
 
-          <h2 className="text-center text-black text-2xl md:text-3xl font-bold mb-8">
+          <h2 className="text-center text-2xl md:text-3xl font-bold mb-8">
             Join the conversation today.
           </h2>
 
@@ -92,7 +102,10 @@ export const LandingPage = () => {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t"></span>
+                <span
+                  className={clsx('w-full border-t', {
+                    'border-app-dark-border': theme.type === 'dark',
+                  })}></span>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-app-gray">or</span>

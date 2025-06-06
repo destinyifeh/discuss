@@ -7,6 +7,8 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Textarea} from '@/components/ui/textarea';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import {AlertTriangle, ArrowLeft, CheckCircle, ShieldAlert} from 'lucide-react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
@@ -14,6 +16,7 @@ import {useState} from 'react';
 
 export default function ReportAbusePage() {
   const searchParams = useSearchParams();
+  const {theme} = useGlobalStore(state => state);
   const contentId = searchParams.get('contentId');
   const contentType = searchParams.get('contentType') || 'report';
   const username = searchParams.get('username') || '';
@@ -45,7 +48,15 @@ export default function ReportAbusePage() {
 
   return (
     <div className="pb-20">
-      <div className="sticky top-0 z-10 bg-white backdrop-blur-sm border-b border-gray-200 md:top-0 top-[57px] p-4">
+      <div
+        className={clsx(
+          'sticky top-0 z-10 backdrop-blur-sm border-b md:top-0 top-[57px] p-4',
+          {
+            'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border':
+              theme.type === 'dark',
+            'bg-white border-gray-200 ': theme.type === 'default',
+          },
+        )}>
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href={'/home'}>

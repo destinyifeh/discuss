@@ -11,6 +11,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import clsx from 'clsx';
 import Link from 'next/link';
 import {useState} from 'react';
 import {toast} from 'sonner';
@@ -19,7 +21,7 @@ export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-
+  const {theme} = useGlobalStore(state => state);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -45,9 +47,16 @@ export const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
-        <div className="hidden md:flex flex-1 bg-app items-center justify-center rounded-l-lg p-8 text-white">
+        <div
+          className={clsx(
+            'hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white',
+            {
+              'bg-app/90': theme.type === 'dark',
+              ' bg-app': theme.type === 'default',
+            },
+          )}>
           <div>
             {/* <svg
                 viewBox="0 0 24 24"
@@ -91,7 +100,11 @@ export const ForgotPasswordPage = () => {
         </div>
 
         <div className="w-full md:flex-1">
-          <Card className="border-0 shadow-none">
+          <Card
+            className={clsx('border-0 shadow-none', {
+              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                theme.type === 'dark',
+            })}>
             <CardHeader>
               <div className="flex justify-center mb-4">
                 {/* <svg
@@ -130,7 +143,9 @@ export const ForgotPasswordPage = () => {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder="name@example.com"
-                      className="form-input"
+                      className={clsx('form-input', {
+                        'border-app-dark-border': theme.type === 'dark',
+                      })}
                       required
                     />
                   </div>

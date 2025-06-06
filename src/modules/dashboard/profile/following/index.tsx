@@ -1,13 +1,16 @@
 'use client';
+import {PageHeader} from '@/components/app-headers';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
-import {ChevronLeft} from 'lucide-react';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {cn} from '@/lib/utils';
+import clsx from 'clsx';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 
 export const UserFollowingPage = () => {
   const {user} = useParams<{user: string}>();
-
+  const {theme} = useGlobalStore(state => state);
   const navigate = useRouter();
 
   if (!user) return null;
@@ -83,20 +86,14 @@ export const UserFollowingPage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm z-10 border-b border-app-border">
-        <div className="px-4 py-3 flex items-center gap-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Following</h1>
-            <p className="text-sm text-app-gray">{profileUser.displayName}</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader title="Following" description={profileUser.displayName} />
 
       {followingUsers.length > 0 ? (
-        <div className="divide-y divide-app-border">
+        <div
+          className={clsx('divide-y', {
+            'divide-app-border': theme.type === 'default',
+            'divide-app-dark-border': theme.type === 'dark',
+          })}>
           {followingUsers.map(followedUser => {
             const isFollowing = profileUser.following.includes(followedUser.id);
             const isCurrentUser = user === followedUser.username;
@@ -123,11 +120,18 @@ export const UserFollowingPage = () => {
                 </div>
                 {!isCurrentUser && (
                   <Button
-                    className={`rounded-full ${
+                    className={cn(
+                      'rounded-full',
                       isFollowing
                         ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black'
-                        : 'bg-app text-white hover:bg-app/90'
-                    }`}
+                        : 'bg-app text-white hover:bg-app/90',
+                      theme.type === 'dark' &&
+                        !isFollowing &&
+                        'bg-app/90 text-white hover:bg-app',
+                      theme.type === 'dark' &&
+                        isFollowing &&
+                        'border-app-dark-border bg-app-dark-bg/10 text-white',
+                    )}
                     size="sm">
                     {isFollowing ? 'Following' : 'Follow'}
                   </Button>

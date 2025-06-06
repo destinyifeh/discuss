@@ -1,18 +1,28 @@
 'use client';
 
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {
+  NotificationCard,
+  NotificationPlaceholder,
+} from '@/components/notication/notification-card';
 import {Button} from '@/components/ui/button';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {notificationData} from '@/constants/data';
-import {BellIcon} from 'lucide-react';
-import Link from 'next/link';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {NotificationItemProps} from '@/types/user.types';
+import clsx from 'clsx';
+import {ArrowUp} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {useState} from 'react';
+import {Fragment, useRef, useState} from 'react';
+import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 
 export const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const navigate = useRouter();
   const [notifications, setNotifications] = useState(notificationData);
+  const [showGoUp, setShowGoUp] = useState(false);
+  const {theme} = useGlobalStore(state => state);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const markAllAsRead = () => {
     setNotifications(
@@ -20,125 +30,109 @@ export const NotificationsPage = () => {
     );
   };
 
-  const formatTimeAgo = (timestamp: string) => {
-    const seconds = Math.floor(
-      (new Date().getTime() - new Date(timestamp).getTime()) / 1000,
-    );
+  const hasUnread = notifications.some(notification => !notification.read);
 
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + ' years ago';
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
 
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + ' months ago';
-
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + ' days ago';
-
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + ' hours ago';
-
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + ' minutes ago';
-
-    return Math.floor(seconds) + ' seconds ago';
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
   };
 
-  const hasUnread = notifications.some(notification => !notification.read);
+  let data: NotificationItemProps[] | [];
+
+  switch (activeTab) {
+    case 'all':
+      data = notifications;
+      break;
+    case 'mentions':
+      data = [];
+      break;
+    default:
+      data = [];
+  }
 
   return (
     <div>
-      <div className="border-b border-app-border p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Notifications</h1>
-        {hasUnread && (
-          <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-            Mark all as read
-          </Button>
-        )}
-      </div>
-
-      <Tabs
-        defaultValue="all"
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full">
-        <TabsList className="w-full grid grid-cols-2 bg-transparent">
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:text-black data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="mentions"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:text-black data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
-            Mentions
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="mt-2">
-          {notifications.length > 0 ? (
-            <div className="divide-y divide-app-border">
-              {notifications.map(notification => (
-                <div
-                  key={notification.id}
-                  className={`p-4 hover:bg-app-hover cursor-pointer ${
-                    !notification.read ? 'bg-blue-50' : ''
-                  }`}>
-                  <Link
-                    href={
-                      notification.postId ? `/post/${notification.postId}` : '#'
-                    }>
-                    <div className="flex gap-3">
-                      <Avatar>
-                        <AvatarImage src={notification.user.avatar} />
-                        <AvatarFallback>
-                          {notification.user.displayName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex flex-wrap gap-1">
-                          <span className="font-bold">
-                            {notification.user.displayName}
-                          </span>
-                          <span className="text-app-gray">
-                            {notification.content}
-                          </span>
-                        </div>
-                        <p className="text-xs text-app-gray mt-1">
-                          {formatTimeAgo(notification.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-10 text-center">
-              <div className="bg-app-hover rounded-full p-4 mb-4">
-                <BellIcon size={32} className="text-app" />
+      <Virtuoso
+        className="custom-scrollbar"
+        style={{height: '100vh'}}
+        data={data}
+        onScroll={handleScroll}
+        ref={virtuosoRef}
+        components={{
+          Header: () => (
+            <Fragment>
+              <div
+                className={clsx(
+                  'border-b p-4 flex justify-between items-center',
+                  {
+                    'border-app-dark-border ': theme.type === 'dark',
+                    'border-app-border  ': theme.type === 'default',
+                  },
+                )}>
+                <h1 className="text-xl font-bold">Notifications</h1>
+                {hasUnread && (
+                  <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                    Mark all as read
+                  </Button>
+                )}
               </div>
-              <h2 className="text-xl font-bold mb-2">No notifications yet</h2>
-              <p className="text-app-gray mb-4">
-                When someone interacts with your posts or follows you,
-                notifications will appear here.
-              </p>
-            </div>
-          )}
-        </TabsContent>
 
-        <TabsContent value="mentions" className="mt-2">
-          <div className="flex flex-col items-center justify-center p-10 text-center">
-            <div className="bg-app-hover rounded-full p-4 mb-4">
-              <BellIcon size={32} className="text-app" />
-            </div>
-            <h2 className="text-xl font-bold mb-2">No mentions yet</h2>
-            <p className="text-app-gray mb-4">
-              When someone mentions you in a post or comment, it will appear
-              here.
-            </p>
+              <Tabs
+                defaultValue="all"
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full mb-7">
+                <TabsList className="w-full grid grid-cols-2 bg-transparent">
+                  <TabsTrigger
+                    value="all"
+                    className={clsx(
+                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
+                      {
+                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
+                          theme.type === 'dark',
+                        'data-[state=active]:text-black':
+                          theme.type === 'default',
+                      },
+                    )}>
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="mentions"
+                    className={clsx(
+                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
+                      {
+                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
+                          theme.type === 'dark',
+                        'data-[state=active]:text-black':
+                          theme.type === 'default',
+                      },
+                    )}>
+                    Mentions
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </Fragment>
+          ),
+          EmptyPlaceholder: () => <NotificationPlaceholder tab={activeTab} />,
+        }}
+        //endReached={fetchMore}
+        itemContent={(index, notification) => (
+          <div>
+            <NotificationCard notification={notification} />
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      />
+      {showGoUp && (
+        <button
+          onClick={() => {
+            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+          }}
+          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          <ArrowUp size={20} />
+        </button>
+      )}
     </div>
   );
 };

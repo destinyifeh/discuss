@@ -11,7 +11,13 @@ interface AppContainerProps {
   appBackgroundColor?: string;
 }
 const AppContainer = ({children}: AppContainerProps) => {
-  const {theme, setTheme} = useGlobalStore(state => state);
+  const {theme, setTheme, getStoredTheme} = useGlobalStore(state => state);
+
+  useEffect(() => {
+    const theme = getStoredTheme();
+    setTheme(theme);
+  }, [setTheme]);
+
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -30,7 +36,6 @@ const AppContainer = ({children}: AppContainerProps) => {
         'default-theme': theme.type === 'default',
         'dark-theme': theme.type === 'dark',
       })}>
-      {/* {`min-h-screen bg-${[theme.background]} text-${ theme.text}`}> */}
       {children}
       <Toaster position="top-center" />
     </div>

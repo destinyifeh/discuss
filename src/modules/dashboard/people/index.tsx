@@ -299,14 +299,7 @@ export const PeoplePage = () => {
                             />
                           </div>
                           <DialogFooter>
-                            <Button
-                              variant="outline"
-                              className={clsx({
-                                'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                                  theme.type === 'dark',
-                              })}>
-                              Cancel
-                            </Button>
+                            <Button variant="outline">Cancel</Button>
                             <Button
                               onClick={handleReportUser}
                               className={clsx('text-white', {

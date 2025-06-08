@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover';
+import {PostContent} from './post-content';
 
 interface PostCardProps {
   post: PostProps;
@@ -265,7 +266,8 @@ export const PostCard = ({
 
           <Link href={`/post/${post.id}`} className="block">
             <div className="mt-1">
-              <p className="whitespace-pre-wrap">{displayContent}</p>
+              {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}
+              <PostContent content={displayContent} />
 
               {shouldTruncate && !isInDetailView && (
                 <Button

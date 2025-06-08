@@ -26,6 +26,7 @@ import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {toast} from 'sonner';
+import {PostContent} from './post-content';
 
 interface CommentCardProps {
   comment: CommentProps;
@@ -133,7 +134,8 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
     }
 
     // If no quote or formatting needed, return content as is
-    return <p className="whitespace-pre-wrap">{comment.content}</p>;
+    // return <p className="whitespace-pre-wrap">{comment.content}</p>;
+    return <PostContent content={comment.content} />;
   };
 
   return (

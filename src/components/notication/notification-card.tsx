@@ -1,7 +1,8 @@
 'use client';
 
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import {cn, formatTimeAgo} from '@/lib/utils';
+import {formatTimeAgo} from '@/lib/formatter';
+import {cn} from '@/lib/utils';
 import {NotificationItemProps} from '@/types/user.types';
 import clsx from 'clsx';
 import {BellIcon} from 'lucide-react';

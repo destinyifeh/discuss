@@ -1,4 +1,5 @@
 'use client';
+import {AddPostField} from '@/components/post/add-post-field';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
@@ -10,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {Textarea} from '@/components/ui/textarea';
 import {Posts, Sections} from '@/constants/data';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {PostProps} from '@/types/post-item.type';
-import {FileImage, SmileIcon, Trash2, Video} from 'lucide-react';
+import clsx from 'clsx';
+import {FileImage, Trash2} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {toast} from 'sonner';
@@ -30,10 +32,12 @@ export const CreatePostPage = () => {
   const [showGuidelines, setShowGuidelines] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const {theme} = useGlobalStore(state => state);
 
   const [posts, setPosts] = useState<PostProps[]>([]);
   const navigate = useRouter();
   const location = useSearchParams();
+  //const [width, height] = useWindowSize();
 
   // Check if we're editing an existing post
   useEffect(() => {
@@ -160,9 +164,14 @@ export const CreatePostPage = () => {
 
   if (!user) return null;
 
+  console.log(content, 'kkkkk');
   return (
     <div className="">
-      <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-app-border z-10">
+      <div
+        className={clsx('sticky top-0 backdrop-blur-sm border-b z-10', {
+          'bg-white/80 border-app-border': theme.type === 'default',
+          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
+        })}>
         <div className="px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold">
             {isEditing ? 'Edit Post' : 'Create Post'}
@@ -184,13 +193,44 @@ export const CreatePostPage = () => {
             <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <Textarea
+            {/* <Textarea
               ref={textareaRef}
               placeholder="What's on your mind?"
               className="border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 min-h-20 px-3"
               value={content}
               onChange={e => setContent(e.target.value)}
-            />
+            /> */}
+
+            {/* <div className="relative w-full">
+              <div
+                style={{fontSize: '0.875rem', lineHeight: '1.25rem'}}
+                className={clsx(
+                  'absolute inset-0 p-3 pointer-events-none text-sm whitespace-pre-wrap break-words',
+                  {
+                    'text-white': theme.type === 'dark',
+                    'text-gray-900': theme.type === 'default',
+                  },
+                )}
+                dangerouslySetInnerHTML={{__html: highlightLinks(content)}}
+              />
+              <Textarea
+                ref={textareaRef}
+                placeholder="What's on your mind?"
+                className="border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full text-transparent caret-app"
+                onChange={e => setContent(e.target.value)}
+                style={{
+                  padding: '12px', // match overlay div padding
+                  fontSize: '0.875rem',
+                  lineHeight: '1.25rem',
+                  fontFamily: 'inherit',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  overflow: 'hidden', // to avoid scroll jumps
+                }}
+              />
+            </div> */}
+
+            <AddPostField setContent={setContent} content={content} />
 
             {/* Hidden file input for image uploads */}
             <input
@@ -227,32 +267,14 @@ export const CreatePostPage = () => {
               </div>
             )}
 
-            {/* Video URL previews */}
-            {videoUrls.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {videoUrls.map((url, index) => (
-                  <div
-                    key={index}
-                    className="relative rounded-lg overflow-hidden border p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <Video size={16} className="text-app shrink-0" />
-                        <span className="truncate text-sm">{url}</span>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => removeVideo(index)}>
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="border-t border-app-border mt-4 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div
+              className={clsx(
+                'border-t mt-4 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3',
+                {
+                  'border-app-border': theme.type === 'default',
+                  'border-app-dark-border': theme.type === 'dark',
+                },
+              )}>
               <div className="flex space-x-3">
                 <Button
                   variant="ghost"
@@ -268,12 +290,12 @@ export const CreatePostPage = () => {
                   disabled={imageUrls.length >= 4}>
                   <FileImage size={18} />
                 </Button>
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   className="text-app h-8 w-8 p-0">
                   <SmileIcon size={18} />
-                </Button>
+                </Button> */}
               </div>
 
               <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
@@ -281,17 +303,30 @@ export const CreatePostPage = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowGuidelines(!showGuidelines)}
-                  className="text-xs sm:text-sm">
+                  className={clsx('text-xs sm:text-sm', {
+                    'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border':
+                      theme.type === 'dark',
+                  })}>
                   Community Guidelines
                 </Button>
 
                 <Select
                   value={selectedSection}
                   onValueChange={setSelectedSection}>
-                  <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm">
+                  <SelectTrigger
+                    className={clsx(
+                      'w-[140px] sm:w-[180px] text-xs sm:text-sm',
+                      {
+                        'border-app-dark-border': theme.type === 'dark',
+                      },
+                    )}>
                     <SelectValue placeholder="Select section" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent
+                    className={clsx({
+                      'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                        theme.type === 'dark',
+                    })}>
                     {Sections.map(section => (
                       <SelectItem key={section.id} value={section.id}>
                         {section.name}
@@ -310,7 +345,11 @@ export const CreatePostPage = () => {
             </div>
 
             {showGuidelines && (
-              <Card className="mt-4">
+              <Card
+                className={clsx('mt-4', {
+                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
+                    theme.type === 'dark',
+                })}>
                 <CardContent className="p-4">
                   <CommunityGuidelines />
                 </CardContent>
@@ -319,6 +358,16 @@ export const CreatePostPage = () => {
           </div>
         </div>
       </div>
+
+      {/* <div
+        style={{
+          margin: 0,
+          padding: 0,
+          lineHeight: '1.25rem',
+          whiteSpace: 'pre-wrap',
+        }}>
+        <div dangerouslySetInnerHTML={{__html: extractLinks2(content)}} />
+      </div> */}
     </div>
   );
 };

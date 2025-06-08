@@ -20,6 +20,8 @@ export const MainLayout = ({children}: MainLayoutProps) => {
     location.includes('/discuss/') ||
     (location.includes('/post/') && !location.includes('/reply')) ||
     location.includes('/user/') ||
+    location.includes('/create-post') ||
+    location.includes('/bookmarks') ||
     location.includes('/profile/');
 
   // useEffect(() => {

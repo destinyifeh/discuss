@@ -4,6 +4,7 @@ import {Fragment, useMemo, useRef, useState} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
 import {AppBannerAd} from '@/components/ad/banner';
+import {AddCommentField} from '@/components/post/add-comment-field';
 import {CommentCard} from '@/components/post/comment-card';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import {PostCard} from '@/components/post/post-card';
@@ -24,6 +25,7 @@ import {
   Send,
   X,
 } from 'lucide-react';
+import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
@@ -430,9 +432,19 @@ export const PostDetailPage = () => {
 
         {/* Mobile inline comment section that slides up from bottom */}
         <div
-          className={`fixed left-0 right-0 bottom-0 bg-white border-t border-app-border transition-transform duration-300 ease-in-out transform ${
-            showMobileComment ? 'translate-y-0' : 'translate-y-full'
-          } z-50`}>
+          // className={`fixed left-0 right-0 bottom-0 bg-white border-t border-app-border transition-transform duration-300 ease-in-out transform ${
+          //   showMobileComment ? 'translate-y-0' : 'translate-y-full'
+          // } z-50`}>
+
+          className={clsx(
+            'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform',
+            {
+              'translate-y-0': showMobileComment === true,
+              'translate-y-full': showMobileComment === false,
+              'bg-app-hover border-app-border': theme.type === 'default',
+              'bg-app-dark border-app-dark-border': theme.type === 'dark',
+            },
+          )}>
           <div className="p-4">
             <div className="flex justify-between items-center mb-3">
               <p className="font-semibold">Add a comment</p>
@@ -458,7 +470,7 @@ export const PostDetailPage = () => {
                   <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="text-sm text-app">
-                  <span>Community Guidelines</span>
+                  <Link href="/community-guidelines">Community Guidelines</Link>
                   <span className="mx-1">•</span>
                   <span className="text-[#666]">
                     Be respectful and constructive in your comments.
@@ -485,11 +497,18 @@ export const PostDetailPage = () => {
               />
 
               {imagePreview && (
-                <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
+                <div
+                  className={clsx(
+                    'relative mt-3 rounded-md overflow-hidden border ',
+                    {
+                      'border-gray-200': theme.type === 'default',
+                      'border-app-dark-border': theme.type === 'dark',
+                    },
+                  )}>
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full max-h-60 object-contain"
+                    className="w-full max-h-30 object-contain"
                   />
                   <Button
                     type="button"
@@ -533,7 +552,7 @@ export const PostDetailPage = () => {
       </div>
 
       <div className="hidden lg:block">
-        {/* Comment button for mobile */}
+        {/* Comment button for web */}
         <Button
           className={clsx(
             'fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1',
@@ -550,10 +569,10 @@ export const PostDetailPage = () => {
           <MessageSquare size={24} />
         </Button>
 
-        {/* Mobile inline comment section that slides up from bottom */}
+        {/* Web inline comment section that slides up from bottom */}
         <div
           className={clsx(
-            'max-w-3xl mx-auto fixed left-0 right-16 bottom-0  border-t transition-transform duration-300 ease-in-out transform z-50',
+            'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50',
             {
               'translate-y-0': showWebComment === true,
               'translate-y-full': showWebComment === false,
@@ -607,12 +626,13 @@ export const PostDetailPage = () => {
                 </div>
               )}
 
-              <Textarea
+              {/* <Textarea
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
-              />
+              /> */}
+              <AddCommentField content={comment} setContent={setComment} />
 
               {imagePreview && (
                 <div

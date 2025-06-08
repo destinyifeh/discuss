@@ -71,13 +71,13 @@ export const SectionPostList = ({
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    if (scrollTop > lastScrollTop.current + 5) {
-      setTimeout(() => {
-        setShowBottomTab(false);
-      }, 500);
-    } else if (scrollTop < lastScrollTop.current - 5) {
-      setShowBottomTab(true);
-    }
+    // if (scrollTop > lastScrollTop.current + 5) {
+    //   setTimeout(() => {
+    //     setShowBottomTab(false);
+    //   }, 500);
+    // } else if (scrollTop < lastScrollTop.current - 5) {
+    //   setShowBottomTab(true);
+    // }
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
@@ -250,25 +250,17 @@ export const HomePostList = () => {
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    if (scrollTop > lastScrollTop.current + 5) {
-      setTimeout(() => {
-        setShowBottomTab(false);
-      }, 500);
-    } else if (scrollTop < lastScrollTop.current - 5) {
-      setShowBottomTab(true);
-    }
+    // if (scrollTop > lastScrollTop.current + 5) {
+    //   setTimeout(() => {
+    //     setShowBottomTab(false);
+    //   }, 500);
+    // } else if (scrollTop < lastScrollTop.current - 5) {
+    //   setShowBottomTab(true);
+    // }
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-  };
-
-  const handleScrolling = (scrollTop: number) => {
-    setShowGoUp(scrollTop > 300);
-  };
-
-  const handleGoToTop = () => {
-    scrollRef.current?.scrollTo({top: 0});
   };
 
   const onSectionNavigate = (section: string) => {
@@ -417,13 +409,13 @@ export const ExplorePostList = () => {
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    if (scrollTop > lastScrollTop.current + 5) {
-      setTimeout(() => {
-        setShowBottomTab(false);
-      }, 500);
-    } else if (scrollTop < lastScrollTop.current - 5) {
-      setShowBottomTab(true);
-    }
+    // if (scrollTop > lastScrollTop.current + 5) {
+    //   setTimeout(() => {
+    //     setShowBottomTab(false);
+    //   }, 500);
+    // } else if (scrollTop < lastScrollTop.current - 5) {
+    //   setShowBottomTab(true);
+    // }
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);

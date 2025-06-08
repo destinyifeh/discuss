@@ -2571,4 +2571,9 @@ export const resourceItems = [
 
     path: '/contact-support',
   },
+  {
+    label: 'Community Guidelines',
+
+    path: '/community-guidelines',
+  },
 ];

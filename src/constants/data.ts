@@ -341,8 +341,19 @@ export const Posts: PostProps[] = [
     verified: true,
     sectionId: '1',
     title: 'The Future of AI #1',
-    content:
-      'What are your thoughts on the future of artificial intelligence? Share your predictions!',
+    content: `https://www.youtube.com/watch?v=a3EQU0muYC8 What are your thoughts on the future of artificial intelligence?  
+Share your predictions!  
+See video: 
+
+https://www.youtube.com/watch?v=a3EQU0muYC8  
+www.google.com  
+
+To truly embrace healthy eating means providing your body with the nutrients it needs to thrive.  
+It is not about restrictive diets or deprivation,  
+but rather about making informed choices that nourish you from the inside out.  
+
+A balanced diet typically emphasizes whole, unprocessed foods like fruits, vegetables, lean proteins, and whole grains,  
+while limiting added sugars, unhealthy fats, and excessive sodium.`,
     section: 'sports',
     timestamp: '2025-05-15T18:08:45.078452',
     likes: 168,
@@ -2345,7 +2356,19 @@ export const Comments: CommentProps[] = [
     username: 'janedoe',
     displayName: 'Jane Doe',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    content: 'AI is definitely going to change the world as we know it!',
+    content: `https://www.youtube.com/watch?v=a3EQU0muYC8 What are your thoughts on the future of artificial intelligence?  
+Share your predictions!  
+See video: 
+
+https://www.youtube.com/watch?v=a3EQU0muYC8  
+www.google.com  
+
+To truly embrace healthy eating means providing your body with the nutrients it needs to thrive.  
+It is not about restrictive diets or deprivation,  
+but rather about making informed choices that nourish you from the inside out.  
+
+A balanced diet typically emphasizes whole, unprocessed foods like fruits, vegetables, lean proteins, and whole grains,  
+while limiting added sugars, unhealthy fats, and excessive sodium.`,
     timestamp: new Date(),
     likes: 50,
     verified: false,
@@ -2357,7 +2380,14 @@ export const Comments: CommentProps[] = [
     username: 'theresatekenah',
     displayName: 'Theresa Tekenah',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Theresa',
-    content: "I'm excited about the potential of AI in healthcare.",
+    content: `> janedoe: https://www.youtube.com/watch?v=a3EQU0muYC8 What are your thoughts on the future of artificial intelligence?  
+Share your predictions!  
+See video: https://www.youtube.com/watch?v=a3EQU0muYC8 www.google.com  do truly embrace healthy eating means providing your body with the nutrients it needs to thrive.  
+It is not about restrictive diets or deprivation,  
+but rather about making informed choices that nourish you from the inside out.  
+
+A balanced diet typically emphasizes whole, unprocessed foods like fruits, vegetables, lean proteins, and whole grains,  
+while limiting added sugars, unhealthy fats, and excessive sodium. `,
     timestamp: new Date(),
     likes: 45,
     verified: true,
@@ -2435,6 +2465,30 @@ export const Comments: CommentProps[] = [
       'Thailand is on my bucket list! Any specific places you recommend?',
     timestamp: new Date(),
     likes: 60,
+    verified: true,
+  },
+
+  {
+    id: '398',
+    postId: '1',
+    userId: '3',
+    username: 'theresatekenah',
+    displayName: 'Theresa Tekenah',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Theresa',
+    content: `> janedoe: https://www.youtube.com/watch?v=a3EQU0muYC8 What are your thoughts on the future of artificial intelligence?  
+Share your predictions!  
+See video: 
+
+https://www.youtube.com/watch?v=a3EQU0muYC8  
+www.google.com  
+
+To truly embrace healthy eating means providing your body with the nutrients it needs to thrive.  
+It is not about restrictive diets or deprivation,  
+but rather about making informed choices that nourish you from the inside out.---QUOTE_END---  
+A balanced diet typically emphasizes whole, unprocessed foods like fruits, vegetables, lean proteins, and whole grains,  
+while limiting added sugars, unhealthy fats, and excessive sodium.`,
+    timestamp: new Date(),
+    likes: 45,
     verified: true,
   },
 ];

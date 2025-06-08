@@ -30,6 +30,7 @@ export const AddCommentField = ({
         placeholder="Add a comment..."
         className=" min-h-[100px] border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full text-transparent caret-app"
         onChange={e => setContent(e.target.value)}
+        value={content}
         style={{
           padding: '12px', // match overlay div padding
           fontSize: '0.875rem',

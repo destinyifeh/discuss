@@ -67,6 +67,7 @@ export const PostDetailPage = () => {
       likes: 0,
       ...comment,
     };
+    console.log(newComment, 'newerrrr22');
     setComments([...comments, newComment]);
   };
 
@@ -94,24 +95,32 @@ export const PostDetailPage = () => {
 
   // Helper function to extract user's added content from a comment
   const extractUserAddedContent = (content: string): string => {
+    console.log(content, 'contyyy');
     // If content has a quote block (starts with >)
     if (content.startsWith('> ')) {
-      const quoteEndIndex = content.indexOf('\n\n');
+      const quoteEndIndex = content.indexOf('---QUOTE_END---');
+      // const quoteEndIndex = content.indexOf('\n\n');
+      console.log(quoteEndIndex, 'contyyy22');
       if (quoteEndIndex !== -1) {
         // Return only the content after the quote (the user's added text)
-        return content.substring(quoteEndIndex + 2);
+        // return content.substring(quoteEndIndex + 2);
+        return content.substring(quoteEndIndex + 15);
       }
     }
     return content;
   };
 
   const handleQuoteComment = (commentId: string) => {
+    console.log(commentId, 'cocooid');
     const commentToQuote = comments.find(c => c.id === commentId);
+    console.log(commentToQuote, 'heeeree');
     if (commentToQuote) {
       // Extract only the direct content, ignoring any nested quotes
       let contentToQuote = extractUserAddedContent(commentToQuote.content);
+      console.log(contentToQuote, 'cocooid33');
       // Format quote consistently for both mobile and desktop
       const formattedQuote = `> ${commentToQuote.username}: ${contentToQuote}`;
+      console.log(formattedQuote, 'cocooid35');
       setQuoteContent(formattedQuote);
       setQuotedUser(commentToQuote.username);
       setShowMobileComment(true);
@@ -135,13 +144,20 @@ export const PostDetailPage = () => {
 
     try {
       // Format the comment content to include the quote if present
+      // const finalComment = quoteContent
+      //   ? `${quoteContent}\n\n${comment.trim()}`
+      //   : comment.trim();
+
       const finalComment = quoteContent
-        ? `${quoteContent}\n\n${comment.trim()}`
+        ? `${quoteContent}---QUOTE_END---${comment.trim()}`
         : comment.trim();
+
+      console.log(finalComment, 'finalCom');
+      console.log(quoteContent, 'finalCom33');
 
       // Add comment to app context
       addComment({
-        postId: postId || '',
+        postId: postId || 1,
         userId: user.id,
         username: user.username,
         displayName: user.displayName,
@@ -156,6 +172,7 @@ export const PostDetailPage = () => {
       setQuoteContent('');
       setQuotedUser('');
       setImagePreview(null);
+      setShowWebComment(false);
       if (isMobile) {
         setShowMobileComment(false);
       }
@@ -207,6 +224,28 @@ export const PostDetailPage = () => {
   const sponsoredAd = mockAds.filter(
     ad => ad.type === 'Sponsored' && ad.section === 'home',
   );
+
+  // Function to format the quoted text with styling that matches CommentCard.tsx
+  const formatReplyTextarea = () => {
+    if (!quoteContent) return null;
+
+    // Extract only the quoted content without the username prefix
+    // This regex matches '> username: ' pattern at the beginning of the string
+    const quote = quoteContent.replace(/^>\s[\w]+:\s/gm, '');
+
+    return (
+      <div className="mb-4">
+        <div className="p-3 rounded-md bg-gray-100 border-l-4 border-forum-blue">
+          {quotedUser && (
+            <p className="font-medium text-sm mb-1 text-forum-blue">
+              @{quotedUser}
+            </p>
+          )}
+          <p className="text-[#333] whitespace-pre-wrap">{quote}</p>
+        </div>
+      </div>
+    );
+  };
 
   // const mergedItems2 = useMemo(() => {
   //   return mergeCommentsWithAds(sortedComments, shuffleArray(sponsoredAd));
@@ -426,7 +465,10 @@ export const PostDetailPage = () => {
         <Button
           className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90"
           size="icon"
-          onClick={() => setShowMobileComment(true)}>
+          onClick={() => {
+            setShowMobileComment(!showMobileComment);
+            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+          }}>
           <MessageSquare size={24} />
         </Button>
 
@@ -457,6 +499,7 @@ export const PostDetailPage = () => {
                   setQuotedUser('');
                   setComment('');
                   setImagePreview(null);
+                  // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
                 }}>
                 Cancel
               </Button>

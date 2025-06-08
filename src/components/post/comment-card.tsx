@@ -84,8 +84,10 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
 
   // Function to parse and format any quoted content in the comment
   const renderCommentContent = () => {
+    // console.log(comment.content, '333');
     // Check if the comment starts with a quote
     if (comment.content.startsWith('> ')) {
+      //console.log(comment.content, 'yes sir');
       // Find the name and content in the quoted text
       const quoteContentStartIndex = comment.content.indexOf(': ');
 
@@ -94,7 +96,9 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
         const quoteName = comment.content.substring(2, quoteContentStartIndex);
 
         // Look for a double newline to separate quoted content from reply
-        const quoteEndIndex = comment.content.indexOf('\n\n');
+        // const quoteEndIndex = comment.content.indexOf('\n\n');
+
+        const quoteEndIndex = comment.content.indexOf('---QUOTE_END---');
 
         if (quoteEndIndex !== -1) {
           // If found, split into quote and reply
@@ -102,7 +106,8 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
             quoteContentStartIndex + 2,
             quoteEndIndex,
           );
-          const regularContent = comment.content.substring(quoteEndIndex + 2);
+          //const regularContent = comment.content.substring(quoteEndIndex + 2);
+          const regularContent = comment.content.substring(quoteEndIndex + 15);
 
           return (
             <>
@@ -110,13 +115,16 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
                 <p className="text-sm font-semibold text-app mb-1">
                   @{quoteName}
                 </p>
-                <p className="text-gray-700">{quoteContent}</p>
+                {/* <p className="text-gray-700">{quoteContent}</p> */}
+                <PostContent content={quoteContent} />
               </div>
-              <p className="whitespace-pre-wrap">{regularContent}</p>
+              {/* <p className="whitespace-pre-wrap">{regularContent}</p> */}
+              <PostContent content={regularContent} />
             </>
           );
         } else {
           // If no newline separation, all content after the name is the quote
+          // If no delimiter separation, all content after the name is the quote
           const quoteContent = comment.content.substring(
             quoteContentStartIndex + 2,
           );
@@ -126,7 +134,8 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
               <p className="text-sm font-semibold text-app mb-1">
                 @{quoteName}
               </p>
-              <p className="text-gray-700">{quoteContent}</p>
+              {/* <p className="text-gray-700">{quoteContent}</p> */}
+              <PostContent content={quoteContent} />
             </div>
           );
         }

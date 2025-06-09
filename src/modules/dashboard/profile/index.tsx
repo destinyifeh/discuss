@@ -76,7 +76,8 @@ export const ProfilePage = () => {
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
-
+  const [showBottomTab, setShowBottomTab] = useState(true);
+  const lastScrollTop = useRef(0);
   // Find the user profile (using our mock data, in real app would fetch from backend)
   const profileUser = [
     {
@@ -130,6 +131,25 @@ export const ProfilePage = () => {
       data = [];
   }
 
+  const handleReportUser = () => {
+    toast.success('Report submitted. Our team will review it shortly.');
+  };
+
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+    // Compare current scrollTop to previous value to determine direction
+    if (scrollTop < lastScrollTop.current) {
+      // Scrolling up
+      setShowBottomTab(true);
+    } else if (scrollTop > lastScrollTop.current) {
+      // Scrolling down
+      setShowBottomTab(false);
+    }
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
   if (!profileUser) {
     return (
       <div>
@@ -142,21 +162,9 @@ export const ProfilePage = () => {
       </div>
     );
   }
-
   const isOwnProfile = user === profileUser.username;
   const userFollowing = profileUser.following || [];
   const isFollowing = userFollowing.includes(profileUser.id);
-
-  const handleReportUser = () => {
-    toast.success('Report submitted. Our team will review it shortly.');
-  };
-
-  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
-    const scrollTop = event.currentTarget.scrollTop;
-
-    // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
-  };
 
   return (
     <div>
@@ -334,7 +342,7 @@ export const ProfilePage = () => {
           </button>
         )}
       </div>
-      <MobileBottomTab />
+      {showBottomTab && <MobileBottomTab />}
     </div>
   );
 };

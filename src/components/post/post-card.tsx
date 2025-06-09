@@ -139,7 +139,7 @@ const PostCard = ({
 
   const shouldTruncate = post.content.length > 100;
   const displayContent =
-    shouldTruncate && !expanded && isInDetailView
+    shouldTruncate && !expanded && !isInDetailView
       ? post.content.slice(0, 100) + '...'
       : post.content;
 

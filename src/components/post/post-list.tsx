@@ -221,6 +221,7 @@ export const SectionPostList = ({
 };
 
 export const HomePostList = () => {
+  const lastScrollTop = useRef(0);
   const {theme} = useGlobalStore(state => state);
   const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
@@ -251,18 +252,17 @@ export const HomePostList = () => {
   //     fetchMore(); // Load initial
   //   }, []);
 
-  const lastScrollTop = useRef(0);
-
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    // if (scrollTop > lastScrollTop.current + 5) {
-    //   setTimeout(() => {
-    //     setShowBottomTab(false);
-    //   }, 500);
-    // } else if (scrollTop < lastScrollTop.current - 5) {
-    //   setShowBottomTab(true);
-    // }
-    setShowBottomTab(scrollTop < 300);
+    // Compare current scrollTop to previous value to determine direction
+    if (scrollTop < lastScrollTop.current) {
+      // Scrolling up
+      setShowBottomTab(true);
+    } else if (scrollTop > lastScrollTop.current) {
+      // Scrolling down
+      setShowBottomTab(false);
+    }
+    // setShowBottomTab(scrollTop < 300);
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
@@ -275,8 +275,10 @@ export const HomePostList = () => {
     }
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
+
+  const allowTab = false;
   return (
-    <div className="pb-15 lg:pb-0">
+    <div className="pb-0 lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -288,47 +290,49 @@ export const HomePostList = () => {
           Header: () => (
             <Fragment>
               <MobileNavigation />
-              <Tabs
-                defaultValue="for-you"
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full">
-                <div className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
-                  <TabsList
-                    className={clsx(
-                      'w-full grid grid-cols-2 border-b rounded-none',
-                      {
-                        'bg-white border-app-border': theme.type === 'default',
-                        'bg-app-dark border-app-dark-border':
-                          theme.type === 'dark',
-                      },
-                    )}>
-                    <TabsTrigger
-                      value="for-you"
+              {allowTab && (
+                <Tabs
+                  defaultValue="for-you"
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full">
+                  <div className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                    <TabsList
                       className={clsx(
-                        'data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black',
+                        'w-full grid grid-cols-2 border-b rounded-none',
                         {
-                          'text-app-dark-text data-[state=active]:bg-app-lightGray':
+                          'bg-white border-app-border':
+                            theme.type === 'default',
+                          'bg-app-dark border-app-dark-border':
                             theme.type === 'dark',
                         },
                       )}>
-                      For You
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="following"
-                      className={clsx(
-                        'data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black',
-                        {
-                          'text-app-dark-text data-[state=active]:bg-app-lightGray':
-                            theme.type === 'dark',
-                        },
-                      )}>
-                      Following
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-              </Tabs>
-
+                      <TabsTrigger
+                        value="for-you"
+                        className={clsx(
+                          'data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black',
+                          {
+                            'text-app-dark-text data-[state=active]:bg-app-lightGray':
+                              theme.type === 'dark',
+                          },
+                        )}>
+                        For You
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="following"
+                        className={clsx(
+                          'data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black',
+                          {
+                            'text-app-dark-text data-[state=active]:bg-app-lightGray':
+                              theme.type === 'dark',
+                          },
+                        )}>
+                        Following
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                </Tabs>
+              )}
               <div
                 className={clsx('px-4 py-3 border-b lg:hidden md:mt-7', {
                   'border-app-border': theme.type === 'default',
@@ -380,7 +384,9 @@ export const HomePostList = () => {
 };
 
 export const ExplorePostList = () => {
-  const {setShowBottomTab, theme} = useGlobalStore(state => state);
+  const lastScrollTop = useRef(0);
+  const {theme} = useGlobalStore(state => state);
+  const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -390,9 +396,6 @@ export const ExplorePostList = () => {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 
-  const sortedPosts2 = [...Posts].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
   const data = sortedPosts;
 
   //   const [posts, setPosts] = useState([]);
@@ -409,29 +412,19 @@ export const ExplorePostList = () => {
   //     fetchMore(); // Load initial
   //   }, []);
 
-  const lastScrollTop = useRef(0);
-
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    // if (scrollTop > lastScrollTop.current + 5) {
-    //   setTimeout(() => {
-    //     setShowBottomTab(false);
-    //   }, 500);
-    // } else if (scrollTop < lastScrollTop.current - 5) {
-    //   setShowBottomTab(true);
-    // }
-
+    // Compare current scrollTop to previous value to determine direction
+    if (scrollTop < lastScrollTop.current) {
+      // Scrolling up
+      setShowBottomTab(true);
+    } else if (scrollTop > lastScrollTop.current) {
+      // Scrolling down
+      setShowBottomTab(false);
+    }
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-  };
-
-  const handleScrolling = (scrollTop: number) => {
-    setShowGoUp(scrollTop > 300);
-  };
-
-  const handleGoToTop = () => {
-    scrollRef.current?.scrollTo({top: 0});
   };
 
   const onSectionNavigate = (section: string) => {
@@ -442,7 +435,7 @@ export const ExplorePostList = () => {
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
   return (
-    <div className="pb-15 lg:pb-0">
+    <div className="lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -517,13 +510,15 @@ export const ExplorePostList = () => {
         </button>
       )}
 
-      <MobileBottomTab />
+      {showBottomTab && <MobileBottomTab />}
     </div>
   );
 };
 
 export const BookmarkPostList = () => {
-  const {setShowBottomTab, theme} = useGlobalStore(state => state);
+  const {theme} = useGlobalStore(state => state);
+  const lastScrollTop = useRef(0);
+  const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -533,9 +528,6 @@ export const BookmarkPostList = () => {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 
-  const sortedPosts2 = [...Posts].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
   // Mock bookmarked posts - in a real app, this would come from user data
   const bookmarkedPostIds = ['1', '3']; // Example IDs
   const bookmarkedPosts = Posts.filter(post =>
@@ -558,29 +550,19 @@ export const BookmarkPostList = () => {
   //     fetchMore(); // Load initial
   //   }, []);
 
-  const lastScrollTop = useRef(0);
-
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    // if (scrollTop > lastScrollTop.current + 5) {
-    //   setTimeout(() => {
-    //     setShowBottomTab(false);
-    //   }, 500);
-    // } else if (scrollTop < lastScrollTop.current - 5) {
-    //   setShowBottomTab(true);
-    // }
-
+    // Compare current scrollTop to previous value to determine direction
+    if (scrollTop < lastScrollTop.current) {
+      // Scrolling up
+      setShowBottomTab(true);
+    } else if (scrollTop > lastScrollTop.current) {
+      // Scrolling down
+      setShowBottomTab(false);
+    }
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-  };
-
-  const handleScrolling = (scrollTop: number) => {
-    setShowGoUp(scrollTop > 300);
-  };
-
-  const handleGoToTop = () => {
-    scrollRef.current?.scrollTo({top: 0});
   };
 
   const onSectionNavigate = (section: string) => {
@@ -591,7 +573,7 @@ export const BookmarkPostList = () => {
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
   return (
-    <div className="pb-15 lg:pb-0">
+    <div className="lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -616,7 +598,7 @@ export const BookmarkPostList = () => {
         </button>
       )}
 
-      <MobileBottomTab />
+      {showBottomTab && <MobileBottomTab />}
     </div>
   );
 };

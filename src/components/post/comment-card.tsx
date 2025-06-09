@@ -13,7 +13,7 @@ import {cn} from '@/lib/utils';
 import {CommentProps} from '@/types/post-item.type';
 import clsx from 'clsx';
 
-import {formatDistanceToNow} from 'date-fns';
+import {formatTimeAgo2} from '@/lib/formatter';
 import {
   EllipsisVertical,
   Flag,
@@ -38,21 +38,6 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
   const [liked, setLiked] = useState(false);
   const navigate = useRouter();
 
-  const formatTimeAgo = (date: Date): string => {
-    const distance = formatDistanceToNow(new Date(date), {addSuffix: false});
-
-    // Convert "about 1 hour" to "1h", "2 days" to "2d", etc.
-    return distance
-      .replace(/about\s/, '')
-      .replace(/less than a minute/, '< 1m')
-      .replace(/minute/, 'm')
-      .replace(/hour/, 'h')
-      .replace(/day/, 'd')
-      .replace(/month/, 'mo')
-      .replace(/year/, 'y')
-      .replace(/\s/g, '');
-  };
-
   const handleLike = () => {
     setLiked(!liked);
   };
@@ -69,17 +54,6 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
       onQuote();
       return;
     }
-
-    const postId = comment.postId;
-    const quoteText = `> ${comment.username}: ${comment.content}`;
-
-    // Navigate to reply page with quoted text
-    // navigate(`/post/${postId}/reply`, {
-    //   state: {
-    //     quote: quoteText,
-    //     quotedUser: comment.username,
-    //   },
-    // });
   };
 
   // Function to parse and format any quoted content in the comment
@@ -111,7 +85,7 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
 
           return (
             <>
-              <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app">
+              <div className="bg-gray-100 p-3 rounded-md mb-0 border-l-4 border-app">
                 <p className="text-sm font-semibold text-app mb-1">
                   @{quoteName}
                 </p>
@@ -149,7 +123,7 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
 
   return (
     <div
-      className={clsx('border-b p-4 transition-colors', {
+      className={clsx('border-b p-4 pb-10 transition-colors', {
         'hover:bg-app-hover border-app-border': theme.type === 'default',
         'hover:bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
       })}>
@@ -169,7 +143,7 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
               </Link>
 
               <span className="text-app-gray">
-                · replied {formatTimeAgo(comment.timestamp)}
+                · replied {formatTimeAgo2(comment.timestamp as string)}
               </span>
             </div>
 

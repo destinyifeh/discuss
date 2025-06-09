@@ -16,13 +16,15 @@ export const MainLayout = ({children}: MainLayoutProps) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const {showBottomTab} = useGlobalStore(state => state);
 
-  const isSection =
+  const isSection2 =
     location.includes('/discuss/') ||
     (location.includes('/post/') && !location.includes('/reply')) ||
     location.includes('/user/') ||
     location.includes('/create-post') ||
     location.includes('/bookmarks') ||
     location.includes('/profile/');
+
+  const isSection = location.includes('/home');
 
   // useEffect(() => {
   //   const handleScroll = () => {
@@ -46,13 +48,13 @@ export const MainLayout = ({children}: MainLayoutProps) => {
 
   return (
     <React.Fragment>
-      {!isSection && <MobileNavigation />}
+      {isSection && <MobileNavigation />}
       <main
         className={clsx('flex-1 flex flex-col max-w-3xl mx-auto border-x', {
           'border-app-border ': theme.type === 'default',
           'border-app-dark-border': theme.type === 'dark',
         })}>
-        <div className={`${isSection ? 'pt-0' : 'pt-14'} md:pt-0`}>
+        <div className={`${!isSection ? 'pt-0' : 'pt-14'} md:pt-0`}>
           {children}
         </div>
         {showBottomTab && <MobileBottomTab />}

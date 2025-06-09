@@ -1,5 +1,8 @@
+import {formatDistanceToNow} from 'date-fns';
+
 export function extractLinks(text: string) {
-  const urlRegex = /(?:https?:\/\/|www\.)[^\s]+/g;
+  const urlRegex =
+    /\b((https?:\/\/|www\.)[^\s]+?\.[a-z]{2,}(\/[^\s]*)?)(?=[\s]|$)/gi;
 
   return text
     .replace(urlRegex, match => {
@@ -23,183 +26,6 @@ export const highlightLinks = (text: string) => {
     )
     .replace(/\n/g, '<br>');
 };
-
-export function extractLinks3(text: string): string {
-  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
-
-  return text.replace(urlRegex, match => {
-    // Normalize YouTube links
-    const ytMatch = match.match(
-      /(?:https?:\/\/)?(?:www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]+)/,
-    );
-
-    if (ytMatch) {
-      const videoId = ytMatch[2];
-      return `
-        <div class="mt-2">
-          <iframe
-            width="100%"
-            height="315"
-            src="https://www.youtube.com/embed/${videoId}"
-            title="YouTube video"
-            frameborder="0"
-            allowfullscreen
-          ></iframe>
-        </div>
-      `;
-    }
-
-    const url = match.startsWith('http') ? match : `https://${match}`;
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline break-all">${match}</a>`;
-  });
-}
-
-export function extractLinks4(text: string): string {
-  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
-
-  return text
-    .split('\n')
-    .map(line => {
-      const trimmedLine = line.trim();
-
-      if (trimmedLine === '') {
-        return '<br />';
-      }
-
-      const ytMatch = trimmedLine.match(
-        /(?:https?:\/\/)?(?:www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]+)/,
-      );
-
-      if (ytMatch) {
-        const videoId = ytMatch[2];
-        return `
-          <iframe
-            width="100%"
-            height="315"
-            src="https://www.youtube.com/embed/${videoId}"
-            title="YouTube video"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            style="margin: 0px 0; display: block;"
-          ></iframe>
-        `;
-      }
-
-      // Handle normal URLs
-      const lineWithLinks = trimmedLine.replace(urlRegex, match => {
-        const href = match.startsWith('http') ? match : `https://${match}`;
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">${match}</a>`;
-      });
-
-      return `<span>${lineWithLinks}</span><br />`;
-    })
-    .join('');
-}
-
-export function extractLinks7(text: string): string {
-  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
-
-  return text
-    .split('\n')
-    .map(line => {
-      const trimmedLine = line.trim();
-
-      // Handle empty lines
-      if (!trimmedLine) {
-        return `<div style="height: 12px;"></div>`; // preserve empty lines with minimal height
-      }
-
-      // Handle YouTube links
-      const ytMatch = trimmedLine.match(
-        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/,
-      );
-
-      if (ytMatch) {
-        const videoId = ytMatch[1];
-        const textBefore = trimmedLine.replace(ytMatch[0], '').trim();
-
-        return `
-          ${
-            textBefore
-              ? `<div style="margin-bottom: 4px;">${textBefore}</div>`
-              : ''
-          }
-          <iframe
-            width="100%"
-            height="315"
-            src="https://www.youtube.com/embed/${videoId}"
-            title="YouTube video"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            style="margin-bottom: 12px; display: block;"
-          ></iframe>
-        `;
-      }
-
-      // Replace other URLs
-      const lineWithLinks = trimmedLine.replace(urlRegex, match => {
-        const href = match.startsWith('http') ? match : `https://${match}`;
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">${match}</a>`;
-      });
-
-      return `<div style="margin-bottom: 4px;">${lineWithLinks}</div>`;
-    })
-    .join('');
-}
-
-export function extractLinks6(text: string): string {
-  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
-
-  return text
-    .split('\n')
-    .map(line => {
-      const trimmedLine = line.trim();
-
-      if (!trimmedLine) {
-        // Render empty lines with a small spacer
-        return `<div style="height: 8px;"></div>`;
-      }
-
-      // YouTube video check
-      const ytMatch = trimmedLine.match(
-        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/,
-      );
-
-      if (ytMatch) {
-        const videoId = ytMatch[1];
-        const textBefore = trimmedLine.replace(ytMatch[0], '').trim();
-
-        return `
-          ${
-            textBefore
-              ? `<div style="margin-bottom: 4px;">${textBefore}</div>`
-              : ''
-          }
-          <iframe
-            width="100%"
-            height="315"
-            src="https://www.youtube.com/embed/${videoId}"
-            title="YouTube video"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            style="margin: 0 0 8px 0; display: block;"
-          ></iframe>
-        `;
-      }
-
-      // Handle normal links
-      const lineWithLinks = trimmedLine.replace(urlRegex, match => {
-        const href = match.startsWith('http') ? match : `https://${match}`;
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">${match}</a>`;
-      });
-
-      return `<div style="margin-bottom: 4px;">${lineWithLinks}</div>`;
-    })
-    .join('');
-}
 
 export function extractLinks8(text: string): string {
   //const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
@@ -401,4 +227,19 @@ export const formatTimeAgo = (timestamp: string) => {
   if (interval > 1) return Math.floor(interval) + ' minutes ago';
 
   return Math.floor(seconds) + ' seconds ago';
+};
+
+export const formatTimeAgo2 = (date: string): string => {
+  const distance = formatDistanceToNow(new Date(date), {addSuffix: false});
+
+  // Convert "about 1 hour" to "1h", "2 days" to "2d", etc.
+  return distance
+    .replace(/about\s/, '')
+    .replace(/less than a minute/, '< 1m')
+    .replace(/minute/, 'm')
+    .replace(/hour/, 'h')
+    .replace(/day/, 'd')
+    .replace(/month/, 'mo')
+    .replace(/year/, 'y')
+    .replace(/\s/g, '');
 };

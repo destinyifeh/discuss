@@ -82,17 +82,6 @@ export const PostDetailPage = () => {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 
-  if (!post) {
-    return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold mb-2">Post not found</h2>
-        <Button variant="outline" onClick={() => navigate.push('/home')}>
-          Back to Home
-        </Button>
-      </div>
-    );
-  }
-
   // Helper function to extract user's added content from a comment
   const extractUserAddedContent = (content: string): string => {
     console.log(content, 'contyyy');
@@ -254,6 +243,17 @@ export const PostDetailPage = () => {
   const mergedItems = useMemo(() => {
     return insertAdsAtRandomCommentsPositions(sortedComments, sponsoredAd);
   }, [Comments, mockAds]);
+
+  if (!post) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold mb-2">Post not found</h2>
+        <Button variant="outline" onClick={() => navigate.push('/home')}>
+          Back to Home
+        </Button>
+      </div>
+    );
+  }
   return (
     <Fragment>
       <div

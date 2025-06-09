@@ -1,6 +1,7 @@
 'use client';
 import {Input} from '@/components/ui/input';
 
+import {PageHeader} from '@/components/app-headers';
 import {ExplorePostList} from '@/components/post/post-list';
 import {Posts} from '@/constants/data';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
@@ -19,29 +20,24 @@ export const ExplorePage = () => {
   );
   return (
     <div>
-      <div
-        className={clsx('sticky top-0 backdrop-blur-sm z-10 border-b', {
-          'bg-white/80 border-app-border': theme.type === 'default',
-          'border-app-dark-border bg-app-dark': theme.type === 'dark',
-        })}>
-        <div className="p-4">
-          <div className="relative">
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
-              size={20}
-            />
-            <Input
-              placeholder="Search"
-              className={clsx('border-0 rounded-full pl-10 form-input', {
-                'bg-gray-100': theme.type === 'default',
-                'bg-app-dark-bg/10': theme.type === 'dark',
-              })}
-            />
-          </div>
+      <PageHeader title="Search" />
+      <div className="p-4">
+        <div className="relative">
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
+            size={20}
+          />
+          <Input
+            placeholder="Search"
+            className={clsx('border-0 rounded-full pl-10 form-input', {
+              'bg-gray-100': theme.type === 'default',
+              'bg-app-dark-bg/10': theme.type === 'dark',
+            })}
+          />
         </div>
-
-        <ExplorePostList />
       </div>
+
+      <ExplorePostList />
     </div>
   );
 };

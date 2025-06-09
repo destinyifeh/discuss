@@ -31,7 +31,7 @@ export interface CommentProps {
   displayName: string;
   avatar: string;
   content: string;
-  timestamp: Date;
+  timestamp: string | Date;
   likes: number;
   verified: boolean;
   image?: string;

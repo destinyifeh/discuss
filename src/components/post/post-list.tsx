@@ -367,7 +367,7 @@ export const HomePostList = () => {
           onClick={() => {
             virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
           }}
-          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          className="fixedBottomBtn z-1 fixed bottom-18 lg:bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
           <ArrowUp size={20} />
         </button>
       )}

@@ -1,7 +1,8 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
-import {PostCard} from '@/components/post/post-card';
+import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
+import PostCard from '@/components/post/post-card';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Posts} from '@/constants/data';
@@ -159,175 +160,181 @@ export const ProfilePage = () => {
 
   return (
     <div>
-      <PageHeader
-        title={profileUser.displayName}
-        description={`${userPosts.length} posts`}
-      />
+      <div className="pb-15 lg:pb-0">
+        <Virtuoso
+          className="custom-scrollbar"
+          style={{height: '100vh'}}
+          data={data}
+          onScroll={handleScroll}
+          ref={virtuosoRef}
+          components={{
+            Header: () => (
+              <Fragment>
+                <PageHeader
+                  title={profileUser.displayName}
+                  description={`${userPosts.length} posts`}
+                />
 
-      <Virtuoso
-        className="custom-scrollbar"
-        style={{height: '100vh'}}
-        data={data}
-        onScroll={handleScroll}
-        ref={virtuosoRef}
-        components={{
-          Header: () => (
-            <Fragment>
-              <div
-                className={clsx('border-b overflow-y-auto', {
-                  'border-app-border': theme.type === 'default',
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
-                <div className="h-40 bg-app/20"></div>
-                <div className="px-4 pb-4">
-                  <div className="flex justify-between relative">
-                    <div className="w-24 h-24 rounded-full border-4 border-white bg-white absolute -top-12">
-                      <img
-                        src={profileUser.avatar}
-                        alt={profileUser.displayName}
-                        className="w-full h-full rounded-full"
-                      />
-                    </div>
+                <div
+                  className={clsx('border-b overflow-y-auto', {
+                    'border-app-border': theme.type === 'default',
+                    'border-app-dark-border': theme.type === 'dark',
+                  })}>
+                  <div className="h-40 bg-app/20"></div>
+                  <div className="px-4 pb-4">
+                    <div className="flex justify-between relative">
+                      <div className="w-24 h-24 rounded-full border-4 border-white bg-white absolute -top-12">
+                        <img
+                          src={profileUser.avatar}
+                          alt={profileUser.displayName}
+                          className="w-full h-full rounded-full"
+                        />
+                      </div>
 
-                    <div className="flex-1"></div>
+                      <div className="flex-1"></div>
 
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        variant="outline"
-                        className={clsx('rounded-full', {
-                          'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                            theme.type === 'dark',
-                        })}
-                        onClick={() => navigate.push(`/profile/${user}/edit`)}>
-                        Edit profile
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className={clsx('rounded-full', {
-                          'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                            theme.type === 'dark',
-                        })}
-                        onClick={() => navigate.push('/settings')}>
-                        <Settings className="h-4 w-4 mr-2" />
-                        Settings
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="mt-16">
-                    <h2 className="font-bold text-xl">
-                      {profileUser.displayName}
-                    </h2>
-                    <p className="text-app-gray">@{profileUser.username}</p>
-
-                    <div className="mt-3 text-app-gray">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <MapPin size={16} />
-                          <span>New York, USA</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <LinkIcon size={16} />
-                          <Link href="#" className="text-app">
-                            example.com
-                          </Link>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          <span>Joined April 2023</span>
-                        </div>
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          variant="outline"
+                          className={clsx('rounded-full', {
+                            'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                              theme.type === 'dark',
+                          })}
+                          onClick={() =>
+                            navigate.push(`/profile/${user}/edit`)
+                          }>
+                          Edit profile
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className={clsx('rounded-full', {
+                            'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                              theme.type === 'dark',
+                          })}
+                          onClick={() => navigate.push('/settings')}>
+                          <Settings className="h-4 w-4 mr-2" />
+                          Settings
+                        </Button>
                       </div>
                     </div>
 
-                    <div className="flex gap-4 mt-3">
-                      <Link
-                        className="flex items-center gap-1 cursor-pointer hover:underline"
-                        href={`/profile/${profileUser.username}/following`}>
-                        <span className="font-bold">
-                          {profileUser.following?.length || 0}
-                        </span>
-                        <span className="text-app-gray">Following</span>
-                      </Link>
-                      <Link
-                        className="flex items-center gap-1 cursor-pointer hover:underline"
-                        href={`/profile/${profileUser.username}/followers`}>
-                        <span className="font-bold">
-                          {profileUser.followers?.length || 0}
-                        </span>
-                        <span className="text-app-gray">Followers</span>
-                      </Link>
+                    <div className="mt-16">
+                      <h2 className="font-bold text-xl">
+                        {profileUser.displayName}
+                      </h2>
+                      <p className="text-app-gray">@{profileUser.username}</p>
+
+                      <div className="mt-3 text-app-gray">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={16} />
+                            <span>New York, USA</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <LinkIcon size={16} />
+                            <Link href="#" className="text-app">
+                              example.com
+                            </Link>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar size={16} />
+                            <span>Joined April 2023</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 mt-3">
+                        <Link
+                          className="flex items-center gap-1 cursor-pointer hover:underline"
+                          href={`/profile/${profileUser.username}/following`}>
+                          <span className="font-bold">
+                            {profileUser.following?.length || 0}
+                          </span>
+                          <span className="text-app-gray">Following</span>
+                        </Link>
+                        <Link
+                          className="flex items-center gap-1 cursor-pointer hover:underline"
+                          href={`/profile/${profileUser.username}/followers`}>
+                          <span className="font-bold">
+                            {profileUser.followers?.length || 0}
+                          </span>
+                          <span className="text-app-gray">Followers</span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <Tabs
-                defaultValue="posts"
-                className="w-full"
-                value={activeTab}
-                onValueChange={setActiveTab}>
-                <TabsList className="w-full grid grid-cols-3 bg-transparent">
-                  <TabsTrigger
-                    value="posts"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
-                    Posts
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="replies"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
-                    Replies
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="likes"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
-                    Likes
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </Fragment>
-          ),
-          EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
-        }}
-        //endReached={fetchMore}
-        itemContent={(index, post) => (
-          <div>
-            <PostCard post={post} />
-          </div>
-        )}
-      />
-      {showGoUp && (
-        <button
-          onClick={() => {
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                <Tabs
+                  defaultValue="posts"
+                  className="w-full"
+                  value={activeTab}
+                  onValueChange={setActiveTab}>
+                  <TabsList className="w-full grid grid-cols-3 bg-transparent">
+                    <TabsTrigger
+                      value="posts"
+                      className={clsx(
+                        'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
+                        {
+                          'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
+                            theme.type === 'dark',
+                          'data-[state=active]:text-black':
+                            theme.type === 'default',
+                        },
+                      )}>
+                      Posts
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="replies"
+                      className={clsx(
+                        'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
+                        {
+                          'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
+                            theme.type === 'dark',
+                          'data-[state=active]:text-black':
+                            theme.type === 'default',
+                        },
+                      )}>
+                      Replies
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="likes"
+                      className={clsx(
+                        'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
+                        {
+                          'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
+                            theme.type === 'dark',
+                          'data-[state=active]:text-black':
+                            theme.type === 'default',
+                        },
+                      )}>
+                      Likes
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </Fragment>
+            ),
+            EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
           }}
-          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
-          <ArrowUp size={20} />
-        </button>
-      )}
+          //endReached={fetchMore}
+          itemContent={(index, post) => (
+            <div>
+              <PostCard post={post} />
+            </div>
+          )}
+        />
+
+        {showGoUp && (
+          <button
+            onClick={() => {
+              virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+            }}
+            className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+            <ArrowUp size={20} />
+          </button>
+        )}
+      </div>
+      <MobileBottomTab />
     </div>
   );
 };

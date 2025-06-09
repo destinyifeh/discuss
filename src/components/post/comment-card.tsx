@@ -1,5 +1,4 @@
 'use client';
-
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {
@@ -12,6 +11,7 @@ import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {CommentProps} from '@/types/post-item.type';
 import clsx from 'clsx';
+import React, {useState} from 'react';
 
 import {formatTimeAgo2} from '@/lib/formatter';
 import {
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import {useState} from 'react';
+
 import {toast} from 'sonner';
 import {PostContent} from './post-content';
 
@@ -33,7 +33,7 @@ interface CommentCardProps {
   onQuote?: () => void;
 }
 
-export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
+const CommentCard = ({comment, onQuote}: CommentCardProps) => {
   const {theme} = useGlobalStore(state => state);
   const [liked, setLiked] = useState(false);
   const navigate = useRouter();
@@ -85,7 +85,11 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
 
           return (
             <>
-              <div className="bg-gray-100 p-3 rounded-md mb-0 border-l-4 border-app">
+              <div
+                className={clsx('p-3 rounded-md mb-0 border-l-4 border-app', {
+                  'bg-gray-100': theme.type === 'default',
+                  'bg-app-dark-bg/10 text-white': theme.type === 'dark',
+                })}>
                 <p className="text-sm font-semibold text-app mb-1">
                   @{quoteName}
                 </p>
@@ -104,7 +108,11 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
           );
 
           return (
-            <div className="bg-gray-100 p-3 rounded-md border-l-4 border-app">
+            <div
+              className={clsx('p-3 rounded-md mb-0 border-l-4 border-app', {
+                'bg-gray-100': theme.type === 'default',
+                'bg-app-dark-bg/10 text-white': theme.type === 'dark',
+              })}>
               <p className="text-sm font-semibold text-app mb-1">
                 @{quoteName}
               </p>
@@ -250,3 +258,5 @@ export const CommentCard = ({comment, onQuote}: CommentCardProps) => {
     </div>
   );
 };
+
+export default React.memo(CommentCard);

@@ -1,13 +1,15 @@
 'use client';
 
-import {Fragment, useMemo, useRef, useState} from 'react';
+import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
 import {AppBannerAd} from '@/components/ad/banner';
+import {PageHeader} from '@/components/app-headers';
 import {AddCommentField} from '@/components/post/add-comment-field';
-import {CommentCard} from '@/components/post/comment-card';
+import CommentCard from '@/components/post/comment-card';
 import CommunityGuidelines from '@/components/post/community-guidelines';
-import {PostCard} from '@/components/post/post-card';
+import PostCard from '@/components/post/post-card';
+import {PostContent2} from '@/components/post/post-content';
 import {CommentPlaceholder} from '@/components/post/post-list';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
@@ -17,14 +19,7 @@ import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {insertAdsAtRandomCommentsPositions} from '@/lib/helpers';
 import {CommentProps} from '@/types/post-item.type';
 import clsx from 'clsx';
-import {
-  ChevronLeft,
-  ImagePlus,
-  MessageSquare,
-  Reply,
-  Send,
-  X,
-} from 'lucide-react';
+import {ImagePlus, MessageSquare, Reply, Send, X} from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
@@ -99,27 +94,37 @@ export const PostDetailPage = () => {
     return content;
   };
 
-  const handleQuoteComment = (commentId: string) => {
-    console.log(commentId, 'cocooid');
-    const commentToQuote = comments.find(c => c.id === commentId);
-    console.log(commentToQuote, 'heeeree');
-    if (commentToQuote) {
-      // Extract only the direct content, ignoring any nested quotes
-      let contentToQuote = extractUserAddedContent(commentToQuote.content);
-      console.log(contentToQuote, 'cocooid33');
-      // Format quote consistently for both mobile and desktop
-      const formattedQuote = `> ${commentToQuote.username}: ${contentToQuote}`;
-      console.log(formattedQuote, 'cocooid35');
-      setQuoteContent(formattedQuote);
-      setQuotedUser(commentToQuote.username);
-      setShowMobileComment(true);
-      setShowWebComment(true);
-
-      if (isMobile) {
+  const handleQuoteComment = useCallback(
+    (commentId: string) => {
+      console.log(commentId, 'cocooid');
+      const commentToQuote = comments.find(c => c.id === commentId);
+      console.log(commentToQuote, 'heeeree');
+      if (commentToQuote) {
+        // Extract only the direct content, ignoring any nested quotes
+        let contentToQuote = extractUserAddedContent(commentToQuote.content);
+        console.log(contentToQuote, 'cocooid33');
+        // Format quote consistently for both mobile and desktop
+        const formattedQuote = `> ${commentToQuote.username}: ${contentToQuote}`;
+        console.log(formattedQuote, 'cocooid35');
+        setQuoteContent(formattedQuote);
+        setQuotedUser(commentToQuote.username);
         setShowMobileComment(true);
+        setShowWebComment(true);
+
+        if (isMobile) {
+          setShowMobileComment(true);
+        }
       }
-    }
-  };
+    },
+    [
+      comments,
+      extractUserAddedContent,
+      setQuoteContent,
+      setQuotedUser,
+      setShowMobileComment,
+      setShowWebComment,
+    ],
+  );
 
   const handleSubmitComment = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -214,28 +219,6 @@ export const PostDetailPage = () => {
     ad => ad.type === 'Sponsored' && ad.section === 'home',
   );
 
-  // Function to format the quoted text with styling that matches CommentCard.tsx
-  const formatReplyTextarea = () => {
-    if (!quoteContent) return null;
-
-    // Extract only the quoted content without the username prefix
-    // This regex matches '> username: ' pattern at the beginning of the string
-    const quote = quoteContent.replace(/^>\s[\w]+:\s/gm, '');
-
-    return (
-      <div className="mb-4">
-        <div className="p-3 rounded-md bg-gray-100 border-l-4 border-forum-blue">
-          {quotedUser && (
-            <p className="font-medium text-sm mb-1 text-forum-blue">
-              @{quotedUser}
-            </p>
-          )}
-          <p className="text-[#333] whitespace-pre-wrap">{quote}</p>
-        </div>
-      </div>
-    );
-  };
-
   // const mergedItems2 = useMemo(() => {
   //   return mergeCommentsWithAds(sortedComments, shuffleArray(sponsoredAd));
   // }, [Comments, mockAds]);
@@ -256,23 +239,10 @@ export const PostDetailPage = () => {
   }
   return (
     <Fragment>
-      <div
-        className={clsx('sticky top-0 backdrop-blur-sm z-10 border-b', {
-          'bg-white/80 border-app-border': theme.type === 'default',
-          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-        })}>
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-              <ChevronLeft />
-            </Button>
-            <h1 className="text-xl font-bold">Post</h1>
-          </div>
-        </div>
-      </div>
+      <PageHeader title="Post" />
       <div>
         <Virtuoso
-          className="custom-scrollbar hide-scrollbar overflow-y-auto"
+          className="custom-scrollbar"
           style={{height: '100vh'}}
           ref={virtuosoRef}
           // onScroll={handleScroll}
@@ -308,7 +278,7 @@ export const PostDetailPage = () => {
           // }}
           components={{
             Header: () => (
-              <div dir="ltr">
+              <Fragment>
                 <div>
                   <AppBannerAd section="home" />
                 </div>
@@ -433,7 +403,7 @@ export const PostDetailPage = () => {
                     </form>
                   </div>
                 )}
-              </div>
+              </Fragment>
             ),
 
             EmptyPlaceholder: () => <CommentPlaceholder />,
@@ -522,22 +492,30 @@ export const PostDetailPage = () => {
               </div>
 
               {quotedUser && (
-                <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app">
+                <div
+                  className={clsx('p-3 rounded-md mb-3 border-l-4 border-app', {
+                    'bg-gray-100 text-gray-700': theme.type === 'default',
+                    'bg-app-dark-bg/10 text-white': theme.type === 'dark',
+                  })}>
                   <div className="font-semibold mb-1 text-app">
                     @{quotedUser}
                   </div>
-                  <div className="text-sm text-gray-700">
-                    {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                  <div className="text-sm">
+                    {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
+                    <PostContent2
+                      content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                    />
                   </div>
                 </div>
               )}
 
-              <Textarea
+              {/* <Textarea
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
-              />
+              /> */}
+              <AddCommentField content={comment} setContent={setComment} />
 
               {imagePreview && (
                 <div
@@ -659,12 +637,19 @@ export const PostDetailPage = () => {
               </div>
 
               {quotedUser && (
-                <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app">
+                <div
+                  className={clsx('p-3 rounded-md mb-3 border-l-4 border-app', {
+                    'bg-gray-100 text-gray-700': theme.type === 'default',
+                    'bg-app-dark-bg/10 text-white': theme.type === 'dark',
+                  })}>
                   <div className="font-semibold mb-1 text-app">
                     @{quotedUser}
                   </div>
-                  <div className="text-sm text-gray-700">
-                    {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                  <div className="text-sm">
+                    {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
+                    <PostContent2
+                      content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                    />
                   </div>
                 </div>
               )}

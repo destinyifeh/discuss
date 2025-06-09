@@ -23,7 +23,8 @@ import {
 import moment from 'moment';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import {useState} from 'react';
+import React, {useState} from 'react';
+
 import {toast} from 'sonner';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
@@ -43,7 +44,7 @@ interface PostCardProps {
   isInDetailView?: boolean;
 }
 
-export const PostCard = ({
+const PostCard = ({
   post,
   showActions = true,
   isInDetailView = false,
@@ -138,7 +139,7 @@ export const PostCard = ({
 
   const shouldTruncate = post.content.length > 100;
   const displayContent =
-    shouldTruncate && !expanded && !isInDetailView
+    shouldTruncate && !expanded && isInDetailView
       ? post.content.slice(0, 100) + '...'
       : post.content;
 
@@ -415,3 +416,5 @@ export const PostCard = ({
     </div>
   );
 };
+
+export default React.memo(PostCard);

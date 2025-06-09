@@ -87,13 +87,15 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
 
   return (
     <div
-      className={clsx('min-h-screen flex lg:hidden', {
+      // className={clsx('min-h-screen flex lg:hidden', {
+      className={clsx('lg:hidden', {
         'bg-white': theme.type === 'default',
         'bg-app-dark': theme.type === 'dark',
       })}>
       <div
         className={clsx(
-          'fixed top-0 left-0 right-0 border-b  flex justify-between items-center p-3 z-30',
+          // 'fixed top-0 left-0 right-0 border-b  flex justify-between items-center p-3 z-30',
+          'sticky top-0 left-0 right-0 border-b flex justify-between items-center p-3 z-30',
           {
             'bg-white border-app-border': theme.type === 'default',
             'bg-app-dark border-app-dark-border': theme.type === 'dark',

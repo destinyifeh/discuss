@@ -19,9 +19,5 @@ export const HomePage = () => {
     post => user.following && user.following.includes(post.userId),
   );
 
-  return (
-    <div className="">
-      <HomePostList />
-    </div>
-  );
+  return <HomePostList />;
 };

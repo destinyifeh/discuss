@@ -1,3 +1,3 @@
-import {ExplorePage} from '@/modules/dashboard/explore/page';
+import {ExplorePage} from '@/modules/dashboard/explore';
 
 export default ExplorePage;

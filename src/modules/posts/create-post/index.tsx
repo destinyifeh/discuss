@@ -1,4 +1,5 @@
 'use client';
+import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import {AddPostField} from '@/components/post/add-post-field';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -25,19 +26,17 @@ export const CreatePostPage = () => {
   const [selectedSection, setSelectedSection] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
-  const [showVideoInput, setShowVideoInput] = useState(false);
-  const [newVideoUrl, setNewVideoUrl] = useState('');
+
   const [isEditing, setIsEditing] = useState(false);
   const [postToEdit, setPostToEdit] = useState<any>(null);
   const [showGuidelines, setShowGuidelines] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const imageInputRef = useRef<HTMLInputElement>(null);
   const {theme} = useGlobalStore(state => state);
 
   const [posts, setPosts] = useState<PostProps[]>([]);
   const navigate = useRouter();
   const location = useSearchParams();
-  //const [width, height] = useWindowSize();
 
   // Check if we're editing an existing post
   useEffect(() => {
@@ -117,13 +116,6 @@ export const CreatePostPage = () => {
     toast.success('Image removed successfully');
   };
 
-  const removeVideo = (index: number) => {
-    const updatedVideos = [...videoUrls];
-    updatedVideos.splice(index, 1);
-    setVideoUrls(updatedVideos);
-    toast.success('Video link removed successfully');
-  };
-
   const handleSubmitPost = () => {
     if (!content.trim() || !selectedSection) {
       toast.error('Please enter content and select a section.');
@@ -144,11 +136,11 @@ export const CreatePostPage = () => {
     } else {
       // Create new post
       addPost({
-        userId: user!.id,
-        username: user!.username,
-        displayName: user!.displayName,
-        avatar: user!.avatar,
-        verified: user!.verified,
+        userId: user.id,
+        username: user.username,
+        displayName: user.displayName,
+        avatar: user.avatar,
+        verified: user.verified,
         content: content,
         title: content.split(' ').slice(0, 5).join(' ') + '...', // Generate title from content
         sectionId: selectedSection,
@@ -368,6 +360,7 @@ export const CreatePostPage = () => {
         }}>
         <div dangerouslySetInnerHTML={{__html: extractLinks2(content)}} />
       </div> */}
+      <MobileBottomTab />
     </div>
   );
 };

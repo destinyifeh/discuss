@@ -1,6 +1,6 @@
 'use client';
 
-import {PostCard} from '@/components/post/post-card';
+import PostCard from '@/components/post/post-card';
 import {Button} from '@/components/ui/button';
 import {
   Dialog,

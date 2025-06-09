@@ -11,16 +11,20 @@ import {
 import {AdProps} from '@/types/ad-types';
 import {PostProps} from '@/types/post-item.type';
 import clsx from 'clsx';
-import {ArrowUp} from 'lucide-react';
+import {ArrowUp, BookmarkIcon, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {AdCard} from '../ad/ad-card';
 import {AppBannerAd} from '../ad/banner';
+import {PageHeader} from '../app-headers';
+import {MobileBottomTab} from '../layouts/dashboard/mobile-bottom-tab';
+import MobileNavigation from '../layouts/dashboard/mobile-navigation';
 import {Badge} from '../ui/badge';
 import {Button} from '../ui/button';
+import {Input} from '../ui/input';
 import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
-import {PostCard} from './post-card';
+import PostCard from './post-card';
 
 type MergedItem = {type: 'post'; data: PostProps} | {type: 'ad'; data: AdProps};
 export const SectionPostList = ({
@@ -164,7 +168,7 @@ export const SectionPostList = ({
   }, [Posts, mockAds, adSection]);
 
   return (
-    <div>
+    <div className="pb-15 lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -217,7 +221,8 @@ export const SectionPostList = ({
 };
 
 export const HomePostList = () => {
-  const {setShowBottomTab, theme} = useGlobalStore(state => state);
+  const {theme} = useGlobalStore(state => state);
+  const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -257,7 +262,7 @@ export const HomePostList = () => {
     // } else if (scrollTop < lastScrollTop.current - 5) {
     //   setShowBottomTab(true);
     // }
-
+    setShowBottomTab(scrollTop < 300);
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
@@ -271,7 +276,7 @@ export const HomePostList = () => {
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
   return (
-    <div>
+    <div className="pb-15 lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -282,6 +287,7 @@ export const HomePostList = () => {
         components={{
           Header: () => (
             <Fragment>
+              <MobileNavigation />
               <Tabs
                 defaultValue="for-you"
                 value={activeTab}
@@ -356,21 +362,19 @@ export const HomePostList = () => {
           EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
         }}
         //endReached={fetchMore}
-        itemContent={(index, post) => (
-          <div>
-            <PostCard post={post} />
-          </div>
-        )}
+        itemContent={(index, post) => <PostCard post={post} />}
       />
       {showGoUp && (
         <button
           onClick={() => {
             virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
           }}
-          className="fixedBottomBtn z-1 fixed bottom-18 lg:bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
           <ArrowUp size={20} />
         </button>
       )}
+
+      {showBottomTab && <MobileBottomTab />}
     </div>
   );
 };
@@ -438,7 +442,7 @@ export const ExplorePostList = () => {
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
   return (
-    <div>
+    <div className="pb-15 lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -449,6 +453,22 @@ export const ExplorePostList = () => {
         components={{
           Header: () => (
             <Fragment>
+              <PageHeader title="Search" />
+              <div className="p-4">
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
+                    size={20}
+                  />
+                  <Input
+                    placeholder="Search"
+                    className={clsx('border-0 rounded-full pl-10 form-input', {
+                      'bg-gray-100': theme.type === 'default',
+                      'bg-app-dark-bg/10': theme.type === 'dark',
+                    })}
+                  />
+                </div>
+              </div>
               <div
                 className={clsx('px-4 py-3 border-b lg:hidden md:mt-7', {
                   'border-app-border': theme.type === 'default',
@@ -482,14 +502,10 @@ export const ExplorePostList = () => {
               </div>
             </Fragment>
           ),
-          EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
+          EmptyPlaceholder: () => <Placeholder holder={'explore'} />,
         }}
         //endReached={fetchMore}
-        itemContent={(index, post) => (
-          <div>
-            <PostCard post={post} />
-          </div>
-        )}
+        itemContent={(index, post) => <PostCard post={post} />}
       />
       {showGoUp && (
         <button
@@ -500,6 +516,107 @@ export const ExplorePostList = () => {
           <ArrowUp size={20} />
         </button>
       )}
+
+      <MobileBottomTab />
+    </div>
+  );
+};
+
+export const BookmarkPostList = () => {
+  const {setShowBottomTab, theme} = useGlobalStore(state => state);
+  const [activeTab, setActiveTab] = useState('for-you');
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showGoUp, setShowGoUp] = useState(false);
+  const navigate = useRouter();
+  const sortedPosts = [...Posts].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  );
+
+  const sortedPosts2 = [...Posts].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
+  // Mock bookmarked posts - in a real app, this would come from user data
+  const bookmarkedPostIds = ['1', '3']; // Example IDs
+  const bookmarkedPosts = Posts.filter(post =>
+    bookmarkedPostIds.includes(post.id),
+  );
+
+  const data = bookmarkedPosts;
+
+  //   const [posts, setPosts] = useState([]);
+  //   const [page, setPage] = useState(1);
+
+  //   const fetchMore = async () => {
+  //     const res = await fetch(`/api/posts?page=${page}`);
+  //     const newPosts = await res.json();
+  //     setPosts(prev => [...prev, ...newPosts]);
+  //     setPage(prev => prev + 1);
+  //   };
+
+  //   useEffect(() => {
+  //     fetchMore(); // Load initial
+  //   }, []);
+
+  const lastScrollTop = useRef(0);
+
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+    // if (scrollTop > lastScrollTop.current + 5) {
+    //   setTimeout(() => {
+    //     setShowBottomTab(false);
+    //   }, 500);
+    // } else if (scrollTop < lastScrollTop.current - 5) {
+    //   setShowBottomTab(true);
+    // }
+
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const handleScrolling = (scrollTop: number) => {
+    setShowGoUp(scrollTop > 300);
+  };
+
+  const handleGoToTop = () => {
+    scrollRef.current?.scrollTo({top: 0});
+  };
+
+  const onSectionNavigate = (section: string) => {
+    if (section === 'Create Ad') {
+      navigate.push('/advertise');
+      return;
+    }
+    navigate.push(`/discuss/${section.toLowerCase()}`);
+  };
+  return (
+    <div className="pb-15 lg:pb-0">
+      <Virtuoso
+        className="custom-scrollbar"
+        style={{height: '100vh'}}
+        //style={{height: '950px', width: '100%'}}
+        data={data}
+        onScroll={handleScroll}
+        ref={virtuosoRef}
+        components={{
+          Header: () => <PageHeader title="Bookmarks" />,
+          EmptyPlaceholder: () => <Placeholder holder={'bookmark'} />,
+        }}
+        //endReached={fetchMore}
+        itemContent={(index, post) => <PostCard post={post} />}
+      />
+      {showGoUp && (
+        <button
+          onClick={() => {
+            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+          }}
+          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          <ArrowUp size={20} />
+        </button>
+      )}
+
+      <MobileBottomTab />
     </div>
   );
 };
@@ -525,6 +642,39 @@ export const PostPlaceholder = ({tab}: {tab: string}) => {
             Find people to follow
           </button>
         </>
+      )}
+    </div>
+  );
+};
+
+export const Placeholder = ({
+  holder,
+  query,
+}: {
+  holder: string;
+  query?: string;
+}) => {
+  const navigate = useRouter();
+  return (
+    <div className="p-8 text-center">
+      {holder === 'explore' && (
+        <>
+          <h2 className="text-xl font-bold mb-2">
+            No search result for {query} found
+          </h2>
+          <p className="text-app-gray">Try another search!</p>
+        </>
+      )}
+      {holder === 'bookmark' && (
+        <div className="flex flex-col items-center justify-center p-2 text-center">
+          <div className="bg-app-hover rounded-full p-4 mb-4">
+            <BookmarkIcon size={32} className="text-app" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">No bookmarks yet</h2>
+          <p className="text-app-gray mb-4">
+            When you bookmark posts, they will appear here for easy access.
+          </p>
+        </div>
       )}
     </div>
   );

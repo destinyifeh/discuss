@@ -1,6 +1,7 @@
 'use client';
 import {useState} from 'react';
 
+import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {
   Card,
@@ -101,6 +102,7 @@ export const ContactSupportPage = () => {
 
   return (
     <div>
+      <PageHeader title="Contact Support" />
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-2 bg-app/10 rounded-full mb-4">

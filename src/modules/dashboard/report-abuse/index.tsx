@@ -2,14 +2,14 @@
 
 import type React from 'react';
 
+import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Textarea} from '@/components/ui/textarea';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
-import {AlertTriangle, ArrowLeft, CheckCircle, ShieldAlert} from 'lucide-react';
+import {AlertTriangle, CheckCircle} from 'lucide-react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import {useState} from 'react';
@@ -48,27 +48,7 @@ export default function ReportAbusePage() {
 
   return (
     <div className="pb-20">
-      <div
-        className={clsx(
-          'sticky top-0 z-10 backdrop-blur-sm border-b md:top-0 top-[57px] p-4',
-          {
-            'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border':
-              theme.type === 'dark',
-            'bg-white border-gray-200 ': theme.type === 'default',
-          },
-        )}>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={'/home'}>
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div className="flex items-center">
-            <ShieldAlert className="h-5 w-5 mr-2 text-red-500" />
-            <h1 className="text-xl font-bold">{getReportHeaderText()}</h1>
-          </div>
-        </div>
-      </div>
+      <PageHeader title="Report Abuse" />
 
       <div className="p-4 max-w-2xl mx-auto">
         {!submitted ? (

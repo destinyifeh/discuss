@@ -232,11 +232,33 @@ export const Sections: Section[] = [
     description: 'Celebrity gossip, news, and public appearances',
     ch: 'celeb',
   },
+];
 
+export const SectionOptions: Section[] = [
   {
-    id: '13',
+    id: '1',
     name: 'Create Ad',
-    description: 'Create your ad',
+    description: 'advertise',
+  },
+  {
+    id: '2',
+    name: 'Report Abuse',
+    description: 'report-abuse',
+  },
+  {
+    id: '3',
+    name: 'Contact Support',
+    description: 'contact-support',
+  },
+  {
+    id: '4',
+    name: 'Help Center',
+    description: 'help',
+  },
+  {
+    id: '5',
+    name: 'Community Guidelines',
+    description: 'community-guidelines',
   },
 ];
 

@@ -1,5 +1,5 @@
 'use client';
-import {mockAds, Posts, Sections} from '@/constants/data';
+import {mockAds, Posts, SectionOptions, Sections} from '@/constants/data';
 import {Fragment, useMemo, useRef, useState} from 'react';
 //import {VariableSizeList as List} from 'react-window';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
@@ -276,6 +276,10 @@ export const HomePostList = () => {
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
 
+  const onSectionOptionsNavigate = (section: string) => {
+    navigate.push(`/${section}`);
+  };
+
   const allowTab = false;
   return (
     <div className="pb-0 lg:pb-0">
@@ -290,6 +294,7 @@ export const HomePostList = () => {
           Header: () => (
             <Fragment>
               <MobileNavigation />
+
               {allowTab && (
                 <Tabs
                   defaultValue="for-you"
@@ -334,24 +339,56 @@ export const HomePostList = () => {
                 </Tabs>
               )}
               <div
-                className={clsx('px-4 py-3 border-b lg:hidden md:mt-7', {
+                className={clsx('px-0 py-3 border-b lg:hidden md:mt-7', {
                   'border-app-border': theme.type === 'default',
                   'border-app-dark-border': theme.type === 'dark',
                 })}>
-                <h2 className="font-semibold my-2">Discuss</h2>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {Sections.map(section => (
+                <div className="px-4">
+                  <h2 className="font-semibold mb-2 mt-0">Discuss</h2>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {Sections.map(section => (
+                      <Badge
+                        key={section.id}
+                        variant="outline"
+                        className={clsx(
+                          'py-1 px-3 cursor-pointer hover:bg-app-hover font-bold',
+                          {
+                            'border-app-border text-app':
+                              theme.type === 'default',
+                            'border-app-dark-border text-app/90':
+                              theme.type === 'dark',
+                          },
+                        )}
+                        onClick={() => onSectionNavigate(section.name)}>
+                        {section.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div
+                  className={clsx(
+                    'px-4 flex flex-wrap gap-2 mb-2 border-t pt-3',
+                    {
+                      'border-app-border': theme.type === 'default',
+                      'border-app-dark-border': theme.type === 'dark',
+                    },
+                  )}>
+                  {SectionOptions.map(section => (
                     <Badge
                       key={section.id}
                       variant="outline"
                       className={clsx(
-                        'py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app',
+                        'py-1 px-3 cursor-pointer hover:bg-app-hover font-bold',
                         {
-                          'border-app-border': theme.type === 'default',
-                          'border-app-dark-border': theme.type === 'dark',
+                          'border-app-border text-app':
+                            theme.type === 'default',
+                          'border-app-dark-border text-app/90':
+                            theme.type === 'dark',
                         },
                       )}
-                      onClick={() => onSectionNavigate(section.name)}>
+                      onClick={() =>
+                        onSectionOptionsNavigate(section.description as string)
+                      }>
                       {section.name}
                     </Badge>
                   ))}

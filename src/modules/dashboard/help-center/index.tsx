@@ -1,5 +1,6 @@
 'use client';
 
+import {PageHeader} from '@/components/app-headers';
 import {
   Accordion,
   AccordionContent,
@@ -97,121 +98,127 @@ export const HelpCenterPage = () => {
     : faqs;
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-6xl">
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-4">
-          <HelpCircle className="h-6 w-6 text-primary" />
-        </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">Help Center</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Find answers to common questions and learn how to make the most of our
-          forum.
-        </p>
-      </div>
+    <div>
+      <PageHeader title="Help Center" />
 
-      <div className="max-w-2xl mx-auto mb-12">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search for help topics..."
-            className={clsx('pl-10 py-6 text-base form-input', {
-              'border-app-dark-border': theme.type === 'dark',
-            })}
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
+      <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-6xl">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-4">
+            <HelpCircle className="h-6 w-6 text-primary" />
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">Help Center</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Find answers to common questions and learn how to make the most of
+            our forum.
+          </p>
         </div>
-      </div>
 
-      {!searchQuery && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {sections.map((section, index) => (
-            <Card
-              key={index}
-              className={clsx('transition-all hover:shadow-md', {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
-              <CardHeader className="flex flex-col items-center text-center">
-                <div className="p-2 bg-primary/10 rounded-full mb-2">
-                  {section.icon}
-                </div>
-                <CardTitle>{section.title}</CardTitle>
-                <CardDescription>{section.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search for help topics..."
+              className={clsx('pl-10 py-6 text-base form-input', {
+                'border-app-dark-border': theme.type === 'dark',
+              })}
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+          </div>
         </div>
-      )}
 
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
-        <Accordion type="single" collapsible className="w-full">
-          {filteredFaqs.length > 0 ? (
-            filteredFaqs.map((faq, index) => (
-              <AccordionItem
+        {!searchQuery && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {sections.map((section, index) => (
+              <Card
                 key={index}
-                value={`item-${index}`}
-                className={clsx({
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
-                <AccordionTrigger className="text-left">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-muted-foreground">{faq.answer}</p>
-                </AccordionContent>
-              </AccordionItem>
-            ))
-          ) : (
-            <Card
-              className={clsx('p-6 text-center', {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
-              <p className="text-muted-foreground mb-2">
-                No results found for "{searchQuery}"
-              </p>
-              <p>Please try different keywords or browse our sections.</p>
-            </Card>
-          )}
-        </Accordion>
-      </div>
-
-      <Card
-        className={clsx('mb-12 ', {
-          'border-primary/20': theme.type === 'default',
-          'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text':
-            theme.type === 'dark',
-        })}>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-xl font-semibold mb-2">Still need help?</h3>
-              <p className="text-muted-foreground">
-                Our support team is ready to assist you
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                variant="outline"
-                className={clsx('flex items-center gap-2', {
-                  'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text hover:bg-app-dark-bg/10 hover:text-white':
+                className={clsx('transition-all hover:shadow-md', {
+                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
                     theme.type === 'dark',
                 })}>
-                <MessageCircle className="h-4 w-4" />
-                Live Chat
-              </Button>
-              <Link href="/contact-support">
-                <Button className="flex items-center gap-2 bg-app hover:bg-app/90">
-                  <Mail className="h-4 w-4" />
-                  Contact Support
-                </Button>
-              </Link>
-            </div>
+                <CardHeader className="flex flex-col items-center text-center">
+                  <div className="p-2 bg-primary/10 rounded-full mb-2">
+                    {section.icon}
+                  </div>
+                  <CardTitle>{section.title}</CardTitle>
+                  <CardDescription>{section.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        )}
+
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">
+            Frequently Asked Questions
+          </h2>
+          <Accordion type="single" collapsible className="w-full">
+            {filteredFaqs.length > 0 ? (
+              filteredFaqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`item-${index}`}
+                  className={clsx({
+                    'border-app-dark-border': theme.type === 'dark',
+                  })}>
+                  <AccordionTrigger className="text-left">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-muted-foreground">{faq.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))
+            ) : (
+              <Card
+                className={clsx('p-6 text-center', {
+                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
+                    theme.type === 'dark',
+                })}>
+                <p className="text-muted-foreground mb-2">
+                  No results found for "{searchQuery}"
+                </p>
+                <p>Please try different keywords or browse our sections.</p>
+              </Card>
+            )}
+          </Accordion>
+        </div>
+
+        <Card
+          className={clsx('mb-12 ', {
+            'border-primary/20': theme.type === 'default',
+            'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text':
+              theme.type === 'dark',
+          })}>
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="mb-4 md:mb-0">
+                <h3 className="text-xl font-semibold mb-2">Still need help?</h3>
+                <p className="text-muted-foreground">
+                  Our support team is ready to assist you
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="outline"
+                  className={clsx('flex items-center gap-2', {
+                    'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text hover:bg-app-dark-bg/10 hover:text-white':
+                      theme.type === 'dark',
+                  })}>
+                  <MessageCircle className="h-4 w-4" />
+                  Live Chat
+                </Button>
+                <Link href="/contact-support">
+                  <Button className="flex items-center gap-2 bg-app hover:bg-app/90">
+                    <Mail className="h-4 w-4" />
+                    Contact Support
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

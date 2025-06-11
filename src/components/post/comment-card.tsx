@@ -131,7 +131,7 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
 
   return (
     <div
-      className={clsx('border-b p-4 pb-10 transition-colors', {
+      className={clsx('border-b py-4 px-2 pb-10 transition-colors', {
         'hover:bg-app-hover border-app-border': theme.type === 'default',
         'hover:bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
       })}>

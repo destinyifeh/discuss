@@ -52,6 +52,7 @@ const PostCard = ({
   const {theme} = useGlobalStore(state => state);
   const [user] = useState({id: '2', following: ['2']});
   const [expanded, setExpanded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
   const [liked, setLiked] = useState(
     user ? (post?.likedBy || []).includes(user.id) : false,
@@ -164,7 +165,7 @@ const PostCard = ({
 
   return (
     <div
-      className={clsx('border-b p-4 h transition-colors', {
+      className={clsx('border-b py-4 px-2 transition-colors', {
         'hover:bg-app-hover border-app-border': theme.type === 'default',
         'border-app-dark-border text-app-dark-text': theme.type === 'dark',
       })}>
@@ -203,14 +204,18 @@ const PostCard = ({
                 </span>
               </div>
 
-              <DropdownMenu>
+              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <DropdownMenuTrigger
                   asChild
                   className={clsx({
                     'hover:bg-app-dark-bg/10 hover:text-white':
                       theme.type === 'dark',
                   })}>
-                  <Button variant="ghost" size="sm" className="h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8"
+                    onClick={() => setIsMenuOpen(prev => !prev)}>
                     <MoreHorizontal size={16} className="hidden md:block" />
                     <EllipsisVertical size={16} className="md:hidden" />
                     <span className="sr-only">Post menu</span>
@@ -226,8 +231,11 @@ const PostCard = ({
                     <>
                       <DropdownMenuItem
                         onClick={handleEditPost}
-                        className="cursor-pointer">
-                        <Pencil size={16} className="mr-2" />
+                        className="cursor-pointer text-black font-bold">
+                        <Pencil
+                          size={16}
+                          className="mr-2 text-black font-bold"
+                        />
                         Edit post
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -238,15 +246,15 @@ const PostCard = ({
                     <>
                       <DropdownMenuItem
                         onClick={handleFollow}
-                        className="cursor-pointer">
+                        className="cursor-pointer text-black font-bold">
                         {isFollowing ? (
                           <>
-                            <UserCheck size={16} className="mr-2" />
+                            <UserCheck size={16} className="mr-2 text-black" />
                             Following
                           </>
                         ) : (
                           <>
-                            <UserPlus size={16} className="mr-2" />
+                            <UserPlus size={16} className="mr-2 text-black" />
                             Follow
                           </>
                         )}
@@ -256,9 +264,15 @@ const PostCard = ({
                   )}
                   <DropdownMenuItem
                     onClick={handleReport}
-                    className="cursor-pointer text">
-                    <Flag size={16} className="mr-2" />
+                    className="cursor-pointer text-black font-bold">
+                    <Flag size={16} className="mr-2 text-black font-bold" />
                     Report post
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setIsMenuOpen(false)}
+                    className="cursor-pointer text-app font-bold justify-center">
+                    Cancel
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -400,7 +414,7 @@ const PostCard = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="justify-start"
+                        className="justify-start text-black"
                         onClick={handleCopyLink}>
                         <LinkIcon size={16} className="mr-2" />
                         Copy link

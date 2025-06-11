@@ -95,7 +95,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       <div
         className={clsx(
           // 'fixed top-0 left-0 right-0 border-b  flex justify-between items-center p-3 z-30',
-          'sticky top-0 left-0 right-0 border-b flex justify-between items-center p-3 z-30',
+          'sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30',
           {
             'bg-white border-app-border': theme.type === 'default',
             'bg-app-dark border-app-dark-border': theme.type === 'dark',

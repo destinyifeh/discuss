@@ -131,10 +131,14 @@ export const AdCard = ({
 
   return (
     <div
-      className={clsx('border-b border-app-border p-4 transition-colors', {
-        'hover:bg-app-hover': theme.type === 'default',
-        'hover:bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-      })}>
+      className={clsx(
+        'border-b border-app-border py-4 px-2 transition-colors',
+        {
+          'hover:bg-app-hover': theme.type === 'default',
+          'hover:bg-app-dark-bg/10 border-app-dark-border':
+            theme.type === 'dark',
+        },
+      )}>
       <div className="flex gap-3">
         <Avatar
           className="w-10 h-10 cursor-pointer"

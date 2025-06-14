@@ -1,7 +1,6 @@
 'use client';
 
 import {Button} from '@/components/ui/button';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {Activity, AlertCircle, CheckCircle, Clock} from 'lucide-react';
 
@@ -12,7 +11,6 @@ export const AdPerformanceNav = ({
   filteredStatus: string;
   setFilteredStatus: (status: any) => void;
 }) => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div className="mb-6 flex flex-wrap gap-2 p-4 px-3">
       <Button
@@ -20,16 +18,8 @@ export const AdPerformanceNav = ({
         size="sm"
         onClick={() => setFilteredStatus('all')}
         className={cn(
-          'flex items-center text-black gap-1',
-          filteredStatus === 'all' &&
-            theme.type === 'default' &&
-            'bg-app text-white hover:bg-app/90',
-          filteredStatus === 'all' &&
-            theme.type === 'dark' &&
-            'bg-app/90 text-white hover:bg-app',
-          theme.type === 'dark' &&
-            filteredStatus !== 'all' &&
-            'bg-app-dark-bg/10 border-app-dark-border text-app-dark-text',
+          'flex items-center text-black gap-1 dark:text-foreground',
+          filteredStatus === 'all' && 'bg-app text-white hover:bg-app/90',
         )}>
         All
       </Button>
@@ -38,16 +28,8 @@ export const AdPerformanceNav = ({
         size="sm"
         onClick={() => setFilteredStatus('pending')}
         className={cn(
-          'flex items-center text-black gap-1',
-          filteredStatus === 'pending' &&
-            theme.type === 'default' &&
-            'bg-app text-white hover:bg-app/90',
-          filteredStatus === 'pending' &&
-            theme.type === 'dark' &&
-            'bg-app/90 text-white hover:bg-app',
-          theme.type === 'dark' &&
-            filteredStatus !== 'pending' &&
-            'bg-app-dark-bg/10 border-app-dark-border text-app-dark-text',
+          'flex items-center text-black gap-1 dark:text-foreground',
+          filteredStatus === 'pending' && 'bg-app text-white hover:bg-app/90',
         )}>
         <Clock size={16} /> Pending
       </Button>
@@ -56,16 +38,8 @@ export const AdPerformanceNav = ({
         size="sm"
         onClick={() => setFilteredStatus('approved')}
         className={cn(
-          'flex items-center text-black gap-1',
-          filteredStatus === 'approved' &&
-            theme.type === 'default' &&
-            'bg-app text-white hover:bg-app/90',
-          filteredStatus === 'approved' &&
-            theme.type === 'dark' &&
-            'bg-app/90 text-white hover:bg-app',
-          theme.type === 'dark' &&
-            filteredStatus !== 'approved' &&
-            'bg-app-dark-bg/10 border-app-dark-border text-app-dark-text',
+          'flex items-center text-black gap-1 dark:text-foreground',
+          filteredStatus === 'approved' && 'bg-app text-white hover:bg-app/90',
         )}>
         <CheckCircle size={16} /> Approved
       </Button>
@@ -74,16 +48,8 @@ export const AdPerformanceNav = ({
         size="sm"
         onClick={() => setFilteredStatus('active')}
         className={cn(
-          'flex items-center text-black gap-1',
-          filteredStatus === 'active' &&
-            theme.type === 'default' &&
-            'bg-app text-white hover:bg-app/90',
-          filteredStatus === 'active' &&
-            theme.type === 'dark' &&
-            'bg-app/90 text-white hover:bg-app',
-          theme.type === 'dark' &&
-            filteredStatus !== 'active' &&
-            'bg-app-dark-bg/10 border-app-dark-border text-app-dark-text',
+          'flex items-center text-black gap-1 dark:text-foreground',
+          filteredStatus === 'active' && 'bg-app text-white hover:bg-app/90',
         )}>
         <Activity size={16} /> Active
       </Button>
@@ -92,16 +58,8 @@ export const AdPerformanceNav = ({
         size="sm"
         onClick={() => setFilteredStatus('rejected')}
         className={cn(
-          'flex items-center text-black gap-1',
-          filteredStatus === 'rejected' &&
-            theme.type === 'default' &&
-            'bg-app text-white hover:bg-app/90',
-          filteredStatus === 'rejected' &&
-            theme.type === 'dark' &&
-            'bg-app/90 text-white hover:bg-app',
-          theme.type === 'dark' &&
-            filteredStatus !== 'rejected' &&
-            'bg-app-dark-bg/10 border-app-dark-border text-app-dark-text',
+          'flex items-center text-black gap-1 dark:text-foreground',
+          filteredStatus === 'rejected' && 'bg-app text-white hover:bg-app/90',
         )}>
         <AlertCircle size={16} /> Rejected
       </Button>

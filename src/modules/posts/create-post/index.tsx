@@ -13,10 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {Posts, Sections} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {PostProps} from '@/types/post-item.type';
-import clsx from 'clsx';
-import {FileImage, Trash2} from 'lucide-react';
+import {FileImage, Trash2, X} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {toast} from 'sonner';
@@ -32,7 +30,6 @@ export const CreatePostPage = () => {
   const [showGuidelines, setShowGuidelines] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const {theme} = useGlobalStore(state => state);
 
   const [posts, setPosts] = useState<PostProps[]>([]);
   const navigate = useRouter();
@@ -159,18 +156,14 @@ export const CreatePostPage = () => {
   console.log(content, 'kkkkk');
   return (
     <div className="">
-      <div
-        className={clsx('sticky top-0 backdrop-blur-sm border-b z-10', {
-          'bg-white/80 border-app-border': theme.type === 'default',
-          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-        })}>
+      <div className="sticky top-0 backdrop-blur-sm border-b z-10 bg-white/80 border-app-border dark:bg-background">
         <div className="px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold">
             {isEditing ? 'Edit Post' : 'Create Post'}
           </h1>
 
           <Button
-            className="rounded-full bg-app hover:bg-app/90 md:hidden"
+            className="rounded-full bg-app hover:bg-app/90 md:hidden text-white"
             onClick={handleSubmitPost}
             disabled={!content.trim() || !selectedSection}>
             {isEditing ? 'Update' : 'Post'}
@@ -240,7 +233,7 @@ export const CreatePostPage = () => {
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {imageUrls.map((url, index) => (
                   <div
-                    key={index}
+                    key={url}
                     className="relative rounded-lg overflow-hidden">
                     <img
                       src={url}
@@ -259,14 +252,7 @@ export const CreatePostPage = () => {
               </div>
             )}
 
-            <div
-              className={clsx(
-                'border-t mt-4 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3',
-                {
-                  'border-app-border': theme.type === 'default',
-                  'border-app-dark-border': theme.type === 'dark',
-                },
-              )}>
+            <div className="border-t mt-4 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-app-border">
               <div className="flex space-x-3">
                 <Button
                   variant="ghost"
@@ -295,30 +281,17 @@ export const CreatePostPage = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowGuidelines(!showGuidelines)}
-                  className={clsx('text-xs sm:text-sm', {
-                    'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border':
-                      theme.type === 'dark',
-                  })}>
+                  className="text-xs sm:text-sm">
                   Community Guidelines
                 </Button>
 
                 <Select
                   value={selectedSection}
                   onValueChange={setSelectedSection}>
-                  <SelectTrigger
-                    className={clsx(
-                      'w-[140px] sm:w-[180px] text-xs sm:text-sm',
-                      {
-                        'border-app-dark-border': theme.type === 'dark',
-                      },
-                    )}>
-                    <SelectValue placeholder="Select section" />
+                  <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm">
+                    <SelectValue placeholder="Select section" className="" />
                   </SelectTrigger>
-                  <SelectContent
-                    className={clsx({
-                      'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                        theme.type === 'dark',
-                    })}>
+                  <SelectContent>
                     {Sections.map(section => (
                       <SelectItem key={section.id} value={section.id}>
                         {section.name}
@@ -328,7 +301,7 @@ export const CreatePostPage = () => {
                 </Select>
 
                 <Button
-                  className="hidden md:block rounded-full bg-app hover:bg-app/90"
+                  className="hidden md:block rounded-full bg-app hover:bg-app/90 text-white"
                   onClick={handleSubmitPost}
                   disabled={!content.trim() || !selectedSection}>
                   {isEditing ? 'Update' : 'Post'}
@@ -337,11 +310,12 @@ export const CreatePostPage = () => {
             </div>
 
             {showGuidelines && (
-              <Card
-                className={clsx('mt-4', {
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <Card className="mt-4">
+                <X
+                  className="self-end mr-5 pointer-cursor hidden md:block"
+                  onClick={() => setShowGuidelines(false)}
+                />
+
                 <CardContent className="p-4">
                   <CommunityGuidelines />
                 </CardContent>

@@ -44,9 +44,7 @@ import {
 } from '@/components/ui/select';
 import {Textarea} from '@/components/ui/textarea';
 import {Comments, Posts, Sections} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
-import clsx from 'clsx';
 import {useRouter} from 'next/navigation';
 import {
   Bar,
@@ -175,8 +173,6 @@ export const AdminDashboardPage = () => {
   const [selectedReportContent, setSelectedReportContent] =
     useState<string>('');
   const [selectedReportType, setSelectedReportType] = useState<string>('');
-
-  const {theme} = useGlobalStore(state => state);
 
   // Filter data based on search terms and filters
   const filteredAds = pendingAds.filter(ad => {
@@ -431,52 +427,21 @@ export const AdminDashboardPage = () => {
           defaultValue="overview"
           className="w-full"
           onValueChange={setCurrentTab}>
-          <div
-            className={clsx('border-b mb-4', {
-              'border-app-dark-border': theme.type === 'dark',
-            })}>
-            <TabsList
-              className={clsx('flex overflow-x-auto', {
-                'bg-app-dark-bg/10': theme.type === 'dark',
-              })}>
-              <TabsTrigger
-                value="overview"
-                className={clsx('flex items-center gap-2', {
-                  'text-app-dark-text data-[state=active]:bg-app-dark-bg data-[state=active]:text-app-dark':
-                    theme.type === 'dark',
-                })}>
+          <div className="border-b mb-4 border-app-border">
+            <TabsList className="flex overflow-x-auto">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
                 <LayoutDashboard size={16} /> Overview
               </TabsTrigger>
-              <TabsTrigger
-                value="ads"
-                className={clsx('flex items-center gap-2', {
-                  'text-app-dark-text data-[state=active]:bg-app-dark-bg data-[state=active]:text-app-dark':
-                    theme.type === 'dark',
-                })}>
+              <TabsTrigger value="ads" className="flex items-center gap-2">
                 <FileText size={16} /> Advertisements
               </TabsTrigger>
-              <TabsTrigger
-                value="users"
-                className={clsx('flex items-center gap-2', {
-                  'text-app-dark-text data-[state=active]:bg-app-dark-bg data-[state=active]:text-app-dark':
-                    theme.type === 'dark',
-                })}>
+              <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users size={16} /> Users
               </TabsTrigger>
-              <TabsTrigger
-                value="reports"
-                className={clsx('flex items-center gap-2', {
-                  'text-app-dark-text data-[state=active]:bg-app-dark-bg data-[state=active]:text-app-dark':
-                    theme.type === 'dark',
-                })}>
+              <TabsTrigger value="reports" className="flex items-center gap-2">
                 <Shield size={16} /> Reports
               </TabsTrigger>
-              <TabsTrigger
-                value="content"
-                className={clsx('flex items-center gap-2', {
-                  'text-app-dark-text data-[state=active]:bg-app-dark-bg data-[state=active]:text-app-dark':
-                    theme.type === 'dark',
-                })}>
+              <TabsTrigger value="content" className="flex items-center gap-2">
                 <FileText size={16} /> Content
               </TabsTrigger>
             </TabsList>
@@ -484,19 +449,10 @@ export const AdminDashboardPage = () => {
 
           <div className="mb-4 flex gap-2">
             <div className="relative flex-1">
-              <Search
-                className={clsx(
-                  'absolute left-2 top-2.5 h-4 w-4 text-muted-foreground',
-                  {
-                    'text-app-dark-text': theme.type === 'dark',
-                  },
-                )}
-              />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search..."
-                className={clsx('pl-8', {
-                  'border-app-dark-border form-input': theme.type === 'dark',
-                })}
+                className="pl-8"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -505,21 +461,13 @@ export const AdminDashboardPage = () => {
               variant="outline"
               size="icon"
               onClick={() => setFilterIsOpen(!filterIsOpen)}
-              className={cn(
-                filterIsOpen ? 'bg-app text-white' : '',
-                theme.type === 'dark' &&
-                  'hover:bg-app-dark-bg/10 hover:border-app-dark-border hover:text-app-dark-text',
-              )}>
+              className={cn(filterIsOpen && 'bg-app text-white')}>
               <Filter className="h-4 w-4" />
             </Button>
           </div>
 
           {filterIsOpen && (
-            <Card
-              className={clsx('mb-4', {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card className="mb-4">
               <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="filter-section">section</Label>
@@ -529,11 +477,7 @@ export const AdminDashboardPage = () => {
                     <SelectTrigger id="filter-section">
                       <SelectValue placeholder="Select section" />
                     </SelectTrigger>
-                    <SelectContent
-                      className={clsx({
-                        'text-app-dark-text bg-app-dark border-app-dark-border':
-                          theme.type === 'dark',
-                      })}>
+                    <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
                       {Sections.map(section => (
                         <SelectItem key={section.id} value={section.id}>
@@ -550,11 +494,7 @@ export const AdminDashboardPage = () => {
                     <SelectTrigger id="filter-status">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                    <SelectContent
-                      className={clsx({
-                        'text-app-dark-text bg-app-dark border-app-dark-border':
-                          theme.type === 'dark',
-                      })}>
+                    <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
@@ -571,11 +511,7 @@ export const AdminDashboardPage = () => {
                     <SelectTrigger id="filter-date">
                       <SelectValue placeholder="Select date range" />
                     </SelectTrigger>
-                    <SelectContent
-                      className={clsx({
-                        'text-app-dark-text bg-app-dark border-app-dark-border':
-                          theme.type === 'dark',
-                      })}>
+                    <SelectContent>
                       <SelectItem value="all">All Time</SelectItem>
                       <SelectItem value="today">Today</SelectItem>
                       <SelectItem value="week">This Week</SelectItem>
@@ -587,10 +523,7 @@ export const AdminDashboardPage = () => {
                 <div className="md:col-span-3 flex justify-end">
                   <Button
                     variant="outline"
-                    className={clsx('mr-2', {
-                      'text-white bg-app-dark-bg/10 border-app-dark-border hover:text-white hover:bg-app-dark-bg/10':
-                        theme.type === 'dark',
-                    })}
+                    className="mr-2"
                     onClick={() => {
                       setFilterSection('all');
                       setFilterStatus('all');
@@ -601,12 +534,7 @@ export const AdminDashboardPage = () => {
                   <Button
                     onClick={() => setFilterIsOpen(false)}
                     variant="outline"
-                    className={clsx({
-                      'text-white bg-app-dark-bg/10 border-app-dark-border hover:text-white hover:bg-app-dark-bg/10':
-                        theme.type === 'dark',
-                      'text-white bg-app-dark border-app-dark-border hover:text-black hover:bg-app-hover':
-                        theme.type === 'default',
-                    })}>
+                    className="text-white bg-app-dark border-app-dark-border hover:text-black hover:bg-app-hover">
                     Apply Filters
                   </Button>
                 </div>
@@ -616,11 +544,7 @@ export const AdminDashboardPage = () => {
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">
                     Total Users
@@ -633,11 +557,7 @@ export const AdminDashboardPage = () => {
                   </p>
                 </CardContent>
               </Card>
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">
                     Active Posts
@@ -650,11 +570,7 @@ export const AdminDashboardPage = () => {
                   </p>
                 </CardContent>
               </Card>
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">
                     Pending Ads
@@ -665,10 +581,7 @@ export const AdminDashboardPage = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className={clsx('mt-2', {
-                      'text-white bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                        theme.type === 'dark',
-                    })}
+                    className="mt-2"
                     onClick={() => setCurrentTab('ads')}>
                     Review
                   </Button>
@@ -676,11 +589,7 @@ export const AdminDashboardPage = () => {
               </Card>
             </div>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle>section Activity</CardTitle>
               </CardHeader>
@@ -701,11 +610,7 @@ export const AdminDashboardPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle>User Distribution</CardTitle>
               </CardHeader>
@@ -737,11 +642,7 @@ export const AdminDashboardPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
@@ -797,12 +698,7 @@ export const AdminDashboardPage = () => {
 
             {filteredAds.length > 0 ? (
               filteredAds.map(ad => (
-                <Card
-                  key={ad.id}
-                  className={clsx('mb-4', {
-                    'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                      theme.type === 'dark',
-                  })}>
+                <Card key={ad.id} className="mb-4">
                   <CardContent className="p-4">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                       <div className="flex-1">
@@ -812,34 +708,17 @@ export const AdminDashboardPage = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-2 mb-2">
-                          <Badge
-                            variant="outline"
-                            className={clsx({
-                              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                                theme.type === 'dark',
-                            })}>
+                          <Badge variant="outline">
                             {ad.type === 'banner'
                               ? 'Banner Ad'
                               : ad.type === 'post'
                               ? 'Sponsored Post'
                               : 'Feed Ad'}
                           </Badge>
-                          <Badge
-                            variant="outline"
-                            className={clsx({
-                              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                                theme.type === 'dark',
-                            })}>
+                          <Badge variant="outline">
                             Duration: {ad.duration} days
                           </Badge>
-                          <Badge
-                            variant="secondary"
-                            className={clsx({
-                              'text-app-dark-text bg-app-hover border-app-border hover:bg-app-dark-bg/10 hover:text-white':
-                                theme.type === 'dark',
-                            })}>
-                            Pending Review
-                          </Badge>
+                          <Badge variant="secondary">Pending Review</Badge>
                         </div>
 
                         <p className="text-xs text-app-gray">
@@ -850,10 +729,7 @@ export const AdminDashboardPage = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className={clsx('mt-2', {
-                            'text-white bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                              theme.type === 'dark',
-                          })}
+                          className="mt-2"
                           onClick={() => {
                             toast.info(
                               'Ad preview functionality would be implemented here',
@@ -882,11 +758,7 @@ export const AdminDashboardPage = () => {
                 </Card>
               ))
             ) : (
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardContent className="p-6 text-center">
                   <p className="text-app-gray">
                     No pending advertisements found
@@ -896,11 +768,7 @@ export const AdminDashboardPage = () => {
             )}
 
             <h2 className="text-lg font-bold mt-8">Active Advertisements</h2>
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardContent className="p-6 text-center">
                 <p className="text-app-gray">No active advertisements found</p>
               </CardContent>
@@ -911,15 +779,8 @@ export const AdminDashboardPage = () => {
             <h2 className="text-lg font-bold">All Users</h2>
 
             {filteredUsers.length > 0 ? (
-              <div
-                className={clsx('rounded-md border', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
-                <div
-                  className={clsx('p-4', {
-                    'bg-app-hover': theme.type === 'default',
-                    'bg-app-dark-bg/10': theme.type === 'dark',
-                  })}>
+              <div className="rounded-md border border-app-border">
+                <div className="p-4 bg-app-hover dark:bg-app-dark-bg/10">
                   <div className="grid grid-cols-1 md:grid-cols-5 font-medium">
                     <div>User</div>
                     <div>Username</div>
@@ -928,10 +789,7 @@ export const AdminDashboardPage = () => {
                     <div>Actions</div>
                   </div>
                 </div>
-                <div
-                  className={clsx('divide-y', {
-                    'divide-app-dark-border': theme.type === 'dark',
-                  })}>
+                <div className="divide-y divide-app-border">
                   {filteredUsers.map(user => (
                     <div
                       key={user.id}
@@ -948,12 +806,7 @@ export const AdminDashboardPage = () => {
                       <div className="mb-2 md:mb-0">{user.username}</div>
                       <div className="hidden md:block">{user.posts}</div>
                       <div className="hidden md:block">
-                        <Badge
-                          variant="outline"
-                          className={clsx({
-                            'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text':
-                              theme.type === 'dark',
-                          })}>
+                        <Badge variant="outline" className="border-app-border">
                           {user.status}
                         </Badge>
                       </div>
@@ -990,11 +843,7 @@ export const AdminDashboardPage = () => {
                 </div>
               </div>
             ) : (
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardContent className="p-6 text-center">
                   <p className="text-app-gray">
                     No users found matching your search
@@ -1009,12 +858,7 @@ export const AdminDashboardPage = () => {
 
             {filteredReports.length > 0 ? (
               filteredReports.map(report => (
-                <Card
-                  key={report.id}
-                  className={clsx('mb-4', {
-                    'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                      theme.type === 'dark',
-                  })}>
+                <Card key={report.id} className="mb-4">
                   <CardContent className="p-4">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                       <div>
@@ -1027,10 +871,7 @@ export const AdminDashboardPage = () => {
                           <Badge variant="destructive">Reported</Badge>
                           <Badge
                             variant="outline"
-                            className={clsx({
-                              'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text':
-                                theme.type === 'dark',
-                            })}>
+                            className="border-app-border">
                             {report.type}
                           </Badge>
                         </div>
@@ -1046,10 +887,7 @@ export const AdminDashboardPage = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className={clsx('mt-2', {
-                            'border-app-dark-border bg-app-dark-bg/10 text-white':
-                              theme.type === 'dark',
-                          })}
+                          className="mt-2"
                           onClick={() => handleViewReportedContent(report)}>
                           View Content
                         </Button>
@@ -1058,12 +896,7 @@ export const AdminDashboardPage = () => {
                       <div className="flex flex-col gap-2 w-full md:w-auto">
                         <Button
                           size="sm"
-                          className={clsx({
-                            'bg-green-700 hover:bg-green-600':
-                              theme.type === 'dark',
-                            'bg-green-600 hover:bg-green-700':
-                              theme.type === 'default',
-                          })}
+                          className="bg-green-700 hover:bg-green-600"
                           onClick={() =>
                             handleOpenReportActionDialog(report.id, 'resolve')
                           }>
@@ -1071,12 +904,7 @@ export const AdminDashboardPage = () => {
                         </Button>
                         <Button
                           size="sm"
-                          className={clsx({
-                            'bg-yellow-600 hover:bg-yellow-500':
-                              theme.type === 'dark',
-                            'bg-yellow-500 hover:bg-yellow-600':
-                              theme.type === 'default',
-                          })}
+                          className="bg-yellow-600 hover:bg-yellow-500"
                           onClick={() =>
                             handleOpenReportActionDialog(report.id, 'warn')
                           }>
@@ -1084,12 +912,7 @@ export const AdminDashboardPage = () => {
                         </Button>
                         <Button
                           size="sm"
-                          className={clsx({
-                            'bg-orange-600 hover:bg-orange-500':
-                              theme.type === 'dark',
-                            'bg-orange-500 hover:bg-orange-600':
-                              theme.type === 'default',
-                          })}
+                          className="bg-orange-600 hover:bg-orange-500"
                           onClick={() =>
                             handleOpenReportActionDialog(report.id, 'suspend')
                           }>
@@ -1098,10 +921,6 @@ export const AdminDashboardPage = () => {
                         <Button
                           size="sm"
                           variant="destructive"
-                          className={clsx({
-                            'bg-red-600 hover:bg-red-500':
-                              theme.type === 'dark',
-                          })}
                           onClick={() =>
                             handleOpenReportActionDialog(report.id, 'ban')
                           }>
@@ -1113,11 +932,7 @@ export const AdminDashboardPage = () => {
                 </Card>
               ))
             ) : (
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardContent className="p-6 text-center">
                   <p className="text-app-gray">
                     No reports found matching your search
@@ -1131,21 +946,11 @@ export const AdminDashboardPage = () => {
             <h2 className="text-lg font-bold">All Content</h2>
 
             {filteredPosts.length > 0 ? (
-              <div
-                className={clsx('rounded-md border mb-8', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
-                <div
-                  className={clsx('p-4', {
-                    'bg-app-hover': theme.type === 'default',
-                    'bg-app-dark-bg/10': theme.type === 'dark',
-                  })}>
+              <div className="rounded-md border mb-8 border-app-border">
+                <div className="p-4 bg-app-hover dark:bg-background">
                   <h3 className="font-bold">Posts</h3>
                 </div>
-                <div
-                  className={clsx('divide-y', {
-                    'divide-app-dark-border': theme.type === 'dark',
-                  })}>
+                <div className="divide-y divide-app-border">
                   {filteredPosts.slice(0, 5).map(post => (
                     <div
                       key={post.id}
@@ -1193,11 +998,7 @@ export const AdminDashboardPage = () => {
                 </div>
               </div>
             ) : (
-              <Card
-                className={clsx('mb-8', {
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardContent className="p-6 text-center">
                   <p className="text-app-gray">
                     No posts found matching your search
@@ -1207,22 +1008,11 @@ export const AdminDashboardPage = () => {
             )}
 
             {filteredComments.length > 0 ? (
-              <div
-                className={clsx('rounded-md border', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
-                <div
-                  className={clsx('p-4', {
-                    'bg-app-hover': theme.type === 'default',
-
-                    'bg-app-dark-bg/10': theme.type === 'dark',
-                  })}>
+              <div className="rounded-md border border-app-border">
+                <div className="p-4 bg-app-hover dark:bg-background">
                   <h3 className="font-bold">Comments</h3>
                 </div>
-                <div
-                  className={clsx('divide-y', {
-                    'divide-app-dark-border': theme.type === 'dark',
-                  })}>
+                <div className="divide-y divide-app-border">
                   {filteredComments.slice(0, 5).map(comment => (
                     <div
                       key={comment.id}
@@ -1265,11 +1055,7 @@ export const AdminDashboardPage = () => {
                 </div>
               </div>
             ) : (
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardContent className="p-6 text-center">
                   <p className="text-app-gray">
                     No comments found matching your search
@@ -1283,11 +1069,7 @@ export const AdminDashboardPage = () => {
 
       {/* Reject Ad Dialog */}
       <Dialog open={rejectAdDialog} onOpenChange={setRejectAdDialog}>
-        <DialogContent
-          className={clsx('mb-4', {
-            'text-app-dark-text bg-app-dark border-app-dark-border':
-              theme.type === 'dark',
-          })}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Advertisement</DialogTitle>
             <DialogDescription>
@@ -1302,9 +1084,7 @@ export const AdminDashboardPage = () => {
                 placeholder="Enter reason for rejection"
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
+                className="form-input"
               />
             </div>
           </div>
@@ -1321,11 +1101,7 @@ export const AdminDashboardPage = () => {
 
       {/* User Action Dialog */}
       <Dialog open={userActionDialog} onOpenChange={setUserActionDialog}>
-        <DialogContent
-          className={clsx({
-            'text-app-dark-text bg-app-dark border-app-dark-border':
-              theme.type === 'dark',
-          })}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {userActionType === 'view'
@@ -1349,18 +1125,10 @@ export const AdminDashboardPage = () => {
                 <Select
                   value={suspensionPeriod}
                   onValueChange={setSuspensionPeriod}>
-                  <SelectTrigger
-                    className={clsx({
-                      'border-app-dark-border bg-app-dark text-app-dark-text':
-                        theme.type === 'dark',
-                    })}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select period" />
                   </SelectTrigger>
-                  <SelectContent
-                    className={clsx({
-                      'border-app-dark-border bg-app-dark text-app-dark-text':
-                        theme.type === 'dark',
-                    })}>
+                  <SelectContent>
                     {suspensionPeriods.map(period => (
                       <SelectItem key={period.value} value={period.value}>
                         {period.label}
@@ -1381,9 +1149,7 @@ export const AdminDashboardPage = () => {
                   }`}
                   value={userActionReason}
                   onChange={e => setUserActionReason(e.target.value)}
-                  className={clsx('form-input', {
-                    'border-app-dark-border': theme.type === 'dark',
-                  })}
+                  className="form-input"
                 />
               </div>
             )}
@@ -1409,11 +1175,7 @@ export const AdminDashboardPage = () => {
 
       {/* Report Action Dialog */}
       <Dialog open={reportActionDialog} onOpenChange={setReportActionDialog}>
-        <DialogContent
-          className={clsx({
-            'text-app-dark-text bg-app-dark border-app-dark-border':
-              theme.type === 'dark',
-          })}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {reportAction === 'resolve'
@@ -1437,9 +1199,7 @@ export const AdminDashboardPage = () => {
                   placeholder="Enter message to user"
                   value={reportActionReason}
                   onChange={e => setReportActionReason(e.target.value)}
-                  className={clsx('form-input', {
-                    'border-app-dark-border': theme.type === 'dark',
-                  })}
+                  className="form-input"
                 />
               </div>
             )}
@@ -1448,18 +1208,10 @@ export const AdminDashboardPage = () => {
               <div className="space-y-2">
                 <Label htmlFor="suspension-period">Suspension Period</Label>
                 <Select defaultValue="7">
-                  <SelectTrigger
-                    className={clsx({
-                      'border-app-dark-border bg-app-dark text-app-dark-text':
-                        theme.type === 'dark',
-                    })}>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select period" />
                   </SelectTrigger>
-                  <SelectContent
-                    className={clsx({
-                      'border-app-dark-border bg-app-dark text-app-dark-text':
-                        theme.type === 'dark',
-                    })}>
+                  <SelectContent>
                     {suspensionPeriods.slice(0, -1).map(period => (
                       <SelectItem key={period.value} value={period.value}>
                         {period.label}
@@ -1493,11 +1245,7 @@ export const AdminDashboardPage = () => {
 
       {/* Content Action Dialog */}
       <Dialog open={contentActionDialog} onOpenChange={setContentActionDialog}>
-        <DialogContent
-          className={clsx({
-            'text-app-dark-text bg-app-dark border-app-dark-border':
-              theme.type === 'dark',
-          })}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {contentAction === 'delete'
@@ -1518,9 +1266,7 @@ export const AdminDashboardPage = () => {
                 placeholder="Enter reason"
                 value={contentActionReason}
                 onChange={e => setContentActionReason(e.target.value)}
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
+                className="form-input"
               />
             </div>
           </div>
@@ -1541,11 +1287,7 @@ export const AdminDashboardPage = () => {
 
       {/* View Reported Content Dialog */}
       <Dialog open={viewContentDialog} onOpenChange={setViewContentDialog}>
-        <DialogContent
-          className={clsx('sm:max-w-md', {
-            'text-app-dark-text bg-app-dark border-app-dark-border':
-              theme.type === 'dark',
-          })}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {selectedReportType === 'post'

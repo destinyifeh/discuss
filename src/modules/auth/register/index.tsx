@@ -3,7 +3,7 @@
 import {useState} from 'react';
 
 import {AppLogo} from '@/components/app-logo';
-import {Avatar, AvatarFallback} from '@/components/ui/avatar';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {
   Card,
@@ -15,8 +15,6 @@ import {
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {Camera} from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
@@ -27,10 +25,10 @@ export const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const {register, loginWithGoogle} = useAuthStore(state => state);
   const navigate = useRouter();
-  const {theme, setTheme} = useGlobalStore(state => state);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,17 +80,33 @@ export const RegisterPage = () => {
     return displayName.charAt(0).toUpperCase();
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        setProfileImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
-        <div
-          className={clsx(
-            'hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white',
-            {
-              'bg-app/90': theme.type === 'dark',
-              ' bg-app': theme.type === 'default',
-            },
-          )}>
+        <div className="hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app/90 dark:bg-app">
           <div>
             {/* <svg
                 viewBox="0 0 24 24"
@@ -136,11 +150,7 @@ export const RegisterPage = () => {
         </div>
 
         <div className="w-full md:flex-1">
-          <Card
-            className={clsx('border-0 shadow-none', {
-              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                theme.type === 'dark',
-            })}>
+          <Card className="border-0 shadow-none">
             <CardHeader>
               <div className="flex justify-center mb-4">
                 {/* <svg
@@ -200,12 +210,7 @@ export const RegisterPage = () => {
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span
-                    className={clsx('w-full border-t ', {
-                      'border-app-dark-border': theme.type === 'dark',
-                      'border-gray-300': theme.type === 'default',
-                    })}
-                  />
+                  <span className="w-full border-t border-app-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-gray-500">
@@ -216,27 +221,48 @@ export const RegisterPage = () => {
 
               <form onSubmit={handleRegister} className="space-y-4">
                 {/* Profile Photo Upload */}
+                {/* Profile Photo Upload */}
                 <div className="flex flex-col items-center mb-4">
                   <div className="relative">
                     <Avatar className="h-20 w-20">
-                      <AvatarFallback className="bg-app/20 text-app text-2xl">
-                        {getInitials()}
-                      </AvatarFallback>
+                      {profileImage ? (
+                        <AvatarImage src={profileImage} alt="Profile preview" />
+                      ) : (
+                        <AvatarFallback className="bg-app/20 text-app text-2xl">
+                          {getInitials()}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="absolute bottom-0 right-0 rounded-full h-8 w-8 bg-white border border-app-border">
-                      <Camera size={16} />
-                      <span className="sr-only">Upload profile photo</span>
-                    </Button>
+                    <label
+                      htmlFor="profilePhoto"
+                      className="absolute bottom-0 right-0 cursor-pointer">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full h-8 w-8 bg-white border border-forum-border pointer-events-none"
+                        asChild>
+                        <div>
+                          <Camera size={16} />
+                          <span className="sr-only">Upload profile photo</span>
+                        </div>
+                      </Button>
+                    </label>
+                    <input
+                      id="profilePhoto"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
                   </div>
                   <div className="mt-2 text-center">
                     <label
                       htmlFor="profilePhoto"
                       className="text-sm text-app cursor-pointer hover:underline">
-                      Upload a profile photo
+                      {profileImage
+                        ? 'Change profile photo'
+                        : 'Upload a profile photo'}
                     </label>
                   </div>
                 </div>
@@ -251,9 +277,7 @@ export const RegisterPage = () => {
                     value={displayName}
                     onChange={e => setDisplayName(e.target.value)}
                     placeholder="Johndoe@mail.com"
-                    className={clsx('form-input', {
-                      'border-app-dark-border': theme.type === 'dark',
-                    })}
+                    className="form-input"
                     required
                   />
                 </div>
@@ -269,9 +293,7 @@ export const RegisterPage = () => {
                     onChange={e => setUsername(e.target.value)}
                     placeholder="johndoe"
                     autoComplete="username"
-                    className={clsx('form-input', {
-                      'border-app-dark-border': theme.type === 'dark',
-                    })}
+                    className="form-input"
                     required
                   />
                 </div>
@@ -287,9 +309,7 @@ export const RegisterPage = () => {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
-                    className={clsx('form-input', {
-                      'border-app-dark-border': theme.type === 'dark',
-                    })}
+                    className="form-input"
                     required
                   />
                 </div>
@@ -307,16 +327,14 @@ export const RegisterPage = () => {
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
-                    className={clsx('form-input', {
-                      'border-app-dark-border': theme.type === 'dark',
-                    })}
+                    className="form-input"
                     required
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-app hover:bg-app/90"
+                  className="w-full bg-app hover:bg-app/90 text-white"
                   disabled={isSubmitting}>
                   {isSubmitting ? 'Creating account...' : 'Sign up'}
                 </Button>

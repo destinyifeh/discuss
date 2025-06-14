@@ -6,9 +6,7 @@ import PostCard from '@/components/post/post-card';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Posts} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {PostProps} from '@/types/post-item.type';
-import clsx from 'clsx';
 import {
   ArrowUp,
   Calendar,
@@ -71,7 +69,7 @@ export const PostPlaceholder = ({
 export const ProfilePage = () => {
   const {user} = useParams<{user: string}>();
   const [users] = useState({username: 'dez'});
-  const {theme} = useGlobalStore(state => state);
+
   const [activeTab, setActiveTab] = useState('posts');
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
@@ -183,11 +181,7 @@ export const ProfilePage = () => {
                   description={`${userPosts.length} posts`}
                 />
 
-                <div
-                  className={clsx('border-b overflow-y-auto', {
-                    'border-app-border': theme.type === 'default',
-                    'border-app-dark-border': theme.type === 'dark',
-                  })}>
+                <div className="border-b overflow-y-auto border-app-border">
                   <div className="h-40 bg-app/20"></div>
                   <div className="px-4 pb-4">
                     <div className="flex justify-between relative">
@@ -204,10 +198,7 @@ export const ProfilePage = () => {
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="outline"
-                          className={clsx('rounded-full', {
-                            'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                              theme.type === 'dark',
-                          })}
+                          className="rounded-full border-app-border"
                           onClick={() =>
                             navigate.push(`/profile/${user}/edit`)
                           }>
@@ -215,10 +206,7 @@ export const ProfilePage = () => {
                         </Button>
                         <Button
                           variant="outline"
-                          className={clsx('rounded-full', {
-                            'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                              theme.type === 'dark',
-                          })}
+                          className="rounded-full border-app-border"
                           onClick={() => navigate.push('/settings')}>
                           <Settings className="h-4 w-4 mr-2" />
                           Settings
@@ -281,41 +269,17 @@ export const ProfilePage = () => {
                   <TabsList className="w-full grid grid-cols-3 bg-transparent">
                     <TabsTrigger
                       value="posts"
-                      className={clsx(
-                        'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                        {
-                          'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                            theme.type === 'dark',
-                          'data-[state=active]:text-black':
-                            theme.type === 'default',
-                        },
-                      )}>
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                       Posts
                     </TabsTrigger>
                     <TabsTrigger
                       value="replies"
-                      className={clsx(
-                        'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                        {
-                          'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                            theme.type === 'dark',
-                          'data-[state=active]:text-black':
-                            theme.type === 'default',
-                        },
-                      )}>
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                       Replies
                     </TabsTrigger>
                     <TabsTrigger
                       value="likes"
-                      className={clsx(
-                        'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                        {
-                          'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                            theme.type === 'dark',
-                          'data-[state=active]:text-black':
-                            theme.type === 'default',
-                        },
-                      )}>
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                       Likes
                     </TabsTrigger>
                   </TabsList>

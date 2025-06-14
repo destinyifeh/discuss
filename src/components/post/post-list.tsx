@@ -10,13 +10,12 @@ import {
 } from '@/lib/helpers';
 import {AdProps} from '@/types/ad-types';
 import {PostProps} from '@/types/post-item.type';
-import clsx from 'clsx';
 import {ArrowUp, BookmarkIcon, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {AdCard} from '../ad/ad-card';
-import {AppBannerAd} from '../ad/banner';
+import {AppBannerAd, AppBannerAd4} from '../ad/banner';
 import {PageHeader} from '../app-headers';
 import {MobileBottomTab} from '../layouts/dashboard/mobile-bottom-tab';
 import MobileNavigation from '../layouts/dashboard/mobile-navigation';
@@ -179,7 +178,7 @@ export const SectionPostList = ({
         components={{
           Header: () => (
             <div>
-              <AppBannerAd section={bannerAd} />
+              <AppBannerAd4 section={bannerAd} />
             </div>
           ),
           EmptyPlaceholder: () => <SectionPlaceholder />,
@@ -222,7 +221,7 @@ export const SectionPostList = ({
 
 export const HomePostList = () => {
   const lastScrollTop = useRef(0);
-  const {theme} = useGlobalStore(state => state);
+
   const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -281,6 +280,7 @@ export const HomePostList = () => {
   };
 
   const allowTab = false;
+  const allowMSearch = false;
   return (
     <div className="pb-0 lg:pb-0">
       <Virtuoso
@@ -302,47 +302,22 @@ export const HomePostList = () => {
                   onValueChange={setActiveTab}
                   className="w-full">
                   <div className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
-                    <TabsList
-                      className={clsx(
-                        'w-full grid grid-cols-2 border-b rounded-none',
-                        {
-                          'bg-white border-app-border':
-                            theme.type === 'default',
-                          'bg-app-dark border-app-dark-border':
-                            theme.type === 'dark',
-                        },
-                      )}>
+                    <TabsList className="w-full grid grid-cols-2 border-b rounded-none border-app-border">
                       <TabsTrigger
                         value="for-you"
-                        className={clsx(
-                          'data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black',
-                          {
-                            'text-app-dark-text data-[state=active]:bg-app-lightGray':
-                              theme.type === 'dark',
-                          },
-                        )}>
+                        className="data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black">
                         For You
                       </TabsTrigger>
                       <TabsTrigger
                         value="following"
-                        className={clsx(
-                          'data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black',
-                          {
-                            'text-app-dark-text data-[state=active]:bg-app-lightGray':
-                              theme.type === 'dark',
-                          },
-                        )}>
+                        className="data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black">
                         Following
                       </TabsTrigger>
                     </TabsList>
                   </div>
                 </Tabs>
               )}
-              <div
-                className={clsx('px-0 py-3 border-b lg:hidden md:mt-7', {
-                  'border-app-border': theme.type === 'default',
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
+              <div className="px-0 py-3 border-b border-app-border lg:hidden md:mt-7">
                 <div className="px-4">
                   <h2 className="font-semibold mb-2 mt-0">Discuss</h2>
                   <div className="flex flex-wrap gap-2 mb-2">
@@ -350,42 +325,19 @@ export const HomePostList = () => {
                       <Badge
                         key={section.id}
                         variant="outline"
-                        className={clsx(
-                          'py-1 px-3 cursor-pointer hover:bg-app-hover font-bold',
-                          {
-                            'border-app-border text-app':
-                              theme.type === 'default',
-                            'border-app-dark-border text-app/90':
-                              theme.type === 'dark',
-                          },
-                        )}
+                        className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border"
                         onClick={() => onSectionNavigate(section.name)}>
                         {section.name}
                       </Badge>
                     ))}
                   </div>
                 </div>
-                <div
-                  className={clsx(
-                    'px-4 flex flex-wrap gap-2 mb-2 border-t pt-3',
-                    {
-                      'border-app-border': theme.type === 'default',
-                      'border-app-dark-border': theme.type === 'dark',
-                    },
-                  )}>
+                <div className="px-4 flex flex-wrap gap-2 mb-2 border-t pt-3 border-app-border">
                   {SectionOptions.map(section => (
                     <Badge
                       key={section.id}
                       variant="outline"
-                      className={clsx(
-                        'py-1 px-3 cursor-pointer hover:bg-app-hover font-bold',
-                        {
-                          'border-app-border text-app':
-                            theme.type === 'default',
-                          'border-app-dark-border text-app/90':
-                            theme.type === 'dark',
-                        },
-                      )}
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold border-app-border text-app"
                       onClick={() =>
                         onSectionOptionsNavigate(section.description as string)
                       }>
@@ -394,7 +346,20 @@ export const HomePostList = () => {
                   ))}
                 </div>
               </div>
-
+              {!allowMSearch && (
+                <div className="pt-4 px-4">
+                  <div className="relative border-1 border-app-border rounded-full">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
+                      size={20}
+                    />
+                    <Input
+                      placeholder="Search"
+                      className="border-0 rounded-full pl-10 form-input"
+                    />
+                  </div>
+                </div>
+              )}
               <div>
                 <AppBannerAd section="home" />
               </div>
@@ -422,7 +387,7 @@ export const HomePostList = () => {
 
 export const ExplorePostList = () => {
   const lastScrollTop = useRef(0);
-  const {theme} = useGlobalStore(state => state);
+
   const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -492,31 +457,18 @@ export const ExplorePostList = () => {
                   />
                   <Input
                     placeholder="Search"
-                    className={clsx('border-0 rounded-full pl-10 form-input', {
-                      'bg-gray-100': theme.type === 'default',
-                      'bg-app-dark-bg/10': theme.type === 'dark',
-                    })}
+                    className="border-0 rounded-full pl-10 form-input"
                   />
                 </div>
               </div>
-              <div
-                className={clsx('px-4 py-3 border-b lg:hidden md:mt-7', {
-                  'border-app-border': theme.type === 'default',
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
+              <div className="px-4 py-3 border-b lg:hidden md:mt-7 border-app-border">
                 <h2 className="font-semibold my-2">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {Sections.map(section => (
                     <Badge
                       key={section.id}
                       variant="outline"
-                      className={clsx(
-                        'py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app',
-                        {
-                          'border-app-border': theme.type === 'default',
-                          'border-app-dark-border': theme.type === 'dark',
-                        },
-                      )}
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border"
                       onClick={() => onSectionNavigate(section.name)}>
                       {section.name}
                     </Badge>
@@ -553,7 +505,6 @@ export const ExplorePostList = () => {
 };
 
 export const BookmarkPostList = () => {
-  const {theme} = useGlobalStore(state => state);
   const lastScrollTop = useRef(0);
   const [showBottomTab, setShowBottomTab] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');

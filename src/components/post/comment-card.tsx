@@ -10,7 +10,6 @@ import {
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {CommentProps} from '@/types/post-item.type';
-import clsx from 'clsx';
 import React, {useState} from 'react';
 
 import {formatTimeAgo2} from '@/lib/formatter';
@@ -85,11 +84,7 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
 
           return (
             <>
-              <div
-                className={clsx('p-3 rounded-md mb-0 border-l-4 border-app', {
-                  'bg-gray-100': theme.type === 'default',
-                  'bg-app-dark-bg/10 text-white': theme.type === 'dark',
-                })}>
+              <div className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background">
                 <p className="text-sm font-semibold text-app mb-1">
                   @{quoteName}
                 </p>
@@ -108,11 +103,7 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
           );
 
           return (
-            <div
-              className={clsx('p-3 rounded-md mb-0 border-l-4 border-app', {
-                'bg-gray-100': theme.type === 'default',
-                'bg-app-dark-bg/10 text-white': theme.type === 'dark',
-              })}>
+            <div className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background">
               <p className="text-sm font-semibold text-app mb-1">
                 @{quoteName}
               </p>
@@ -130,11 +121,7 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
   };
 
   return (
-    <div
-      className={clsx('border-b py-4 px-2 pb-10 transition-colors', {
-        'hover:bg-app-hover border-app-border': theme.type === 'default',
-        'hover:bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-      })}>
+    <div className="border-b py-4 px-2 pb-10 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
         <Avatar className="w-10 h-10">
           <AvatarImage src={comment.avatar} />
@@ -156,24 +143,14 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
             </div>
 
             <DropdownMenu>
-              <DropdownMenuTrigger
-                asChild
-                className={clsx({
-                  'hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8">
                   <MoreHorizontal size={16} className="hidden md:block" />
                   <EllipsisVertical size={16} className="md:hidden" />
                   <span className="sr-only">Comment menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className={clsx({
-                  'bg-app-dark-bg/10 border-app-dark-border text-app-dark-text':
-                    theme.type === 'dark',
-                })}>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={handleReport}
                   className="cursor-pointer">
@@ -201,9 +178,7 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className={clsx('text-app-gray hover:text-app p-0 h-auto', {
-                'hover:bg-app-dark-bg/10': theme.type === 'dark',
-              })}
+              className="text-app-gray hover:text-app p-0 h-auto"
               //onClick={() => navigate.push(`/post/${comment.postId}/reply`)}
               onClick={handleQuote}>
               <MessageSquare size={16} className="mr-1" />
@@ -225,7 +200,6 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
               className={cn(
                 'text-app-gray hover:text-red-500 p-0 h-auto',
                 liked && 'text-red-500',
-                theme.type === 'dark' && 'hover:bg-app-dark-bg/10',
               )}
               onClick={handleLike}>
               <Heart
@@ -246,9 +220,7 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className={clsx('text-app-gray hover:text-app p-0 h-auto', {
-                'hover:bg-app-dark-bg/10': theme.type === 'dark',
-              })}>
+              className="text-app-gray hover:text-app p-0 h-auto">
               <ThumbsDown size={16} />
               <span className="text-xs">{comment.likes}</span>
             </Button>

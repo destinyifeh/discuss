@@ -6,9 +6,7 @@ import {
 } from '@/components/ad/ad-performace-card';
 import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {AdPerformanceData} from '@/types/ad-types';
-import clsx from 'clsx';
 import {
   Activity,
   AlertCircle,
@@ -172,7 +170,7 @@ const gridComponents = {
 
 export const AdPerformancePage = () => {
   const navigate = useRouter();
-  const {theme} = useGlobalStore(state => state);
+
   const [filteredStatus, setFilteredStatus] = useState<AdStatus | 'all'>('all');
   const [ads, setAds] = useState<AdPerformanceData[]>(mockAds);
 
@@ -225,10 +223,7 @@ export const AdPerformancePage = () => {
       <div className="mt-10 mb-20 md:mb-5 text-center">
         <Button
           onClick={() => navigate.push('/advertise')}
-          className={clsx({
-            'bg-app hover:bg-app/90': theme.type === 'dark',
-            'bg-app-/90 hover:bg-app': theme.type === 'default',
-          })}>
+          className="bg-app hover:bg-app/90 dark:bg-app-/90 dark:hover:bg-app text-white">
           Create New Advertisement <ArrowRight className="ml-2" />
         </Button>
       </div>

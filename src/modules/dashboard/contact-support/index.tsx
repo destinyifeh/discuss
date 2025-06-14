@@ -20,9 +20,7 @@ import {
 } from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {zodResolver} from '@hookform/resolvers/zod';
-import clsx from 'clsx';
 import {
   CheckCircle,
   HelpCircle,
@@ -54,7 +52,7 @@ const formSchema = z.object({
 export const ContactSupportPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const {theme} = useGlobalStore(state => state);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -119,12 +117,7 @@ export const ContactSupportPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {supportSections.map((section, index) => (
-            <Card
-              key={index}
-              className={clsx('transition-all hover:shadow-md', {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card key={index} className="transition-all hover:shadow-md">
               <CardHeader className="flex flex-row items-center gap-4">
                 <div className="p-2 bg-app/10 rounded-full">{section.icon}</div>
                 <div>
@@ -138,11 +131,7 @@ export const ContactSupportPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Contact Information</CardTitle>
               </CardHeader>
@@ -165,38 +154,20 @@ export const ContactSupportPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx('transition-all hover:shadow-md', {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card className="transition-all hover:shadow-md">
               <CardHeader>
                 <CardTitle className="text-xl">Quick Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Link
                   href="/help"
-                  className={clsx(
-                    'flex items-center gap-2 p-2 rounded-md transition-colors',
-                    {
-                      'hover:bg-app-dark-bg/10 hover:text-white':
-                        theme.type === 'dark',
-                      'hover:bg-accent': theme.type === 'default',
-                    },
-                  )}>
+                  className="flex items-center gap-2 p-2 rounded-md transition-colors hover:bg-accent">
                   <HelpCircle className="h-5 w-5" />
                   <span>Help Center</span>
                 </Link>
                 <Link
                   href="/settings"
-                  className={clsx(
-                    'flex items-center gap-2 p-2 rounded-md transition-colors',
-                    {
-                      'hover:bg-app-dark-bg/10 hover:text-white':
-                        theme.type === 'dark',
-                      'hover:bg-accent': theme.type === 'default',
-                    },
-                  )}>
+                  className="flex items-center gap-2 p-2 rounded-md transition-colors hover:bg-accent">
                   <Users className="h-5 w-5" />
                   <span>Account Settings</span>
                 </Link>
@@ -205,11 +176,7 @@ export const ContactSupportPage = () => {
           </div>
 
           <div className="lg:col-span-3">
-            <Card
-              className={clsx('transition-all hover:shadow-md', {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}>
+            <Card className="transition-all hover:shadow-md">
               <CardHeader>
                 <CardTitle className="text-xl">Send Us a Message</CardTitle>
                 <CardDescription>

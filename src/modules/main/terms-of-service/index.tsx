@@ -1,36 +1,19 @@
 'use client';
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 
 export const TermsOfServicePage = () => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div>
-      <div
-        className={clsx({
-          'bg-app-dark': theme.type === 'dark',
-          'bg-gray-50': theme.type === 'default',
-        })}>
+      <div>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1
-              className={clsx('text-4xl font-bold mb-4', {
-                'text-app-dark-text': theme.type === 'dark',
-                'text-gray-900': theme.type === 'default',
-              })}>
-              Terms of Service
-            </h1>
+            <h1 className="text-4xl font-bold mb-4">Terms of Service</h1>
             <p className="text-gray-600">Last updated: December 1, 2025</p>
           </div>
 
           <div className="space-y-6">
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   1. Acceptance of Terms
@@ -46,11 +29,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   2. User Accounts
@@ -77,11 +56,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   3. User Content
@@ -111,11 +86,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   4. Prohibited Uses
@@ -149,11 +120,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   5. Privacy Policy
@@ -168,11 +135,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   6. Termination
@@ -187,11 +150,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   7. Changes to Terms
@@ -207,11 +166,7 @@ export const TermsOfServicePage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   8. Contact Information

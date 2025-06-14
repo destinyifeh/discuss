@@ -3,7 +3,6 @@ import {mockAds} from '@/constants/data';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {AdProps} from '@/types/ad-types';
-import clsx from 'clsx';
 import copy from 'copy-to-clipboard';
 import {
   BarChart3,
@@ -130,15 +129,7 @@ export const AdCard = ({
     shouldTruncate && !expanded && !isInDetailView ? sliceContent : ad?.content;
 
   return (
-    <div
-      className={clsx(
-        'border-b border-app-border py-4 px-2 transition-colors',
-        {
-          'hover:bg-app-hover': theme.type === 'default',
-          'hover:bg-app-dark-bg/10 border-app-dark-border':
-            theme.type === 'dark',
-        },
-      )}>
+    <div className="border-b border-app-border py-4 px-2 transition-colors hover:bg-app-hover dark:hover:bg-background border-app-border">
       <div className="flex gap-3">
         <Avatar
           className="w-10 h-10 cursor-pointer"

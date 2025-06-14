@@ -119,25 +119,25 @@ export const AdPreviewPage = ({
             <div className="border-t pt-6 mt-6">
               <h3 className="font-bold mb-4">Advertisement Summary</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-app-hover p-3 rounded-lg">
+                <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">Selected Plan</span>
                   <p className="font-medium capitalize">
                     {previewAdData.plan || 'None selected'}
                   </p>
                 </div>
-                <div className="bg-app-hover p-3 rounded-lg">
+                <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">Ad Type</span>
                   <p className="font-medium">
                     {previewAdData.type || 'None selected'}
                   </p>
                 </div>
-                <div className="bg-app-hover p-3 rounded-lg">
+                <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">Duration</span>
                   <p className="font-medium">
                     {previewAdData.duration + ' ' + 'Days'}
                   </p>
                 </div>
-                <div className="bg-app-hover p-3 rounded-lg">
+                <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">
                     Target {previewAdData.plan === 'basic' && 'Section'}
                   </span>
@@ -145,7 +145,7 @@ export const AdPreviewPage = ({
                     {previewAdData.section || 'Multiple sections'}
                   </p>
                 </div>
-                <div className="bg-app-hover p-3 rounded-lg">
+                <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">Price</span>
                   <p className="font-medium">
                     {adPriceFormatter(
@@ -163,7 +163,7 @@ export const AdPreviewPage = ({
               </Button>
               <Button
                 onClick={handleSubmitForApproval}
-                className="bg-app hover:bg-app/90">
+                className="bg-app hover:bg-app/90 text-white">
                 Submit for Approval <ArrowRight className="ml-2" />
               </Button>
             </div>

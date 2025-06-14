@@ -1,36 +1,19 @@
 'use client';
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 
 export const PrivacyPolicyPage = () => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div>
-      <div
-        className={clsx({
-          'bg-app-dark': theme.type === 'dark',
-          'bg-gray-50': theme.type === 'default',
-        })}>
+      <div>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1
-              className={clsx('text-4xl font-bold mb-4', {
-                'text-app-dark-text': theme.type === 'dark',
-                'text-gray-900': theme.type === 'default',
-              })}>
-              Privacy Policy
-            </h1>
+            <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
             <p className="text-gray-600">Last updated: December 1, 2025</p>
           </div>
 
           <div className="space-y-6">
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Information We Collect
@@ -57,11 +40,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   How We Use Your Information
@@ -85,11 +64,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Information Sharing
@@ -120,11 +95,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Data Security
@@ -140,11 +111,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Your Rights
@@ -162,11 +129,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Cookies and Tracking
@@ -182,11 +145,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Children's Privacy
@@ -201,11 +160,7 @@ export const PrivacyPolicyPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">Contact Us</CardTitle>
               </CardHeader>

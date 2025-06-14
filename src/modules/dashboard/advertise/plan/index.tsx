@@ -12,11 +12,14 @@ import {
 } from '@/components/ui/select';
 import {Sections} from '@/constants/data';
 import {
+  BASIC_PLAN_DESCRIPTION,
   basicAdTypes,
   basicDurations,
   ctaBtn,
+  ENTERPRISE_PLAN_DESCRIPTION,
   enterPriseAdTypes,
   enterpriseDurations,
+  PROFESSIONAL_PLAN_DESCRIPTION,
   professionalAdTypes,
   professionalDurations,
 } from '@/fixtures/ad';
@@ -120,17 +123,14 @@ export const AdPlanPage = () => {
 
   switch (plan) {
     case 'basic':
-      planDescription =
-        'Reach your ideal audience with the Basic plan—promote your ad in a single section, perfect for focused exposure as a banner or sponsored post.';
+      planDescription = BASIC_PLAN_DESCRIPTION;
       break;
     case 'professional':
-      planDescription =
-        'Boost your brand with the Professional plan—your ad appears on the homepage and in a highly relevant section, driving more visibility and engagement.';
+      planDescription = PROFESSIONAL_PLAN_DESCRIPTION;
       break;
     case 'enterprise':
     default:
-      planDescription =
-        'Maximize your impact with the Enterprise plan—your ad is featured across the homepage, article pages, and multiple sections for premium, all-around exposure.';
+      planDescription = ENTERPRISE_PLAN_DESCRIPTION;
       break;
   }
 
@@ -849,7 +849,7 @@ export const AdPlanPage = () => {
             <Button
               disabled={disablePreviewBtn()}
               onClick={handleSubmitForApproval}
-              className="bg-app hover:bg-app/90">
+              className="bg-app hover:bg-app/90 text-white">
               Preview <ArrowRight className="ml-2" />
             </Button>
           </div>

@@ -8,21 +8,14 @@ import {
 } from '@/components/ui/accordion';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 
 export const PublicHelpCenterPage = () => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div>
       <div className="max-w-6xl mx-auto px-4">
-        <div
-          className={clsx('py-8 border-b ', {
-            'border-gray-200': theme.type === 'default',
-            'border-app-dark-border': theme.type === 'dark',
-          })}>
+        <div className="py-8 border-b border-app-border">
           <h1 className="text-3xl font-bold">Help Center</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="mt-2">
             Find answers to your questions and learn how to use Discussday
           </p>
         </div>
@@ -34,34 +27,10 @@ export const PublicHelpCenterPage = () => {
               Frequently Asked Questions
             </h2>
             <Tabs defaultValue="account" className="max-w-3xl">
-              <TabsList
-                className={clsx('w-full grid grid-cols-3 mb-4', {
-                  'text-white bg-app-dark-bg/10': theme.type === 'dark',
-                })}>
-                <TabsTrigger
-                  value="account"
-                  className={clsx({
-                    'text-white data-[state=active]:text-app-dark-text':
-                      theme.type === 'dark',
-                  })}>
-                  Account
-                </TabsTrigger>
-                <TabsTrigger
-                  value="features"
-                  className={clsx({
-                    'text-white data-[state=active]:text-app-dark-text':
-                      theme.type === 'dark',
-                  })}>
-                  Features
-                </TabsTrigger>
-                <TabsTrigger
-                  value="privacy"
-                  className={clsx({
-                    'text-white data-[state=active]:text-app-dark-text':
-                      theme.type === 'dark',
-                  })}>
-                  Privacy
-                </TabsTrigger>
+              <TabsList className="w-full grid grid-cols-3 mb-4">
+                <TabsTrigger value="account">Account</TabsTrigger>
+                <TabsTrigger value="features">Features</TabsTrigger>
+                <TabsTrigger value="privacy">Privacy</TabsTrigger>
               </TabsList>
 
               <TabsContent value="account">
@@ -202,24 +171,16 @@ export const PublicHelpCenterPage = () => {
           {/* User Guide Section */}
           <div
             id="user-guide"
-            className={clsx('mb-12 pt-8 border-t', {
-              'border-gray-200': theme.type === 'default',
-              'border-app-dark-border': theme.type === 'dark',
-            })}>
+            className="mb-12 pt-8 border-t border-app-border">
             <h2 className="text-xl font-semibold mb-6">User Guide</h2>
             <div className="space-y-6 max-w-3xl">
-              <div
-                className={clsx('p-6 rounded-lg max-w-3xl', {
-                  'bg-muted/30': theme.type === 'default',
-                  'border-app-dark-border bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
                 <h3 className="font-medium text-lg mb-3">Getting Started</h3>
-                <p className="text-gray-600 mb-4">
+                <p className=" mb-4">
                   Welcome to Discussday! This guide will help you navigate our
                   platform and make the most of your experience.
                 </p>
-                <ul className="list-disc list-inside text-gray-600 space-y-2 ml-2">
+                <ul className="list-disc list-inside  space-y-2 ml-2">
                   <li>
                     Create your profile and customize it to reflect your
                     interests
@@ -230,18 +191,13 @@ export const PublicHelpCenterPage = () => {
                 </ul>
               </div>
 
-              <div
-                className={clsx('p-6 rounded-lg max-w-3xl', {
-                  'bg-muted/30': theme.type === 'default',
-                  'border-app-dark-border bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
                 <h3 className="font-medium text-lg mb-3">Creating Posts</h3>
-                <p className="text-gray-600 mb-4">
+                <p className=" mb-4">
                   Sharing your thoughts and starting discussions is easy on
                   Discussday.
                 </p>
-                <ol className="list-decimal list-inside text-gray-600 space-y-2 ml-2">
+                <ol className="list-decimal list-inside  space-y-2 ml-2">
                   <li>
                     Click the "Post" button in the sidebar or the pen icon in
                     mobile navigation
@@ -255,26 +211,16 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Privacy & Safety Section */}
-          <div
-            id="privacy"
-            className={clsx('mb-12 pt-8 border-t', {
-              'border-gray-200': theme.type === 'default',
-              'border-app-dark-border': theme.type === 'dark',
-            })}>
+          <div id="privacy" className="mb-12 pt-8 border-t border-app-border">
             <h2 className="text-xl font-semibold mb-6">Privacy & Safety</h2>
             <div className="space-y-6 max-w-3xl">
-              <div
-                className={clsx('p-6 rounded-lg max-w-3xl', {
-                  'bg-muted/30': theme.type === 'default',
-                  'border-app-dark-border bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
                 <h3 className="font-medium text-lg mb-3">Privacy Settings</h3>
-                <p className="text-gray-600 mb-4">
+                <p className=" mb-4">
                   Control who can see your content and how your information is
                   used.
                 </p>
-                <ul className="list-disc list-inside text-gray-600 space-y-2 ml-2">
+                <ul className="list-disc list-inside  space-y-2 ml-2">
                   <li>Adjust your profile visibility in Privacy Settings</li>
                   <li>Control who can message you directly</li>
                   <li>Manage email notifications and preferences</li>
@@ -282,17 +228,12 @@ export const PublicHelpCenterPage = () => {
                 </ul>
               </div>
 
-              <div
-                className={clsx('p-6 rounded-lg max-w-3xl', {
-                  'bg-muted/30': theme.type === 'default',
-                  'border-app-dark-border bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
                 <h3 className="font-medium text-lg mb-3">Staying Safe</h3>
-                <p className="text-gray-600 mb-4">
+                <p className=" mb-4">
                   Tips for maintaining your safety and security on Discussday.
                 </p>
-                <ul className="list-disc list-inside text-gray-600 space-y-2 ml-2">
+                <ul className="list-disc list-inside space-y-2 ml-2">
                   <li>
                     Use a strong, unique password and enable two-factor
                     authentication
@@ -308,53 +249,43 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Community Guidelines Section */}
-          <div
-            id="community"
-            className={clsx('mb-12 pt-8 border-t', {
-              'border-gray-200': theme.type === 'default',
-              'border-app-dark-border': theme.type === 'dark',
-            })}>
+          <div id="community" className="mb-12 pt-8 border-t border-app-border">
             <h2 className="text-xl font-semibold mb-6">Community Guidelines</h2>
-            <div
-              className={clsx('p-6 rounded-lg max-w-3xl', {
-                'bg-muted/30': theme.type === 'default',
-                'border-app-dark-border bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
-              <p className="text-gray-600 mb-6">
+            <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
+              <p className=" mb-6">
                 Our community guidelines are designed to ensure Discuss remains
                 a respectful, inclusive, and constructive platform for everyone.
               </p>
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium">Be Respectful</h3>
-                  <p className="text-gray-600">
+                  <p className="">
                     Treat others with respect and kindness, even in
                     disagreement.
                   </p>
                 </div>
                 <div>
                   <h3 className="font-medium">No Harassment</h3>
-                  <p className="text-gray-600">
+                  <p className="">
                     Harassment, bullying, or intimidation is not tolerated.
                   </p>
                 </div>
                 <div>
                   <h3 className="font-medium">No Hate Speech</h3>
-                  <p className="text-gray-600">
+                  <p className="">
                     Content that promotes hate based on identity or
                     vulnerability is prohibited.
                   </p>
                 </div>
                 <div>
                   <h3 className="font-medium">No Misinformation</h3>
-                  <p className="text-gray-600">
+                  <p className="">
                     Avoid sharing false information that could cause harm.
                   </p>
                 </div>
                 <div>
                   <h3 className="font-medium">Respect Privacy</h3>
-                  <p className="text-gray-600">
+                  <p className="">
                     Do not share others' personal information without consent.
                   </p>
                 </div>
@@ -363,27 +294,17 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Contact Support Section */}
-          <div
-            id="contact"
-            className={clsx('mb-12 pt-8 border-t', {
-              'border-gray-200': theme.type === 'default',
-              'border-app-dark-border': theme.type === 'dark',
-            })}>
+          <div id="contact" className="mb-12 pt-8 border-t border-app-border">
             <h2 className="text-xl font-semibold mb-6">Contact Support</h2>
-            <div
-              className={clsx('p-6 rounded-lg max-w-3xl', {
-                'bg-muted/30': theme.type === 'default',
-                'border-app-dark-border bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
-              <p className="text-gray-600 mb-6">
+            <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
+              <p className=" mb-6">
                 Need help with something specific? Our support team is here to
                 assist you.
               </p>
               <div className="space-y-6">
                 <div>
                   <h3 className="font-medium mb-2">Email Support</h3>
-                  <p className="text-gray-600">
+                  <p className="">
                     For general inquiries and non-urgent issues, email us at{' '}
                     <a
                       href="mailto:support@discuss.com"
@@ -391,23 +312,18 @@ export const PublicHelpCenterPage = () => {
                       support@discuss.com
                     </a>
                   </p>
-                  <p className="text-gray-600 mt-1">
+                  <p className=" mt-1">
                     We typically respond within 24-48 hours.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="font-medium mb-2">Live Chat</h3>
-                  <p className="text-gray-600 mb-3">
+                  <p className=" mb-3">
                     For immediate assistance, our live chat is available Monday
                     through Friday, 9am-5pm EST.
                   </p>
-                  <Button
-                    className={clsx('', {
-                      'bg-[#084e96] hover:bg-[#0A66C2]': theme.type === 'dark',
-                      'bg-[#0A66C2] hover:bg-[#084e96]':
-                        theme.type === 'default',
-                    })}>
+                  <Button className="bg-app text-white hover:bg-app/90">
                     Start Live Chat
                   </Button>
                 </div>

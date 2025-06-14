@@ -6,8 +6,6 @@ import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {AlertTriangle, Send} from 'lucide-react';
 import {useParams, useRouter} from 'next/navigation';
 import {toast} from 'sonner';
@@ -16,7 +14,7 @@ export const EmailMessage = () => {
   const {user} = useParams<{user: string}>();
   const [username] = useState('deee');
   const navigate = useRouter();
-  const {theme} = useGlobalStore(state => state);
+
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -87,25 +85,17 @@ export const EmailMessage = () => {
       <PageHeader title={`Email ${recipientUser.displayName}`} />
 
       <div className="p-4">
-        <div
-          className={clsx('rounded-lg border p-4', {
-            'border-app-dark-border bg-app-dark': theme.type === 'dark',
-            'border-app-border bg-white': theme.type === 'default',
-          })}>
+        <div className="rounded-lg border p-4 border-app-border">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="to"
-                className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="to" className="block text-sm font-medium mb-1">
                 To:
               </label>
               <Input
                 id="to"
                 value={`${recipientUser.displayName} <${recipientUser.email}>`}
                 disabled
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
+                className="form-input"
               />
             </div>
 
@@ -124,13 +114,11 @@ export const EmailMessage = () => {
             <div>
               <label
                 htmlFor="subject"
-                className="block text-sm font-medium text-gray-700 mb-1">
+                className="block text-sm font-medium mb-1">
                 Subject:
               </label>
               <Input
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
+                className="form-input"
                 id="subject"
                 placeholder="Enter subject"
                 value={subject}
@@ -141,7 +129,7 @@ export const EmailMessage = () => {
             <div>
               <label
                 htmlFor="message"
-                className="block text-sm font-medium text-gray-700 mb-1">
+                className="block text-sm font-medium mb-1">
                 Message:
               </label>
               <Textarea
@@ -149,16 +137,14 @@ export const EmailMessage = () => {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={e => setMessage(e.target.value)}
-                className={clsx('min-h-[200px] resize-none form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
+                className="min-h-[200px] resize-none form-input"
               />
             </div>
 
             <div className="flex justify-end pt-4">
               <Button
                 type="submit"
-                className="bg-app hover:bg-app/90"
+                className="bg-app hover:bg-app/90 text-white"
                 disabled={isSending || !subject.trim() || !message.trim()}>
                 {isSending ? (
                   'Sending...'

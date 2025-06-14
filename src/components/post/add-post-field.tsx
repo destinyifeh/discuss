@@ -1,8 +1,6 @@
 'use client';
 
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {highlightLinks} from '@/lib/formatter';
-import clsx from 'clsx';
 import {Textarea} from '../ui/textarea';
 
 export const AddPostField = ({
@@ -12,18 +10,11 @@ export const AddPostField = ({
   setContent: (text: string) => void;
   content: string;
 }) => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div className="relative w-full">
       <div
         style={{fontSize: '0.875rem', lineHeight: '1.25rem'}}
-        className={clsx(
-          'absolute inset-0 p-3 pointer-events-none text-sm whitespace-pre-wrap break-words',
-          {
-            'text-white': theme.type === 'dark',
-            'text-gray-900': theme.type === 'default',
-          },
-        )}
+        className="absolute inset-0 p-3 pointer-events-none text-sm whitespace-pre-wrap break-words text-gray-900 dark:text-white"
         dangerouslySetInnerHTML={{__html: highlightLinks(content)}}
       />
       <Textarea

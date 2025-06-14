@@ -292,14 +292,7 @@ export const PostDetailPage = () => {
                 </div>
 
                 {/* All replies header with add comment button for web */}
-                <div
-                  className={clsx(
-                    'px-4 py-3 border-b flex justify-between items-center',
-                    {
-                      ' border-app-border': theme.type === 'default',
-                      'border-app-dark-border': theme.type === 'dark',
-                    },
-                  )}>
+                <div className="px-4 py-3 border-b flex justify-between items-center border-app-border">
                   <h2 className="font-bold text-lg">All replies</h2>
                 </div>
 
@@ -433,7 +426,7 @@ export const PostDetailPage = () => {
       <div className="lg:hidden">
         {/* Comment button for mobile */}
         <Button
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
           size="icon"
           onClick={() => {
             setShowMobileComment(!showMobileComment);
@@ -449,12 +442,10 @@ export const PostDetailPage = () => {
           // } z-50`}>
 
           className={clsx(
-            'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform',
+            'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform bg-app-hover border-app-border dark:bg-background',
             {
               'translate-y-0': showMobileComment === true,
               'translate-y-full': showMobileComment === false,
-              'bg-app-hover border-app-border': theme.type === 'default',
-              'bg-app-dark border-app-dark-border': theme.type === 'dark',
             },
           )}>
           <div className="p-4">
@@ -492,11 +483,7 @@ export const PostDetailPage = () => {
               </div>
 
               {quotedUser && (
-                <div
-                  className={clsx('p-3 rounded-md mb-3 border-l-4 border-app', {
-                    'bg-gray-100 text-gray-700': theme.type === 'default',
-                    'bg-app-dark-bg/10 text-white': theme.type === 'dark',
-                  })}>
+                <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
                   <div className="font-semibold mb-1 text-app">
                     @{quotedUser}
                   </div>
@@ -518,14 +505,7 @@ export const PostDetailPage = () => {
               <AddCommentField content={comment} setContent={setComment} />
 
               {imagePreview && (
-                <div
-                  className={clsx(
-                    'relative mt-3 rounded-md overflow-hidden border ',
-                    {
-                      'border-gray-200': theme.type === 'default',
-                      'border-app-dark-border': theme.type === 'dark',
-                    },
-                  )}>
+                <div className="relative mt-3 rounded-md overflow-hidden border border-app-border ">
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -561,7 +541,7 @@ export const PostDetailPage = () => {
                 </Button>
                 <Button
                   onClick={handleSubmitComment}
-                  className="rounded-full bg-app hover:bg-app/90"
+                  className="rounded-full bg-app hover:bg-app/90 text-white"
                   disabled={isSubmitting || (!comment.trim() && !imagePreview)}>
                   <Reply size={16} className="mr-2" />
                   Reply
@@ -575,13 +555,7 @@ export const PostDetailPage = () => {
       <div className="hidden lg:block">
         {/* Comment button for web */}
         <Button
-          className={clsx(
-            'fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1',
-            {
-              'bg-app hover:bg-app/90': theme.type === 'default',
-              'hover:bg-app bg-app/90': theme.type === 'dark',
-            },
-          )}
+          className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1 bg-app hover:bg-app/90 dark:hover:bg-app dark:bg-app/90 text-white"
           size="icon"
           onClick={() => {
             setShowWebComment(!showWebComment);
@@ -593,12 +567,10 @@ export const PostDetailPage = () => {
         {/* Web inline comment section that slides up from bottom */}
         <div
           className={clsx(
-            'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50',
+            'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50 bg-app-hover dark:bg-background border-app-border',
             {
               'translate-y-0': showWebComment === true,
               'translate-y-full': showWebComment === false,
-              'bg-app-hover border-app-border': theme.type === 'default',
-              'bg-app-dark border-app-dark-border': theme.type === 'dark',
             },
           )}>
           <div className="p-4">
@@ -637,11 +609,7 @@ export const PostDetailPage = () => {
               </div>
 
               {quotedUser && (
-                <div
-                  className={clsx('p-3 rounded-md mb-3 border-l-4 border-app', {
-                    'bg-gray-100 text-gray-700': theme.type === 'default',
-                    'bg-app-dark-bg/10 text-white': theme.type === 'dark',
-                  })}>
+                <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
                   <div className="font-semibold mb-1 text-app">
                     @{quotedUser}
                   </div>
@@ -663,14 +631,7 @@ export const PostDetailPage = () => {
               <AddCommentField content={comment} setContent={setComment} />
 
               {imagePreview && (
-                <div
-                  className={clsx(
-                    'relative mt-3 rounded-md overflow-hidden border py-1',
-                    {
-                      'border-gray-200': theme.type === 'default',
-                      'border-app-dark-border': theme.type === 'dark',
-                    },
-                  )}>
+                <div className="relative mt-3 rounded-md overflow-hidden border py-1 border-app-border">
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -709,7 +670,7 @@ export const PostDetailPage = () => {
                 </Button>
                 <Button
                   onClick={handleSubmitComment}
-                  className="rounded-full bg-app hover:bg-app/90"
+                  className="rounded-full bg-app hover:bg-app/90 text-white"
                   disabled={isSubmitting || (!comment.trim() && !imagePreview)}>
                   <Reply size={16} className="mr-2" />
                   Reply

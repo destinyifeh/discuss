@@ -11,8 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import Link from 'next/link';
 import {useState} from 'react';
 import {toast} from 'sonner';
@@ -21,7 +19,7 @@ export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const {theme} = useGlobalStore(state => state);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -49,14 +47,7 @@ export const ForgotPasswordPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
-        <div
-          className={clsx(
-            'hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white',
-            {
-              'bg-app/90': theme.type === 'dark',
-              ' bg-app': theme.type === 'default',
-            },
-          )}>
+        <div className="hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app/90 dark:bg-app">
           <div>
             {/* <svg
                 viewBox="0 0 24 24"
@@ -100,11 +91,7 @@ export const ForgotPasswordPage = () => {
         </div>
 
         <div className="w-full md:flex-1">
-          <Card
-            className={clsx('border-0 shadow-none', {
-              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                theme.type === 'dark',
-            })}>
+          <Card className="border-0 shadow-none">
             <CardHeader>
               <div className="flex justify-center mb-4">
                 {/* <svg
@@ -143,16 +130,14 @@ export const ForgotPasswordPage = () => {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder="name@example.com"
-                      className={clsx('form-input', {
-                        'border-app-dark-border': theme.type === 'dark',
-                      })}
+                      className="form-input"
                       required
                     />
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-app hover:bg-app/90"
+                    className="w-full bg-app hover:bg-app/90 text-white"
                     disabled={isSubmitting}>
                     {isSubmitting ? 'Sending...' : 'Send Reset Link'}
                   </Button>

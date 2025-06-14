@@ -3,16 +3,13 @@
 import {PageHeader} from '@/components/app-headers';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
-import clsx from 'clsx';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 
 export const UserFollowersPage = () => {
   const {user} = useParams<{user: string}>();
   const navigate = useRouter();
-  const {theme} = useGlobalStore(state => state);
 
   if (!user) return null;
 
@@ -92,11 +89,7 @@ export const UserFollowersPage = () => {
       <PageHeader title="Followers" description={profileUser.displayName} />
 
       {followerUsers.length > 0 ? (
-        <div
-          className={clsx('divide-y', {
-            'divide-app-border': theme.type === 'default',
-            'divide-app-dark-border': theme.type === 'dark',
-          })}>
+        <div className="divide-y divide-app-border">
           {followerUsers.map(follower => {
             const isFollowing = profileUser.following.includes(follower.id);
             const isCurrentUser = user === follower.username;
@@ -126,14 +119,8 @@ export const UserFollowersPage = () => {
                     className={cn(
                       'rounded-full',
                       isFollowing
-                        ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black'
+                        ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black dark:text-white'
                         : 'bg-app text-white hover:bg-app/90',
-                      theme.type === 'dark' &&
-                        !isFollowing &&
-                        'bg-app/90 text-white hover:bg-app',
-                      theme.type === 'dark' &&
-                        isFollowing &&
-                        'border-app-dark-border bg-app-dark-bg/10 text-white',
                     )}
                     size="sm">
                     {isFollowing ? 'Following' : 'Follow'}

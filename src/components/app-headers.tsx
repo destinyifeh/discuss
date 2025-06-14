@@ -1,7 +1,5 @@
 'use client';
 
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {ChevronLeft} from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
@@ -15,25 +13,11 @@ export const PageHeader = ({
   description?: string | number;
 }) => {
   const navigate = useRouter();
-  const {theme} = useGlobalStore(state => state);
+
   return (
-    <div
-      className={clsx(
-        'sticky top-0 backdrop-blur-sm z-10 border-b md:mt-15 lg:mt-0',
-        {
-          'bg-white/80 border-app-border': theme.type === 'default',
-          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-        },
-      )}>
+    <div className="sticky top-0 bg-white/80 dark:bg-background backdrop-blur-sm z-10 border-b md:mt-0 lg:mt-0 border-app-border">
       <div className="px-4 py-3 flex items-center gap-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate.back()}
-          className={clsx({
-            'hover:bg-app-dark-bg/10 hover:text-app-dark-text':
-              theme.type === 'dark',
-          })}>
+        <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
           <ChevronLeft />
         </Button>
         <div>
@@ -55,14 +39,9 @@ export const SectionHeader = ({
   description?: string;
 }) => {
   const navigate = useRouter();
-  const {theme} = useGlobalStore(state => state);
 
   return (
-    <div
-      className={clsx('sticky top-0  backdrop-blur-sm z-10 border-b', {
-        'bg-white/80 border-app-border': theme.type === 'default',
-        'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-      })}>
+    <div className="sticky top-0 bg-white/80 border-app-border dark:bg-background backdrop-blur-sm z-10 border-b">
       <div className="px-4 py-3 flex flex-col">
         <div className="flex items-start gap-6">
           <Button
@@ -85,13 +64,8 @@ export const SectionHeader = ({
 };
 
 export const AppHeader = () => {
-  const {theme} = useGlobalStore(state => state);
   return (
-    <header
-      className={clsx('border-b', {
-        'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-        'bg-white': theme.type === 'default',
-      })}>
+    <header className="border-b border-app-border">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-app">
@@ -102,11 +76,7 @@ export const AppHeader = () => {
               <Button variant="outline">Sign In</Button>
             </Link>
             <Link href="/register">
-              <Button
-                className={clsx({
-                  'bg-app hover:bg-app/90': theme.type === 'default',
-                  'bg-app/90 hover:bg-app': theme.type === 'dark',
-                })}>
+              <Button className="bg-app hover:bg-app/90 dark:bg-app/90 dark:hover:bg-app text-white">
                 Join Now
               </Button>
             </Link>

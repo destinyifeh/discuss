@@ -2,41 +2,24 @@
 
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {Shield, Target, TrendingUp, Users} from 'lucide-react';
 import Link from 'next/link';
 
 export const AdsInfoPage = () => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div>
-      <div
-        className={clsx({
-          'bg-app-dark': theme.type === 'dark',
-          'bg-gray-50': theme.type === 'default',
-        })}>
+      <div>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1
-              className={clsx('text-4xl font-bold mb-4', {
-                'text-app-dark-text': theme.type === 'dark',
-                'text-gray-900': theme.type === 'default',
-              })}>
-              Advertising Information
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold mb-4">Advertising Information</h1>
+            <p className="text-xl max-w-2xl mx-auto">
               Learn about how advertising works on Discuss and our commitment to
               user experience.
             </p>
           </div>
 
           <div className="space-y-6">
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Our Advertising Philosophy
@@ -53,11 +36,7 @@ export const AdsInfoPage = () => {
             </Card>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-bold text-2xl">
                     <Target className="h-5 w-5 text-[#0A66C2]" />
@@ -65,18 +44,14 @@ export const AdsInfoPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">
+                  <p className="">
                     We use your interests and activity to show you ads that are
                     more likely to be relevant to you.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-bold text-2xl">
                     <Shield className="h-5 w-5 text-[#0A66C2]" />
@@ -84,18 +59,14 @@ export const AdsInfoPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">
+                  <p className="">
                     Your personal information is never sold to advertisers. We
                     maintain strict privacy standards.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-bold text-2xl">
                     <Users className="h-5 w-5 text-[#0A66C2]" />
@@ -103,18 +74,14 @@ export const AdsInfoPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">
+                  <p className="">
                     Ads are clearly labeled and designed to complement, not
                     disrupt, your community experience.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card
-                className={clsx({
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                    theme.type === 'dark',
-                })}>
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-bold text-2xl">
                     <TrendingUp className="h-5 w-5 text-[#0A66C2]" />
@@ -122,7 +89,7 @@ export const AdsInfoPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">
+                  <p className="">
                     All ads are reviewed for quality and appropriateness before
                     being shown to our community.
                   </p>
@@ -130,11 +97,7 @@ export const AdsInfoPage = () => {
               </Card>
             </div>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Types of Ads on Discuss
@@ -174,11 +137,7 @@ export const AdsInfoPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   How We Target Ads
@@ -203,11 +162,7 @@ export const AdsInfoPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Your Ad Controls
@@ -235,11 +190,7 @@ export const AdsInfoPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Advertiser Guidelines
@@ -257,11 +208,7 @@ export const AdsInfoPage = () => {
               </CardContent>
             </Card>
 
-            <Card
-              className={clsx({
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                  theme.type === 'dark',
-              })}>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Questions or Concerns?
@@ -275,14 +222,11 @@ export const AdsInfoPage = () => {
                 <div className="flex flex-wrap gap-4 mt-4">
                   <Button
                     asChild
-                    className={clsx('text-white', {
-                      'bg-app hover:bg-app/90': theme.type === 'default',
-                      'bg-app/90 hover:bg-app': theme.type === 'dark',
-                    })}>
+                    className="text-white bg-app hover:bg-app/90 dark:bg-app/90 dark:hover:bg-app">
                     <Link href="/help-center">Ask a Question</Link>
                   </Button>
                   <Button variant="outline" asChild className="">
-                    <Link href="/register" className="text-black">
+                    <Link href="/register" className="">
                       Advertise With Us
                     </Link>
                   </Button>

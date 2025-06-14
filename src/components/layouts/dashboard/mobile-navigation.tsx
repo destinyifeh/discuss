@@ -12,10 +12,8 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import {Sections} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden';
-import clsx from 'clsx';
 import {Bell, BookmarkIcon, Home, LogOut, Search, User} from 'lucide-react';
 import Link from 'next/link';
 import {toast} from 'sonner';
@@ -27,7 +25,6 @@ interface MainLayoutProps {
 const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   const navigate = useRouter();
   const location = usePathname();
-  const {theme} = useGlobalStore(state => state);
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [user] = useState({
@@ -88,19 +85,9 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   return (
     <div
       // className={clsx('min-h-screen flex lg:hidden', {
-      className={clsx('lg:hidden', {
-        'bg-white': theme.type === 'default',
-        'bg-app-dark': theme.type === 'dark',
-      })}>
-      <div
-        className={clsx(
-          // 'fixed top-0 left-0 right-0 border-b  flex justify-between items-center p-3 z-30',
-          'sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30',
-          {
-            'bg-white border-app-border': theme.type === 'default',
-            'bg-app-dark border-app-dark-border': theme.type === 'dark',
-          },
-        )}>
+      className="lg:hidden">
+      <div className=// 'fixed top-0 left-0 right-0 border-b  flex justify-between items-center p-3 z-30',
+      "sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30 border-app-border">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="p-0">
@@ -113,11 +100,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
               {/* <Menu size={24} /> */}
             </Button>
           </SheetTrigger>
-          <SheetContent
-            side="left"
-            className={clsx('w-64', {
-              'bg-app-dark text-app-dark-text': theme.type === 'dark',
-            })}>
+          <SheetContent side="left" className="w-64">
             <VisuallyHidden>
               <SheetTitle>Mobile Sidebar</SheetTitle>
             </VisuallyHidden>
@@ -154,10 +137,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
               <div className="p-4">
                 <Button
                   variant="outline"
-                  className={clsx('w-full justify-start', {
-                    'bg-app-dark-bg/10 text-white border-app-dark-border':
-                      theme.type === 'dark',
-                  })}
+                  className="w-full justify-start"
                   onClick={handleLogout}>
                   <LogOut size={18} className="mr-2" />
                   Log out

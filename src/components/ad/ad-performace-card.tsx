@@ -1,6 +1,5 @@
 'use client';
 
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {AdPerformanceData, AdStatus} from '@/types/ad-types';
 import clsx from 'clsx';
 import {
@@ -48,17 +47,12 @@ const getStatusColor = (status: AdStatus) => {
 
 export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
   const navigate = useRouter();
-  const {theme} = useGlobalStore(state => state);
+
   const handleMakePayment = (adId: string) => {
     navigate.push(`/payment/${adId}`);
   };
   return (
-    <Card
-      key={ad.id}
-      className={clsx('verflow-hidden', {
-        'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-          theme.type === 'dark',
-      })}>
+    <Card key={ad.id} className="verflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -68,10 +62,6 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
           <Badge
             className={clsx(
               `${getStatusColor(ad.status)} flex items-center gap-1`,
-              {
-                'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              },
             )}>
             {getStatusIcon(ad.status)}{' '}
             {ad.status.charAt(0).toUpperCase() + ad.status.slice(1)}
@@ -81,31 +71,19 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
 
       <CardContent className="pb-4">
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <div
-            className={clsx('text-center p-2 rounded-lg', {
-              'bg-gray-50': theme.type === 'default',
-              'bg-app-dark-bg/10': theme.type === 'dark',
-            })}>
+          <div className="text-center p-2 rounded-lg bg-gray-50">
             <p className="text-xs text-app-gray">Type</p>
-            <p className="font-medium">
+            <p className="font-medium text-black">
               {ad.adType.charAt(0).toUpperCase() + ad.adType.slice(1)}
             </p>
           </div>
-          <div
-            className={clsx('text-center p-2 rounded-lg', {
-              'bg-gray-50': theme.type === 'default',
-              'bg-app-dark-bg/10': theme.type === 'dark',
-            })}>
+          <div className="text-center p-2 rounded-lg bg-gray-50">
             <p className="text-xs text-app-gray">Plan</p>
-            <p className="font-medium">{ad.plan}</p>
+            <p className="font-medium text-black">{ad.plan}</p>
           </div>
-          <div
-            className={clsx('text-center p-2 rounded-lg', {
-              'bg-gray-50': theme.type === 'default',
-              'bg-app-dark-bg/10': theme.type === 'dark',
-            })}>
+          <div className="text-center p-2 rounded-lg bg-gray-50">
             <p className="text-xs text-app-gray">Section</p>
-            <p className="font-medium">{ad.section}</p>
+            <p className="font-medium text-black">{ad.section}</p>
           </div>
         </div>
 
@@ -203,11 +181,11 @@ export const AdPerformancePlaceholder = () => {
   const navigate = useRouter();
   return (
     <div className="col-span-2 p-8 text-center">
-      <p className="text-lg text-app-gray mb-4">
+      <p className="text-lg text-app-gray mb-4 dark:text-white">
         No advertisements found with the selected filter
       </p>
       <Button
-        className="bg-app hover:bg-app/90"
+        className="bg-app hover:bg-app/90 text-white"
         onClick={() => navigate.push('/advertise')}>
         Create New Advertisement
       </Button>

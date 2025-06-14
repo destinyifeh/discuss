@@ -1,5 +1,6 @@
 'use client';
 
+import {PageHeader} from '@/components/app-headers';
 import PostCard from '@/components/post/post-card';
 import {Button} from '@/components/ui/button';
 import {
@@ -14,15 +15,12 @@ import {
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Textarea} from '@/components/ui/textarea';
 import {Posts} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {PostProps} from '@/types/post-item.type';
-import clsx from 'clsx';
 import {
   AlertTriangle,
   ArrowUp,
   Calendar,
-  ChevronLeft,
   Link as LinkIcon,
   Mail,
   MapPin,
@@ -82,7 +80,7 @@ export const PostPlaceholder = ({
 export const PeoplePage = () => {
   const {user} = useParams<{user: string}>();
   const [users] = useState({username: 'dez'});
-  const {theme} = useGlobalStore(state => state);
+
   const [activeTab, setActiveTab] = useState('posts');
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
@@ -170,21 +168,10 @@ export const PeoplePage = () => {
 
   return (
     <div className="pb-10">
-      <div
-        className={clsx('sticky top-0  backdrop-blur-sm z-10 border-b', {
-          'bg-white/80 border-app-border': theme.type === 'default',
-          'bg-app-dark-bg/10 border-app-dark-border': theme.type === 'dark',
-        })}>
-        <div className="px-4 py-3 flex items-center gap-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
-            <ChevronLeft />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">{profileUser.displayName}</h1>
-            <p className="text-sm text-app-gray">{userPosts.length} posts</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={profileUser.displayName}
+        description={`${userPosts.length} posts`}
+      />
 
       <Virtuoso
         className="custom-scrollbar"
@@ -195,11 +182,7 @@ export const PeoplePage = () => {
         components={{
           Header: () => (
             <Fragment>
-              <div
-                className={clsx('border-b overflow-y-auto', {
-                  'border-app-border': theme.type === 'default',
-                  'border-app-dark-border': theme.type === 'dark',
-                })}>
+              <div className="border-b overflow-y-auto border-app-border">
                 <div className="h-40 bg-app/20"></div>
                 <div className="px-4 pb-4">
                   <div className="flex justify-between relative">
@@ -218,20 +201,14 @@ export const PeoplePage = () => {
                         className={cn(
                           'rounded-full',
                           isFollowing
-                            ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black'
+                            ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black dark:text-white'
                             : 'bg-app text-white hover:bg-app/90',
-                          theme.type === 'dark' &&
-                            !isFollowing &&
-                            'bg-app/90 hover:bg-app',
                         )}>
                         {isFollowing ? 'Following' : 'Follow'}
                       </Button>
                       <Button
                         variant="outline"
-                        className={clsx('rounded-full', {
-                          'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                            theme.type === 'dark',
-                        })}
+                        className="rounded-full"
                         onClick={() =>
                           navigate.push(`/email/${profileUser.username}`)
                         }>
@@ -247,11 +224,7 @@ export const PeoplePage = () => {
                             <AlertTriangle className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent
-                          className={clsx({
-                            'bg-app-dark text-app-dark-text border-app-dark-border':
-                              theme.type === 'dark',
-                          })}>
+                        <DialogContent>
                           <DialogHeader>
                             <DialogTitle>
                               Report {profileUser.displayName}
@@ -270,14 +243,7 @@ export const PeoplePage = () => {
                             </label>
                             <select
                               id="reason"
-                              className={clsx(
-                                'w-full mb-4 p-2 border border-gray-300 rounded-md form-input',
-                                {
-                                  'border-app-dark-border bg-app-dark':
-                                    theme.type === 'dark',
-                                  'border-gray-300': theme.type === 'default',
-                                },
-                              )}>
+                              className="w-full mb-4 p-2 border border-gray-300 rounded-md form-input">
                               <option value="spam">Spam</option>
                               <option value="harassment">Harassment</option>
                               <option value="misinformation">
@@ -302,12 +268,7 @@ export const PeoplePage = () => {
                             <Button variant="outline">Cancel</Button>
                             <Button
                               onClick={handleReportUser}
-                              className={clsx('text-white', {
-                                'bg-red-700 hover:bg-red-600':
-                                  theme.type === 'dark',
-                                'bg-red-600 hover:bg-red-700':
-                                  theme.type === 'default',
-                              })}>
+                              className="text-white bg-red-600 hover:bg-red-700  dark:bg-red-700 dark:hover:bg-red-600">
                               Submit Report
                             </Button>
                           </DialogFooter>
@@ -371,41 +332,17 @@ export const PeoplePage = () => {
                 <TabsList className="w-full grid grid-cols-3 bg-transparent">
                   <TabsTrigger
                     value="posts"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                     Posts
                   </TabsTrigger>
                   <TabsTrigger
                     value="replies"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                     Replies
                   </TabsTrigger>
                   <TabsTrigger
                     value="likes"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                     Likes
                   </TabsTrigger>
                 </TabsList>

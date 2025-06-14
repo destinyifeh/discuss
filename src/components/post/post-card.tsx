@@ -3,7 +3,6 @@ import {Sections} from '@/constants/data';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {PostProps} from '@/types/post-item.type';
-import clsx from 'clsx';
 import copy from 'copy-to-clipboard';
 import {formatDistanceToNow} from 'date-fns';
 import {
@@ -164,11 +163,7 @@ const PostCard = ({
   };
 
   return (
-    <div
-      className={clsx('border-b py-4 px-2 transition-colors', {
-        'hover:bg-app-hover border-app-border': theme.type === 'default',
-        'border-app-dark-border text-app-dark-text': theme.type === 'dark',
-      })}>
+    <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background ">
       <div className="flex gap-3">
         <Avatar
           className="w-10 h-10 cursor-pointer"
@@ -205,12 +200,7 @@ const PostCard = ({
               </div>
 
               <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <DropdownMenuTrigger
-                  asChild
-                  className={clsx({
-                    'hover:bg-app-dark-bg/10 hover:text-white':
-                      theme.type === 'dark',
-                  })}>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -221,21 +211,13 @@ const PostCard = ({
                     <span className="sr-only">Post menu</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className={clsx({
-                    'bg-app-dark-bg/10 border-app-dark-border text-white':
-                      theme.type === 'dark',
-                  })}>
+                <DropdownMenuContent align="end" className="border-app-border">
                   {post.userId === user?.id && (
                     <>
                       <DropdownMenuItem
                         onClick={handleEditPost}
-                        className="cursor-pointer text-black font-bold">
-                        <Pencil
-                          size={16}
-                          className="mr-2 text-black font-bold"
-                        />
+                        className="cursor-pointer">
+                        <Pencil size={16} className="mr-2 font-bold" />
                         Edit post
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -246,15 +228,15 @@ const PostCard = ({
                     <>
                       <DropdownMenuItem
                         onClick={handleFollow}
-                        className="cursor-pointer text-black font-bold">
+                        className="cursor-pointer">
                         {isFollowing ? (
                           <>
-                            <UserCheck size={16} className="mr-2 text-black" />
+                            <UserCheck size={16} className="mr-2" />
                             Following
                           </>
                         ) : (
                           <>
-                            <UserPlus size={16} className="mr-2 text-black" />
+                            <UserPlus size={16} className="mr-2" />
                             Follow
                           </>
                         )}
@@ -264,14 +246,14 @@ const PostCard = ({
                   )}
                   <DropdownMenuItem
                     onClick={handleReport}
-                    className="cursor-pointer text-black font-bold">
-                    <Flag size={16} className="mr-2 text-black font-bold" />
+                    className="cursor-pointer">
+                    <Flag size={16} className="mr-2 font-bold" />
                     Report post
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setIsMenuOpen(false)}
-                    className="cursor-pointer text-app font-bold justify-center">
+                    className="cursor-pointer text-app justify-center">
                     Cancel
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -313,9 +295,7 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={clsx('text-app-gray hover:text-app', {
-                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
-                  })}
+                  className="text-app-gray hover:text-app"
                   onClick={handleCommentClick}>
                   <div className="flex items-center gap-1">
                     <MessageSquare size={18} />
@@ -347,7 +327,6 @@ const PostCard = ({
                   className={cn(
                     'text-app-gray hover:text-red-500',
                     liked && 'text-red-500',
-                    theme.type === 'dark' && 'hover:bg-app-dark-bg/10',
                   )}
                   onClick={e => {
                     e.preventDefault();
@@ -363,9 +342,7 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={clsx('text-app-gray hover:text-app', {
-                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
-                  })}
+                  className="text-app-gray hover:text-app"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -381,9 +358,7 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={clsx('text-app-gray hover:text-app', {
-                    'hover:bg-app-dark-bg/10': theme.type === 'dark',
-                  })}
+                  className="text-app-gray hover:text-app"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -398,9 +373,7 @@ const PostCard = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={clsx('text-app-gray hover:text-app', {
-                        'hover:bg-app-dark-bg/10': theme.type === 'dark',
-                      })}
+                      className="text-app-gray hover:text-app"
                       onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -414,7 +387,7 @@ const PostCard = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="justify-start text-black"
+                        className="justify-start"
                         onClick={handleCopyLink}>
                         <LinkIcon size={16} className="mr-2" />
                         Copy link

@@ -26,18 +26,15 @@ import {Input} from '@/components/ui/input';
 import {Separator} from '@/components/ui/separator';
 import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
-import {darkTheme, defaultTheme} from '@/constants/styles';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {AlertTriangle, HelpCircle, Lock, Moon, Sun} from 'lucide-react';
+import {useTheme} from 'next-themes';
 import {useRouter} from 'next/navigation';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {toast} from 'sonner';
-
 export const SettingsPage = () => {
   const [user] = useState('dez');
   const navigate = useRouter();
-  const {theme, setTheme} = useGlobalStore(state => state);
+  const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -45,17 +42,20 @@ export const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const {theme, setTheme} = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null; // prevent SSR mismatch
 
   if (!user) return null;
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-    if (theme.type === 'default') {
-      setTheme(darkTheme);
-    } else {
-      setTheme(defaultTheme);
-    }
-    toast.success(`${!darkMode ? 'Dark' : 'Light'} mode activated`);
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+    toast.success(`${theme === 'dark' ? 'Light' : 'Dark'} mode activated`);
   };
 
   const toggleNotifications = () => {
@@ -96,26 +96,18 @@ export const SettingsPage = () => {
     <div>
       <PageHeader title="Settings" />
 
-      <div
-        className={clsx('divide-y', {
-          'divide-app-border': theme.type === 'default',
-          'divide-app-dark-border': theme.type === 'dark',
-        })}>
+      <div className="divide-y divide-app-border">
         {/* Theme Settings */}
         <div className="p-4">
           <h2 className="font-semibold text-lg mb-4">Appearance</h2>
 
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
-              {theme.type === 'default' ? (
-                <Moon size={20} />
-              ) : (
-                <Sun size={20} />
-              )}
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
               <span>Dark Mode</span>
             </div>
             <Switch
-              checked={theme.type === 'dark'}
+              checked={theme === 'dark'}
               onCheckedChange={toggleDarkMode}
               className="data-[state=checked]:bg-app"
             />
@@ -143,9 +135,7 @@ export const SettingsPage = () => {
                 Current Password
               </label>
               <Input
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
+                className="form-input"
                 id="current-password"
                 type="password"
                 value={currentPassword}
@@ -160,11 +150,9 @@ export const SettingsPage = () => {
                 New Password
               </label>
               <Input
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
                 id="new-password"
                 type="password"
+                className="form-input"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
               />
@@ -177,17 +165,15 @@ export const SettingsPage = () => {
                 Confirm New Password
               </label>
               <Input
-                className={clsx('form-input', {
-                  'border-app-dark-border': theme.type === 'dark',
-                })}
                 id="confirm-password"
                 type="password"
+                className="form-input"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
               />
             </div>
 
-            <Button type="submit" className="bg-app hover:bg-app/90">
+            <Button type="submit" className="bg-app hover:bg-app/90 text-white">
               <Lock className="h-4 w-4 mr-2" />
               Change Password
             </Button>
@@ -201,10 +187,7 @@ export const SettingsPage = () => {
           <div className="space-y-4">
             <Button
               variant="outline"
-              className={clsx('flex items-center gap-2 w-full justify-start', {
-                'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                  theme.type === 'dark',
-              })}
+              className="flex items-center gap-2 w-full justify-start border-app-border"
               onClick={() => navigate.push('/help')}>
               <HelpCircle size={18} />
               Help Center
@@ -214,24 +197,12 @@ export const SettingsPage = () => {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className={clsx(
-                    'flex items-center gap-2 w-full justify-start',
-                    {
-                      'bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10  text-red-700 hover:text-red-600':
-                        theme.type === 'dark',
-                      'text-red-600 hover:bg-red-50 hover:text-red-700':
-                        theme.type === 'default',
-                    },
-                  )}>
+                  className="flex items-center gap-2 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 border-app-border dark:text-red-700 dark:hover:text-red-600 ">
                   <AlertTriangle size={18} />
                   Report Abuse
                 </Button>
               </DialogTrigger>
-              <DialogContent
-                className={clsx({
-                  'bg-app-dark border-app-dark-border text-app-dark-text':
-                    theme.type === 'dark',
-                })}>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Report Abuse</DialogTitle>
                   <DialogDescription>
@@ -273,12 +244,7 @@ export const SettingsPage = () => {
 
                   <Button
                     onClick={handleReportAbuse}
-                    className={clsx({
-                      'hover:bg-red bg-red-700 text-white':
-                        theme.type === 'dark',
-                      'bg-red-600 hover:bg-red-700 text-white':
-                        theme.type === 'default',
-                    })}>
+                    className="dark:hover:bg-red dark:bg-red-700 text-white bg-red-600 hover:bg-red-700 ">
                     Submit Report
                   </Button>
                 </DialogFooter>
@@ -308,20 +274,11 @@ export const SettingsPage = () => {
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
-                    className={clsx({
-                      'text-red-500 border-red-500 hover:bg-red-50':
-                        theme.type === 'default',
-                      'text-red-500 border-red-500  bg-app-dark-bg/10 hover:bg-app-dark-bg/10 hover:text-app-dark-text':
-                        theme.type === 'dark',
-                    })}>
+                    className="text-red-500 border-red-500 hover:bg-red-50">
                     Deactivate
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent
-                  className={clsx({
-                    'border-app-dark-border bg-app-dark text-app-dark-text':
-                      theme.type === 'dark',
-                  })}>
+                <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Deactivate Account</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -333,7 +290,7 @@ export const SettingsPage = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-500 hover:bg-red-600">
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-600 dark:text-white">
                       Yes, Deactivate
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -354,11 +311,7 @@ export const SettingsPage = () => {
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive">Delete</Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent
-                  className={clsx({
-                    'border-app-dark-border bg-app-dark text-app-dark-text':
-                      theme.type === 'dark',
-                  })}>
+                <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Account</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -370,7 +323,7 @@ export const SettingsPage = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-500 hover:bg-red-600">
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-600 dark:text-white">
                       Yes, Delete Forever
                     </AlertDialogAction>
                   </AlertDialogFooter>

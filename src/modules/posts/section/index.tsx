@@ -5,12 +5,10 @@ import {SectionNotFound} from '@/components/app-not-founds';
 import {SectionPostList} from '@/components/post/post-list';
 
 import {Sections} from '@/constants/data';
-import {useParams, useRouter} from 'next/navigation';
+import {useParams} from 'next/navigation';
 
 export const SectionPage = () => {
   const {section: theSection} = useParams<{section: string}>();
-
-  const navigate = useRouter();
 
   const section = Sections.find(cat => cat.name.toLowerCase() === theSection);
 

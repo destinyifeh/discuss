@@ -12,8 +12,6 @@ import {
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
@@ -25,7 +23,7 @@ export const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const {login, loginWithGoogle} = useAuthStore(state => state);
-  const {theme} = useGlobalStore(state => state);
+
   const navigate = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -66,14 +64,7 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
-        <div
-          className={clsx(
-            'hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white',
-            {
-              'bg-app/90': theme.type === 'dark',
-              ' bg-app': theme.type === 'default',
-            },
-          )}>
+        <div className="hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app dark:bg-app/90">
           <div>
             {/* <svg
                 viewBox="0 0 24 24"
@@ -117,11 +108,7 @@ export const LoginPage = () => {
         </div>
 
         <div className="w-full md:flex-1">
-          <Card
-            className={clsx('border-0 shadow-none', {
-              'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10':
-                theme.type === 'dark',
-            })}>
+          <Card className="border-0 shadow-none">
             <CardHeader>
               <div className="flex justify-center mb-4">
                 {/* <svg
@@ -156,9 +143,7 @@ export const LoginPage = () => {
                     onChange={e => setUsername(e.target.value)}
                     placeholder="johndoe"
                     autoComplete="username"
-                    className={clsx('form-input', {
-                      'border-app-dark-border': theme.type === 'dark',
-                    })}
+                    className="form-input"
                     required
                   />
                 </div>
@@ -174,9 +159,7 @@ export const LoginPage = () => {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    className={clsx('form-input', {
-                      'border-app-dark-border': theme.type === 'dark',
-                    })}
+                    className="form-input"
                     required
                   />
                 </div>
@@ -191,19 +174,14 @@ export const LoginPage = () => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-app hover:bg-app/90"
+                  className="w-full bg-app hover:bg-app/90 text-white"
                   disabled={isSubmitting}>
                   {isSubmitting ? 'Signing in...' : 'Sign in'}
                 </Button>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span
-                      className={clsx('w-full border-t ', {
-                        'border-app-dark-border': theme.type === 'dark',
-                        'border-gray-300': theme.type === 'default',
-                      })}
-                    />
+                    <span className="w-full border-t border-app-border " />
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-2 bg-white text-gray-500">

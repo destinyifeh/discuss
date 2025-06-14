@@ -2,7 +2,6 @@
 
 import {Button} from '@/components/ui/button';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {Info} from 'lucide-react';
 import {useState} from 'react';
 
@@ -11,11 +10,7 @@ const CommunityGuidelines = () => {
   const {theme} = useGlobalStore(state => state);
 
   return (
-    <div
-      className={clsx('rounded-lg p-4 mb-4', {
-        'bg-white': theme.type === 'default',
-        'bg-app-dark-bg/10': theme.type === 'dark',
-      })}>
+    <div className="rounded-lg p-4 mb-4 border border-app-border">
       <div className="flex items-start gap-2">
         <Info className="text-app mt-0.5" size={18} />
         <div className="flex-1">

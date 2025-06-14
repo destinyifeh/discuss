@@ -16,8 +16,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import clsx from 'clsx';
 import {
   Book,
   FileText,
@@ -32,7 +30,6 @@ import {useState} from 'react';
 
 export const HelpCenterPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const {theme} = useGlobalStore(state => state);
 
   const sections = [
     {
@@ -103,8 +100,8 @@ export const HelpCenterPage = () => {
 
       <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8 max-w-6xl">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-4">
-            <HelpCircle className="h-6 w-6 text-primary" />
+          <div className="inline-flex items-center justify-center p-2 bg-app/10 rounded-full mb-4">
+            <HelpCircle className="h-6 w-6 text-app" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Help Center</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -118,9 +115,7 @@ export const HelpCenterPage = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search for help topics..."
-              className={clsx('pl-10 py-6 text-base form-input', {
-                'border-app-dark-border': theme.type === 'dark',
-              })}
+              className="pl-10 py-6 text-base form-input"
               value={searchQuery}
               onChange={handleSearchChange}
             />
@@ -132,12 +127,9 @@ export const HelpCenterPage = () => {
             {sections.map((section, index) => (
               <Card
                 key={index}
-                className={clsx('transition-all hover:shadow-md', {
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+                className="transition-all hover:shadow-md border-app/20">
                 <CardHeader className="flex flex-col items-center text-center">
-                  <div className="p-2 bg-primary/10 rounded-full mb-2">
+                  <div className="p-2 bg-app/10 rounded-full mb-2">
                     {section.icon}
                   </div>
                   <CardTitle>{section.title}</CardTitle>
@@ -155,12 +147,7 @@ export const HelpCenterPage = () => {
           <Accordion type="single" collapsible className="w-full">
             {filteredFaqs.length > 0 ? (
               filteredFaqs.map((faq, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`item-${index}`}
-                  className={clsx({
-                    'border-app-dark-border': theme.type === 'dark',
-                  })}>
+                <AccordionItem key={index} value={`item-${index}`}>
                   <AccordionTrigger className="text-left">
                     {faq.question}
                   </AccordionTrigger>
@@ -170,11 +157,7 @@ export const HelpCenterPage = () => {
                 </AccordionItem>
               ))
             ) : (
-              <Card
-                className={clsx('p-6 text-center', {
-                  'text-app-dark-text bg-app-dark-bg/10 border-app-dark-border hover:bg-app-dark-bg/10 hover:text-white':
-                    theme.type === 'dark',
-                })}>
+              <Card className="p-6 text-center">
                 <p className="text-muted-foreground mb-2">
                   No results found for "{searchQuery}"
                 </p>
@@ -184,12 +167,7 @@ export const HelpCenterPage = () => {
           </Accordion>
         </div>
 
-        <Card
-          className={clsx('mb-12 ', {
-            'border-primary/20': theme.type === 'default',
-            'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text':
-              theme.type === 'dark',
-          })}>
+        <Card className="mb-12 border-app/20">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="mb-4 md:mb-0">
@@ -199,17 +177,12 @@ export const HelpCenterPage = () => {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  variant="outline"
-                  className={clsx('flex items-center gap-2', {
-                    'border-app-dark-border bg-app-dark-bg/10 text-app-dark-text hover:bg-app-dark-bg/10 hover:text-white':
-                      theme.type === 'dark',
-                  })}>
+                <Button variant="outline" className="flex items-center gap-2">
                   <MessageCircle className="h-4 w-4" />
                   Live Chat
                 </Button>
                 <Link href="/contact-support">
-                  <Button className="flex items-center gap-2 bg-app hover:bg-app/90">
+                  <Button className="flex items-center gap-2 bg-app hover:bg-app/90 dark:text-white">
                     <Mail className="h-4 w-4" />
                     Contact Support
                   </Button>

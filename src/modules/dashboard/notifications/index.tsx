@@ -7,9 +7,7 @@ import {
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {notificationData} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {NotificationItemProps} from '@/types/user.types';
-import clsx from 'clsx';
 import {ArrowUp} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {Fragment, useRef, useState} from 'react';
@@ -20,7 +18,6 @@ export const NotificationsPage = () => {
   const navigate = useRouter();
   const [notifications, setNotifications] = useState(notificationData);
   const [showGoUp, setShowGoUp] = useState(false);
-  const {theme} = useGlobalStore(state => state);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
@@ -63,14 +60,7 @@ export const NotificationsPage = () => {
         components={{
           Header: () => (
             <Fragment>
-              <div
-                className={clsx(
-                  'border-b p-4 flex justify-between items-center',
-                  {
-                    'border-app-dark-border ': theme.type === 'dark',
-                    'border-app-border  ': theme.type === 'default',
-                  },
-                )}>
+              <div className="border-b p-4 flex justify-between items-center border-app-border">
                 <h1 className="text-xl font-bold">Notifications</h1>
                 {hasUnread && (
                   <Button variant="ghost" size="sm" onClick={markAllAsRead}>
@@ -87,28 +77,12 @@ export const NotificationsPage = () => {
                 <TabsList className="w-full grid grid-cols-2 bg-transparent">
                   <TabsTrigger
                     value="all"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                     All
                   </TabsTrigger>
                   <TabsTrigger
                     value="mentions"
-                    className={clsx(
-                      'data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3',
-                      {
-                        'data-[state=active]:text-app-dark-text data-[state=active]:bg-app-dark-bg/10 text-app-dark-text':
-                          theme.type === 'dark',
-                        'data-[state=active]:text-black':
-                          theme.type === 'default',
-                      },
-                    )}>
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                     Mentions
                   </TabsTrigger>
                 </TabsList>
@@ -119,9 +93,7 @@ export const NotificationsPage = () => {
         }}
         //endReached={fetchMore}
         itemContent={(index, notification) => (
-          <div>
-            <NotificationCard notification={notification} />
-          </div>
+          <NotificationCard notification={notification} />
         )}
       />
       {showGoUp && (

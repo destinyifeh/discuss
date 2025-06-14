@@ -3,10 +3,10 @@
 import {mockAds} from '@/constants/data';
 import {useAdStore} from '@/hooks/stores/use-ad-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {useAdManger} from '@/hooks/use-ad-manager';
 import {shuffleArray} from '@/lib/helpers';
 import {cn} from '@/lib/utils';
 import {AdProps} from '@/types/ad-types';
-import clsx from 'clsx';
 import {ExternalLink} from 'lucide-react';
 import Image from 'next/image';
 import {useEffect, useState} from 'react';
@@ -66,13 +66,9 @@ export function BannerAd({
   return (
     <div
       className={cn(
-        'relative mx-auto w-full overflow-hidden rounded-lg border ',
+        'relative mx-auto w-full overflow-hidden rounded-lg border bg-white dark:bg-background border-app-border ',
         sizeClasses[size],
         className,
-        {
-          'bg-white border-gray-200': theme.type === 'default',
-          'border-app-dark-border bg-app-dark-bg': theme.type === 'dark',
-        },
       )}>
       <div className="absolute right-2 top-2 z-10 rounded bg-black/70 px-2 py-1 text-xs text-white">
         Sponsored
@@ -125,7 +121,6 @@ export function AppBannerAd3({section}: {section: string}) {
 }
 
 export function AppBannerAd({section}: {section: string}) {
-  const {theme} = useGlobalStore(state => state);
   const bannerAds = mockAds.filter(
     ad => ad.type === 'Banner' && ad.section === section,
   );
@@ -146,12 +141,24 @@ export function AppBannerAd({section}: {section: string}) {
   const currentAd = bannerAds[currentIndex];
 
   return (
-    <div
-      className={clsx('p-4 border-b', {
-        'border-app-border': theme.type === 'default',
-        'border-app-dark-border': theme.type === 'dark',
-      })}>
+    <div className="p-4 border-b border-app-border">
       <BannerAd ad={currentAd} />
+    </div>
+  );
+}
+
+export function AppBannerAd4({section}: {section: string}) {
+  const ad = useAdManger(
+    mockAds,
+    ad => ad.type === 'Banner' && ad.section === section,
+    10000, // 10s interval
+  );
+
+  if (!ad) return null;
+
+  return (
+    <div className="p-4 border-b border-app-border">
+      <BannerAd ad={ad} />
     </div>
   );
 }

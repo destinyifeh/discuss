@@ -239,3 +239,12 @@ export const mockAdPerformancew: AdPerformanceData[] = [
       'Ad content violates community guidelines regarding promotional claims.',
   },
 ];
+
+export const BASIC_PLAN_DESCRIPTION =
+  'Reach your ideal audience with the Basic plan—promote your ad in a single section, perfect for focused exposure as a banner or sponsored post.';
+
+export const PROFESSIONAL_PLAN_DESCRIPTION =
+  'Boost your brand with the Professional plan—your ad appears on the homepage and in a highly relevant section, driving more visibility and engagement.';
+
+export const ENTERPRISE_PLAN_DESCRIPTION =
+  'Maximize your impact with the Enterprise plan—your ad is featured across the homepage, article pages, and multiple sections for premium, all-around exposure.';

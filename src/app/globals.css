@@ -1,40 +1,56 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *)); */
 
 @layer base {
   :root {
-    --background-color: #ffffff;
-    --app-foreground-color: #000000; 
+    --app-background-color:#ffffff;
+    --app-foreground-color-: #0f172a; 
     --app-color: #0a66c2; /* LinkedIn blue */
     --app-black: #0f1419;
     --app-gray: #536471;
     --app-lightGray: #e7e7e8;
-    --app-border: #eff3f4;
+    --app-border:  #e2e8f0;
     --app-hover: #f7f9f9;
     --app-dark: #0f1419;
     --app-dark-bg: #536471;
     --app-dark-text: #536471;
     --app-dark-border: #536471;
+    --primary:#1e40af; /* LinkedIn blue color */
+    --primary-foreground:#f8fafc; 
+    --muted: #1C2431;
+    --muted-foreground: #64748B;
+    --app-text:#0f172a;
+    --app-accent:#f1f5f9;
+    
+
   }
 
   .dark {
-    --background-color: #0a0a0a;
-    --foreground-color: #ededed;
-    /* --app-foreground: #171717; */
+    --app-background-color: #ffffff;
+    --app-foreground-color: #f8fafc;
     --app-color: #0a66c2; /* LinkedIn blue */
     --app-black: #0f1419;
     --app-gray: #536471;
     --app-lightGray: #e7e7e8;
-    --app-border: #eff3f4;
-    --app-hover: #f7f9f9;
+    --app-border: #334155;
+    --app-hover:#f7f9f9;
     --app-dark: #0f1419;
     --app-blue: #0a66c2;
     --app-dark-bg: #536471;
     --app-dark-text: #536471;
     --app-dark-border: #536471;
+    --app-primary:#1e40af;  /* LinkedIn blue */
+    --app-primary-foreground:#f8fafc;
+    --app-muted: #94a3b8;
+    --app-muted-foreground:#94a3b8;
+    --app-text:#f8fafc;
+    --app-accent:#334155;
   }
 }
 
@@ -50,13 +66,19 @@
   --color-app-lightGray: var(--app-lightGray);
   --color-app-border: var(--app-border);
   --color-app-dark: var(--app-dark);
-  --color-app-background: var(--background-color)
-  --color-app-foreground: var(--foreground-color)
+  --color-app-background: var(--app-background-color)
+  --color-app-foreground: var(--app-foreground-color)
   --color-app-blue: var(--app-blue);
   --color-app-dark-bg: var(--app-dark-bg);
   --color-app-dark-text: var(--app-dark-text);
   --color-app-dark-border: var(--app-dark-border);
-}
+  --color-app-primary: var(--app-primary);
+  --color-app-primary-foreground: var(--app-primary-foreground);
+  --color-app-muted: var(--app-muted);
+  --color-app-muted-foreground: var(--app-muted-foreground);
+  --color-app-text: var(--app-text);
+  --color-app-accent: var(--app-accent);
+} 
 
 
 
@@ -191,9 +213,10 @@
     @apply focus:!border-app focus:!outline-none focus:!ring-0
    }
 
-   .default-theme{
-    @apply bg-white text-black
+   .app-theme{
+    @apply bg-background text-foreground border-border
    }
+ 
    .dark-theme{
     @apply bg-[#0f1419] text-app-dark-text
    }

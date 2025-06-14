@@ -1,10 +1,8 @@
 'use client';
 
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {formatTimeAgo} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
 import {NotificationItemProps} from '@/types/user.types';
-import clsx from 'clsx';
 import {BellIcon} from 'lucide-react';
 import Link from 'next/link';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
@@ -14,15 +12,12 @@ export const NotificationCard = ({
 }: {
   notification: NotificationItemProps;
 }) => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div
       key={notification.id}
       className={cn(
-        'p-4 cursor-pointer',
-        !notification.read ? 'bg-blue-50' : '',
-        theme.type === 'dark' && 'bg-app-dark hover:bg-app-dark-bg/10',
-        theme.type === 'default' && 'bg-white hover:bg-app-hover ',
+        'p-4 cursor-pointer hover:bg-app-hover dark:hover:bg-app-dark-bg/10',
+        !notification.read ? 'bg-blue-50 dark:bg-app-dark-bg/10' : '',
       )}>
       <Link href={notification.postId ? `/post/${notification.postId}` : '#'}>
         <div className="flex gap-3">
@@ -48,16 +43,11 @@ export const NotificationCard = ({
 };
 
 export const NotificationPlaceholder = ({tab}: {tab: string}) => {
-  const {theme} = useGlobalStore(state => state);
   return (
     <div>
       {tab === 'all' && (
         <div className="flex flex-col items-center justify-center p-10 text-center">
-          <div
-            className={clsx('rounded-full p-4 mb-4', {
-              'bg-app-dark-bg/10 ': theme.type === 'dark',
-              'bg-app-hover   ': theme.type === 'default',
-            })}>
+          <div className="rounded-full p-4 mb-4 hover:bg-app-hover dark:hover:bg-app-dark-bg/10">
             <BellIcon size={32} className="text-app" />
           </div>
           <h2 className="text-xl font-bold mb-2">No notifications yet</h2>
@@ -69,11 +59,7 @@ export const NotificationPlaceholder = ({tab}: {tab: string}) => {
       )}
       {tab === 'mentions' && (
         <div className="flex flex-col items-center justify-center p-10 text-center">
-          <div
-            className={clsx('rounded-full p-4 mb-4', {
-              'bg-app-dark-bg/10 ': theme.type === 'dark',
-              'bg-app-hover   ': theme.type === 'default',
-            })}>
+          <div className="rounded-full p-4 mb-4 hover:bg-app-hover dark:hover:bg-app-dark-bg/10">
             <BellIcon size={32} className="text-app" />
           </div>
           <h2 className="text-xl font-bold mb-2">No mentions yet</h2>

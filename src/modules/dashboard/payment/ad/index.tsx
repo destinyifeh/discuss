@@ -2,6 +2,7 @@
 
 import type React from 'react';
 
+import {PageHeader} from '@/components/app-headers';
 import {Button} from '@/components/ui/button';
 import {
   Card,
@@ -16,13 +17,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Separator} from '@/components/ui/separator';
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle,
-  CreditCard,
-  ShieldCheck,
-} from 'lucide-react';
+import {ArrowRight, CheckCircle, CreditCard, ShieldCheck} from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useState} from 'react';
@@ -68,7 +63,7 @@ export const AdPaymentPage = () => {
 
   if (isSuccess) {
     return (
-      <div>
+      <div className="">
         <div className="max-w-3xl mx-auto p-4">
           <div className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
@@ -79,7 +74,7 @@ export const AdPaymentPage = () => {
               Your ad campaign has been paid for and is now active. It will run
               for the selected duration.
             </p>
-            <div className="bg-app-hover p-6 rounded-lg mb-6 text-left">
+            <div className="p-6 rounded-lg mb-6 text-left">
               <h3 className="font-medium mb-4">Campaign Details</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -104,7 +99,7 @@ export const AdPaymentPage = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild className="bg-app hover:bg-app/90">
+              <Button asChild className="bg-app hover:bg-app/90 text-white">
                 <Link href="/dashboard/ads">
                   View Ad Performance
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -122,16 +117,7 @@ export const AdPaymentPage = () => {
 
   return (
     <div>
-      <div className="sticky top-0 z-10 bg-white backdrop-blur-sm border-b border-gray-200 md:top-0 top-[57px] p-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/dashboard/ads">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <h1 className="text-xl font-bold">Complete Payment</h1>
-        </div>
-      </div>
+      <PageHeader title="Complete Payment" href="/" />
 
       <div className="p-4">
         <div className="max-w-3xl mx-auto">
@@ -319,7 +305,7 @@ export const AdPaymentPage = () => {
                     <CardFooter className="flex justify-end pt-6 px-0">
                       <Button
                         type="submit"
-                        className="w-full md:w-auto bg-app hover:bg-app/90"
+                        className="w-full md:w-auto bg-app hover:bg-app/90 text-white"
                         disabled={isSubmitting}>
                         {isSubmitting
                           ? 'Processing...'

@@ -8,16 +8,21 @@ import {Button} from './ui/button';
 export const PageHeader = ({
   title,
   description,
+  href,
 }: {
   title: string;
   description?: string | number;
+  href?: string;
 }) => {
   const navigate = useRouter();
 
   return (
     <div className="sticky top-0 bg-white/80 dark:bg-background backdrop-blur-sm z-10 border-b md:mt-0 lg:mt-0 border-app-border">
       <div className="px-4 py-3 flex items-center gap-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => (href ? navigate.push(href) : navigate.back())}>
           <ChevronLeft />
         </Button>
         <div>

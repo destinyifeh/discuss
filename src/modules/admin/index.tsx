@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import {PageHeader} from '@/components/app-headers';
+import AdminDashboardSkeleton from '@/components/skeleton/admin-dashboard-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {
@@ -173,7 +174,12 @@ export const AdminDashboardPage = () => {
   const [selectedReportContent, setSelectedReportContent] =
     useState<string>('');
   const [selectedReportType, setSelectedReportType] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 800);
+  }, []);
   // Filter data based on search terms and filters
   const filteredAds = pendingAds.filter(ad => {
     const matchesSearch =
@@ -415,6 +421,9 @@ export const AdminDashboardPage = () => {
     setViewContentDialog(true);
   };
 
+  if (isLoading) {
+    return <AdminDashboardSkeleton />;
+  }
   return (
     <div>
       <PageHeader

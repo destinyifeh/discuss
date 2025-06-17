@@ -297,6 +297,13 @@ export const SidebarLayoutLeft = () => {
 };
 
 export const SidebarLayoutRight = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
   return (
     <aside className="hidden lg:flex flex-col w-80 h-screen border-0 p-4 border-app-border ">
       <div className="sticky top-4 space-y-4">

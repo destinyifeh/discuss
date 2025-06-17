@@ -4,13 +4,14 @@ import {
   NotificationCard,
   NotificationPlaceholder,
 } from '@/components/notication/notification-card';
+import NotificationSkeleton from '@/components/skeleton/notification-skeleton';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {notificationData} from '@/constants/data';
 import {NotificationItemProps} from '@/types/user.types';
 import {ArrowUp} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {Fragment, useRef, useState} from 'react';
+import {Fragment, useEffect, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 
 export const NotificationsPage = () => {
@@ -18,6 +19,7 @@ export const NotificationsPage = () => {
   const navigate = useRouter();
   const [notifications, setNotifications] = useState(notificationData);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
@@ -36,6 +38,11 @@ export const NotificationsPage = () => {
     setShowGoUp(scrollTop > 300);
   };
 
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 800);
+  }, []);
+
   let data: NotificationItemProps[] | [];
 
   switch (activeTab) {
@@ -49,6 +56,9 @@ export const NotificationsPage = () => {
       data = [];
   }
 
+  if (isLoading) {
+    return <NotificationSkeleton />;
+  }
   return (
     <div>
       <Virtuoso

@@ -1,6 +1,6 @@
 'use client';
 import {mockAds, Posts, SectionOptions, Sections} from '@/constants/data';
-import {Fragment, useMemo, useRef, useState} from 'react';
+import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 //import {VariableSizeList as List} from 'react-window';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {
@@ -19,6 +19,7 @@ import {AppBannerAd, AppBannerAd4} from '../ad/banner';
 import {PageHeader} from '../app-headers';
 import {MobileBottomTab} from '../layouts/dashboard/mobile-bottom-tab';
 import MobileNavigation from '../layouts/dashboard/mobile-navigation';
+import PostSkeleton from '../skeleton/post-skeleton';
 import {Badge} from '../ui/badge';
 import {Button} from '../ui/button';
 import {Input} from '../ui/input';
@@ -227,7 +228,14 @@ export const HomePostList = () => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useRouter();
+
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 800);
+  }, []);
+
   const sortedPosts = [...Posts].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
@@ -235,7 +243,9 @@ export const HomePostList = () => {
   const sortedPosts2 = [...Posts].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
   );
-  const data = activeTab === 'for-you' ? sortedPosts : sortedPosts2;
+  const data2 = activeTab === 'for-you' ? sortedPosts : sortedPosts2;
+
+  const data = isLoading ? Array(5).fill(null) : sortedPosts;
 
   //   const [posts, setPosts] = useState([]);
   //   const [page, setPage] = useState(1);
@@ -281,6 +291,7 @@ export const HomePostList = () => {
 
   const allowTab = false;
   const allowMSearch = false;
+
   return (
     <div className="pb-0 lg:pb-0">
       <Virtuoso
@@ -368,7 +379,14 @@ export const HomePostList = () => {
           EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
         }}
         //endReached={fetchMore}
-        itemContent={(index, post) => <PostCard post={post} />}
+        // itemContent={(index, post) => <PostCard post={post} />}
+        itemContent={(index, post) =>
+          isLoading ? (
+            <PostSkeleton /> // your loader
+          ) : (
+            <PostCard post={post} />
+          )
+        }
       />
       {showGoUp && (
         <button

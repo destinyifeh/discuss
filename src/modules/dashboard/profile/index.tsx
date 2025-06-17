@@ -3,6 +3,7 @@
 import {PageHeader} from '@/components/app-headers';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import PostCard from '@/components/post/post-card';
+import ProfileSkeleton from '@/components/skeleton/profile-skeleton';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Posts} from '@/constants/data';
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
-import {Fragment, useRef, useState} from 'react';
+import {Fragment, useEffect, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
 
@@ -76,6 +77,7 @@ export const ProfilePage = () => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [showBottomTab, setShowBottomTab] = useState(true);
   const lastScrollTop = useRef(0);
+  const [isLoading, setIsLoading] = useState(true);
   // Find the user profile (using our mock data, in real app would fetch from backend)
   const profileUser = [
     {
@@ -106,6 +108,11 @@ export const ProfilePage = () => {
       verified: true,
     },
   ].find(u => u.username === user);
+
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 800);
+  }, []);
 
   // Get posts by this user
   const userPosts = Posts.filter(post => post.username === user);
@@ -147,6 +154,10 @@ export const ProfilePage = () => {
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
+
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
   if (!profileUser) {
     return (

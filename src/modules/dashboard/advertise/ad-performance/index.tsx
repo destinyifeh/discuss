@@ -5,6 +5,7 @@ import {
   AdPerformancePlaceholder,
 } from '@/components/ad/ad-performace-card';
 import {PageHeader} from '@/components/app-headers';
+import AdPerformanceSkeleton from '@/components/skeleton/adperformance-skeleton';
 import {Button} from '@/components/ui/button';
 import {AdPerformanceData} from '@/types/ad-types';
 import {
@@ -15,7 +16,7 @@ import {
   Clock,
 } from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {CSSProperties, forwardRef, ReactNode, useState} from 'react';
+import {CSSProperties, forwardRef, ReactNode, useEffect, useState} from 'react';
 import {VirtuosoGrid} from 'react-virtuoso';
 import {AdPerformanceNav} from './components/ad-performance-nav';
 
@@ -173,6 +174,12 @@ export const AdPerformancePage = () => {
 
   const [filteredStatus, setFilteredStatus] = useState<AdStatus | 'all'>('all');
   const [ads, setAds] = useState<AdPerformanceData[]>(mockAds);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 800);
+  }, []);
 
   const filteredAds =
     filteredStatus === 'all'
@@ -184,6 +191,10 @@ export const AdPerformancePage = () => {
   };
 
   const show = false;
+
+  if (isLoading) {
+    return <AdPerformanceSkeleton />;
+  }
 
   return (
     <div className="flex flex-col h-screen">

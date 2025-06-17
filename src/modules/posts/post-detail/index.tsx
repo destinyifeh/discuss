@@ -1,6 +1,13 @@
 'use client';
 
-import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
 import {AppBannerAd} from '@/components/ad/banner';
@@ -11,6 +18,7 @@ import CommunityGuidelines from '@/components/post/community-guidelines';
 import PostCard from '@/components/post/post-card';
 import {PostContent2} from '@/components/post/post-content';
 import {CommentPlaceholder} from '@/components/post/post-list';
+import PostDetailSkeleton from '@/components/skeleton/post-detail-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
@@ -41,7 +49,12 @@ export const PostDetailPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [comments, setComments] = useState<CommentProps[]>([...Comments]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setIsLoading(false), 800);
+  }, []);
   const user = {
     id: '1',
     username: 'johndoe',
@@ -226,6 +239,10 @@ export const PostDetailPage = () => {
   const mergedItems = useMemo(() => {
     return insertAdsAtRandomCommentsPositions(sortedComments, sponsoredAd);
   }, [Comments, mockAds]);
+
+  if (isLoading) {
+    return <PostDetailSkeleton />;
+  }
 
   if (!post) {
     return (

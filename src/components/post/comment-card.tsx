@@ -19,6 +19,7 @@ import {
   Heart,
   MessageSquare,
   MoreHorizontal,
+  Pencil,
   ThumbsDown,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -30,9 +31,10 @@ import {PostContent} from './post-content';
 interface CommentCardProps {
   comment: CommentProps;
   onQuote?: () => void;
+  onEdit?: () => void;
 }
 
-const CommentCard = ({comment, onQuote}: CommentCardProps) => {
+const CommentCard = ({comment, onQuote, onEdit}: CommentCardProps) => {
   const {theme} = useGlobalStore(state => state);
   const [liked, setLiked] = useState(false);
   const navigate = useRouter();
@@ -51,6 +53,13 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
   const handleQuote = () => {
     if (onQuote) {
       onQuote();
+      return;
+    }
+  };
+
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit();
       return;
     }
   };
@@ -156,6 +165,12 @@ const CommentCard = ({comment, onQuote}: CommentCardProps) => {
                   className="cursor-pointer">
                   <Flag size={16} className="mr-2" />
                   Report comment
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleEdit}
+                  className="cursor-pointer">
+                  <Pencil size={16} className="mr-2" />
+                  Edit
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

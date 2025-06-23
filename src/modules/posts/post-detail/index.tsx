@@ -50,6 +50,7 @@ export const PostDetailPage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [comments, setComments] = useState<CommentProps[]>([...Comments]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editComment, setEditComment] = useState<CommentProps>();
 
   useEffect(() => {
     // Simulate loading
@@ -106,6 +107,24 @@ export const PostDetailPage = () => {
     }
     return content;
   };
+
+  const handleEditComment = useCallback(
+    (commentId: string) => {
+      console.log(commentId, 'cocooid');
+      const comment = comments.find(c => c.id === commentId);
+      console.log(comment, 'heeeree');
+      if (comment) {
+        setComment(comment.content);
+        setShowMobileComment(true);
+        setShowWebComment(true);
+        setEditComment(comment);
+        if (isMobile) {
+          setShowMobileComment(true);
+        }
+      }
+    },
+    [comments, setComment, setShowMobileComment, setShowWebComment],
+  );
 
   const handleQuoteComment = useCallback(
     (commentId: string) => {
@@ -285,6 +304,7 @@ export const PostDetailPage = () => {
                 comment={item.data}
                 key={item.data.id}
                 onQuote={() => handleQuoteComment(item.data.id)}
+                onEdit={() => handleEditComment(item.data.id)}
               />
             );
           }}
@@ -602,7 +622,7 @@ export const PostDetailPage = () => {
                   setQuotedUser('');
                   setComment('');
                   setImagePreview(null);
-                  virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                  // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
                 }}>
                 Cancel
               </Button>

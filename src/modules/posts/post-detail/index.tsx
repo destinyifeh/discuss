@@ -13,7 +13,7 @@ import {AdCard} from '@/components/ad/ad-card';
 import {AppBannerAd} from '@/components/ad/banner';
 import {PageHeader} from '@/components/app-headers';
 import {AddCommentField} from '@/components/post/add-comment-field';
-import CommentCard from '@/components/post/comment-card';
+import CommentCard2 from '@/components/post/comments/comment-card2';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import PostCard from '@/components/post/post-card';
 import {PostContent2} from '@/components/post/post-content';
@@ -273,6 +273,28 @@ export const PostDetailPage = () => {
       </div>
     );
   }
+
+  const handleQuoteClick = (quotedCommentId: string) => {
+    // 1. Find the index of the first comment by the quotedUsername
+    const targetIndex = comments.findIndex(c => c.id === quotedCommentId);
+    console.log(targetIndex, 'tarrr');
+    if (targetIndex !== -1) {
+      // 2. Use Virtuoso's scrollToIndex method
+      virtuosoRef.current?.scrollToIndex({
+        index: targetIndex,
+        align: 'center', // 'start', 'center', 'end'
+        behavior: 'smooth',
+      });
+
+      // // 3. Add highlight effect
+      // setHighlightedUsername(quotedUsername); // Set state to trigger highlight in rendering
+      // setTimeout(() => {
+      //   setHighlightedUsername(null); // Remove highlight after a delay
+      // }, 2000);
+    } else {
+      console.log(`Comment by user "${quotedCommentId}" not found.`);
+    }
+  };
   return (
     <Fragment>
       <PageHeader title="Post" />
@@ -300,11 +322,12 @@ export const PostDetailPage = () => {
               return <AdCard ad={item.data} />;
             }
             return (
-              <CommentCard
+              <CommentCard2
                 comment={item.data}
                 key={item.data.id}
                 onQuote={() => handleQuoteComment(item.data.id)}
-                onEdit={() => handleEditComment(item.data.id)}
+                handleQuoteClick={handleQuoteClick}
+                // onEdit={() => handleEditComment(item.data.id)}
               />
             );
           }}

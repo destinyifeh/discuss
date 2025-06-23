@@ -1,0 +1,196 @@
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {useState} from 'react';
+
+import {CommentProps} from '@/types/post-item.type';
+import {useRouter} from 'next/navigation';
+import {toast} from 'sonner';
+import CommentActions from './comment-actions';
+import CommentContent from './comment-content';
+import CommentEditForm from './comment-edit-form';
+import CommentHeader from './comment-header';
+
+interface CommentCardProps {
+  comment: CommentProps;
+  onQuote?: () => void;
+  handleQuoteClick: (username: string) => void;
+}
+
+const CommentCard2 = ({
+  comment,
+  onQuote,
+  handleQuoteClick,
+}: CommentCardProps) => {
+  //const { toast } = useSonner();
+  const [user] = useState({id: '3'});
+
+  const [liked, setLiked] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+  const navigate = useRouter();
+
+  const handleLike = () => {
+    setLiked(!liked);
+  };
+
+  const updateComment = (updatedComment: Comment) => {
+    // setComments(prevComments =>
+    //   prevComments.map(comment =>
+    //     comment.id === updatedComment.id ? updatedComment : comment
+    //   )
+    // );
+  };
+
+  const handleReport = () => {
+    // toast({
+    //   title: "Comment Reported",
+    //   description: "Thank you for reporting this comment. Our team will review it.",
+    // });
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditContent(comment.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editContent.trim()) {
+      toast('Error');
+      return;
+    }
+
+    // updateComment({
+    //   ...comment,
+    //   content: editContent.trim(),
+    // });
+
+    setIsEditing(false);
+    toast('Your comment has been updated successfully');
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditContent(comment.content);
+  };
+
+  const handleQuote = () => {
+    if (onQuote) {
+      onQuote();
+      return;
+    }
+
+    const postId = comment.postId;
+
+    // Extract only the direct content, not any nested quotes
+    const contentToQuote = extractDirectContent(comment.content);
+    const quoteText = `> ${comment.username}: ${contentToQuote}`;
+
+    // Navigate to reply page with quoted text
+    // navigate.push(`/post/${postId}/reply`, {
+
+    //     quote: quoteText,
+    //     quotedUser: comment.username,
+
+    // })
+  };
+
+  // Function to extract direct content, ignoring any nested quotes
+  const extractDirectContent = (content: string): string => {
+    // If content has a quote block
+    if (content.startsWith('> ')) {
+      const quoteEndIndex = content.indexOf('---QUOTE_END---');
+      if (quoteEndIndex !== -1) {
+        // Return only the content after the quote (the user's added text)
+        return content.substring(quoteEndIndex + 15);
+      }
+    }
+    return content;
+  };
+
+  const handleQuoteClick2 = (quotedUsername: string) => {
+    console.log('here ma');
+    // Find the comment element by username and scroll to it
+    const commentElements = document.querySelectorAll('[data-username]');
+    const targetComment = Array.from(commentElements).find(
+      el => el.getAttribute('data-username') === quotedUsername,
+    );
+
+    if (targetComment) {
+      targetComment.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+      // Add a highlight effect
+      targetComment.classList.add(
+        'bg-blue-50',
+        'border-l-4',
+        'border-blue-500',
+      );
+      setTimeout(() => {
+        targetComment.classList.remove(
+          'bg-blue-50',
+          'border-l-4',
+          'border-blue-500',
+        );
+      }, 2000);
+    }
+  };
+
+  const isOwnComment = user?.id === comment.userId;
+
+  return (
+    <div
+      className="border-b border-app-border p-4 hover:bg-app-hover transition-colors"
+      data-username={comment.username}>
+      <div className="flex gap-3">
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={comment.avatar} />
+          <AvatarFallback>{comment.displayName.charAt(0)}</AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1">
+          <CommentHeader
+            comment={comment}
+            isOwnComment={isOwnComment}
+            onEdit={handleEdit}
+            onReport={handleReport}
+          />
+
+          <CommentContent
+            content={comment.content}
+            isEditing={isEditing}
+            editContent={editContent}
+            onEditContentChange={setEditContent}
+            onQuoteClick={handleQuoteClick}
+            commentId={comment.commentId}
+          />
+
+          {comment.image && (
+            <div className="mt-3 rounded-lg overflow-hidden">
+              <img
+                src={comment.image}
+                alt="Comment attachment"
+                className="max-h-60 object-contain"
+              />
+            </div>
+          )}
+
+          {isEditing ? (
+            <CommentEditForm
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
+            />
+          ) : (
+            <CommentActions
+              comment={comment}
+              liked={liked}
+              onLike={handleLike}
+              onQuote={handleQuote}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CommentCard2;

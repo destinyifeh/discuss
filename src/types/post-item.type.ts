@@ -35,6 +35,7 @@ export interface CommentProps {
   likes: number;
   verified: boolean;
   image?: string;
+  commentId?: string;
 }
 
 export interface AdvertisementProps {

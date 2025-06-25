@@ -6,7 +6,7 @@ interface CommentContentProps {
   isEditing: boolean;
   editContent: string;
   onEditContentChange: (content: string) => void;
-  onQuoteClick: (username: string) => void;
+  onQuoteClick: (quote: string) => void;
   commentId?: string;
 }
 

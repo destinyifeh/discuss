@@ -243,3 +243,32 @@ export const formatTimeAgo2 = (date: string): string => {
     .replace(/year/, 'y')
     .replace(/\s/g, '');
 };
+
+export function parseComment(commentString: string) {
+  // Regex to capture:
+  // Group 1: Username
+  // Group 2: Quoted Text
+  // Group 3: Remaining (new) Comment Text
+  const regex = /^>\s*([^:]+):\s*([\s\S]*?)---QUOTE_END---\s*([\s\S]*)$/;
+
+  const match = commentString.match(regex);
+
+  if (match) {
+    const quotedUsername = match[1].trim();
+    const quotedText = match[2].trim();
+    const commentText = match[3].trim(); // This captures everything after ---QUOTE_END---
+
+    return {
+      isQuoted: true,
+      quotedUsername: quotedUsername,
+      quotedText: quotedText,
+      commentText: commentText,
+    };
+  } else {
+    // If it doesn't match the quoted format, assume the whole string is the comment text
+    return {
+      isQuoted: false,
+      commentText: commentString.trim(),
+    };
+  }
+}

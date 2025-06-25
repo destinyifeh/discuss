@@ -24,6 +24,7 @@ import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Comments, mockAds, Posts} from '@/constants/data';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {parseComment} from '@/lib/formatter';
 import {insertAdsAtRandomCommentsPositions} from '@/lib/helpers';
 import {CommentProps} from '@/types/post-item.type';
 import clsx from 'clsx';
@@ -114,13 +115,21 @@ export const PostDetailPage = () => {
       const comment = comments.find(c => c.id === commentId);
       console.log(comment, 'heeeree');
       if (comment) {
+        const isQuotedComment = parseComment(comment.content);
+        console.log(isQuotedComment, 'comm');
+
+        if (comment.content.startsWith('> ') && isQuotedComment.isQuoted) {
+          setQuoteContent(isQuotedComment.quotedText as string);
+          setQuotedUser(isQuotedComment.quotedUsername as string);
+          setComment(isQuotedComment.commentText);
+          setShowMobileComment(true);
+          setShowWebComment(true);
+          return;
+        }
         setComment(comment.content);
         setShowMobileComment(true);
         setShowWebComment(true);
         setEditComment(comment);
-        if (isMobile) {
-          setShowMobileComment(true);
-        }
       }
     },
     [comments, setComment, setShowMobileComment, setShowWebComment],

@@ -1,8 +1,7 @@
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {useState} from 'react';
-
 import {CommentProps} from '@/types/post-item.type';
 import {useRouter} from 'next/navigation';
+import {useState} from 'react';
 import {toast} from 'sonner';
 import CommentActions from './comment-actions';
 import CommentContent from './comment-content';
@@ -12,7 +11,7 @@ import CommentHeader from './comment-header';
 interface CommentCardProps {
   comment: CommentProps;
   onQuote?: () => void;
-  handleQuoteClick: (username: string) => void;
+  handleQuoteClick: (quote: string) => void;
 }
 
 const CommentCard2 = ({
@@ -20,18 +19,32 @@ const CommentCard2 = ({
   onQuote,
   handleQuoteClick,
 }: CommentCardProps) => {
-  //const { toast } = useSonner();
   const [user] = useState({id: '3'});
 
   const [liked, setLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
+  const [editImagePreview, setEditImagePreview] = useState<string | undefined>(
+    comment.image,
+  );
   const navigate = useRouter();
 
   const handleLike = () => {
     setLiked(!liked);
   };
 
+  const handleReport = () => {
+    toast(
+      // "Comment Reported",
+      'Thank you for reporting this comment. Our team will review it.',
+    );
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditContent(comment.content);
+    setEditImagePreview(comment.image);
+  };
   const updateComment = (updatedComment: Comment) => {
     // setComments(prevComments =>
     //   prevComments.map(comment =>
@@ -40,36 +53,56 @@ const CommentCard2 = ({
     // );
   };
 
-  const handleReport = () => {
-    // toast({
-    //   title: "Comment Reported",
-    //   description: "Thank you for reporting this comment. Our team will review it.",
-    // });
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast('Image too large. Please select an image less than 5MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast('Please select an image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = event => {
+      if (event.target?.result) {
+        setEditImagePreview(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditContent(comment.content);
+  const handleImageRemove = () => {
+    setEditImagePreview(undefined);
   };
 
   const handleSaveEdit = () => {
-    if (!editContent.trim()) {
-      toast('Error');
+    if (!editContent.trim() && !editImagePreview) {
+      toast('Comment cannot be empty');
       return;
     }
 
     // updateComment({
     //   ...comment,
     //   content: editContent.trim(),
+    //   image: editImagePreview
     // });
 
     setIsEditing(false);
-    toast('Your comment has been updated successfully');
+    toast(
+      // "Comment Updated",
+      'Your comment has been updated successfully',
+    );
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditContent(comment.content);
+    setEditImagePreview(comment.image);
   };
 
   const handleQuote = () => {
@@ -85,12 +118,12 @@ const CommentCard2 = ({
     const quoteText = `> ${comment.username}: ${contentToQuote}`;
 
     // Navigate to reply page with quoted text
-    // navigate.push(`/post/${postId}/reply`, {
-
+    // navigate(`/post/${postId}/reply`, {
+    //   state: {
     //     quote: quoteText,
-    //     quotedUser: comment.username,
-
-    // })
+    //     quotedUser: comment.username
+    //   }
+    // });
   };
 
   // Function to extract direct content, ignoring any nested quotes
@@ -107,7 +140,6 @@ const CommentCard2 = ({
   };
 
   const handleQuoteClick2 = (quotedUsername: string) => {
-    console.log('here ma');
     // Find the comment element by username and scroll to it
     const commentElements = document.querySelectorAll('[data-username]');
     const targetComment = Array.from(commentElements).find(
@@ -164,7 +196,7 @@ const CommentCard2 = ({
             commentId={comment.commentId}
           />
 
-          {comment.image && (
+          {!isEditing && comment.image && (
             <div className="mt-3 rounded-lg overflow-hidden">
               <img
                 src={comment.image}
@@ -178,6 +210,9 @@ const CommentCard2 = ({
             <CommentEditForm
               onSave={handleSaveEdit}
               onCancel={handleCancelEdit}
+              imagePreview={editImagePreview}
+              onImageUpload={handleImageUpload}
+              onImageRemove={handleImageRemove}
             />
           ) : (
             <CommentActions

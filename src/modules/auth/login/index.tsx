@@ -12,47 +12,121 @@ import {
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {saveAccessToken, saveRefreshToken} from '@/lib/client/local-storage';
+import {InputLabel, InputMessage} from '@/modules/components/form-info';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useMutation} from '@tanstack/react-query';
 import Link from 'next/link';
-import {useRouter} from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 import {useState} from 'react';
+import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
+import {z} from 'zod';
+import {loginRequestAction} from '../actions';
+const formSchema = z.object({
+  username: z.string().trim().min(1, {message: 'Please enter username'}),
+
+  password: z.string().trim().min(1, {message: 'Please enter password'}),
+});
+
+type loginFormData = z.infer<typeof formSchema>;
 
 export const LoginPage = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const {login, loginWithGoogle} = useAuthStore(state => state);
+  const {setUser} = useAuthStore(state => state);
 
-  const navigate = useRouter();
+  const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') || '/home';
 
-    if (!username || !password) {
-      toast.error('Please enter both username and password');
+  const {mutate: loginUser} = useMutation({
+    mutationFn: loginRequestAction,
+  });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    clearErrors,
+    reset,
+    setError,
+    formState: {errors, isValid},
+  } = useForm<loginFormData>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+  });
+
+  const [username = '', password = ''] = watch(['username', 'password']);
+
+  const resetFormError = () => {
+    clearErrors(['username', 'password']);
+  };
+
+  const handleLogin = async (credentials: loginFormData) => {
+    setIsSubmitting(true);
+    resetFormError();
+
+    loginUser(credentials, {
+      onSuccess(response) {
+        const {access_token, refresh_token, user} = response ?? {};
+
+        if (!user || !access_token || !refresh_token) {
+          toast.error('Login failed: incomplete response');
+          return;
+        }
+        reset();
+        setUser(user);
+        saveAccessToken(access_token);
+        saveRefreshToken(refresh_token);
+
+        toast.success('Login successful!');
+        //router.push('/home');
+        router.replace(next);
+      },
+      onError(error: any, variables, context) {
+        const {data} = error?.response ?? {};
+        console.log(data, 'error data');
+        if (data?.message) {
+          errorHandler(data.message);
+          return;
+        }
+        toast.error('Oops! Something went wrong, please try again');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
+  };
+
+  const errorHandler = (message: string) => {
+    if (message === 'Incorrect password') {
+      setError('password', {
+        type: 'server',
+        message: message,
+      });
       return;
     }
-
-    setIsSubmitting(true);
-
-    try {
-      await login(username, password);
-      navigate.push('/home');
-    } catch (error) {
-      console.error('Login failed:', error);
-      // Error is already handled in the auth context
-    } finally {
-      setIsSubmitting(false);
+    if (message === 'User not found') {
+      setError('username', {
+        type: 'server',
+        message: message,
+      });
     }
+    toast.error(message);
   };
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
 
     try {
-      await loginWithGoogle();
-      navigate.push('/home');
+      //  await loginWithGoogle();
+      router.push('/home');
     } catch (error) {
       console.error('Google login failed:', error);
       // Error is already handled in the auth context
@@ -131,37 +205,37 @@ export const LoginPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="username">
-                    Username
-                  </label>
+                  <InputLabel label="Username" htmlFor="username" />
                   <Input
                     id="username"
                     type="text"
                     value={username}
-                    onChange={e => setUsername(e.target.value)}
                     placeholder="johndoe"
                     autoComplete="username"
                     className="form-input"
                     required
+                    {...register('username')}
                   />
+
+                  <InputMessage field={username} errorField={errors.username} />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="password">
-                    Password
-                  </label>
+                  <InputLabel label="Password" htmlFor="password" />
                   <Input
                     id="password"
                     type="password"
+                    disabled={isSubmitting}
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="current-password"
                     className="form-input"
                     required
+                    {...register('password')}
                   />
+                  <InputMessage field={password} errorField={errors.password} />
                 </div>
 
                 <div className="flex justify-end">
@@ -175,7 +249,7 @@ export const LoginPage = () => {
                 <Button
                   type="submit"
                   className="w-full bg-app hover:bg-app/90 text-white"
-                  disabled={isSubmitting}>
+                  disabled={isSubmitting || !isValid}>
                   {isSubmitting ? 'Signing in...' : 'Sign in'}
                 </Button>
 

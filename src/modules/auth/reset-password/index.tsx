@@ -12,13 +12,39 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {InputLabel, InputMessage} from '@/modules/components/form-info';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useMutation} from '@tanstack/react-query';
 import {Eye, EyeOff} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
+import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
+import {z} from 'zod';
+import {resetPasswordRequestAction} from '../actions';
+
+const formSchema = z
+  .object({
+    password: z
+      .string()
+      .trim()
+      .min(4, {message: 'Password must be 4 or more characters long'})
+      .regex(/[A-Z]/, {
+        message: 'Password must contain at least one uppercase letter',
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: 'Password must contain at least one special character',
+      }),
+
+    confirmPassword: z.string().trim(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'], // This sets the error message on the `confirmPassword` field
+  });
+
+type resetFormData = z.infer<typeof formSchema>;
 
 export const ResetPasswordPage = () => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,41 +53,78 @@ export const ResetPasswordPage = () => {
 
   // In a real app, you would extract the token from the URL
   // For demo purposes, we're simulating a valid token
-  const token = location.get('token');
+  const token = location.get('token') as string;
   console.log(token, 'tokennn');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {mutate: resetPass} = useMutation({
+    mutationFn: resetPasswordRequestAction,
+  });
 
-    if (!password) {
-      toast.error('Please enter a password');
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    watch,
+    clearErrors,
+    reset,
+    setError,
+    formState: {errors, isValid},
+  } = useForm<resetFormData>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters long');
-      return;
-    }
+  const [password = '', confirmPassword] = watch([
+    'password',
+    'confirmPassword',
+  ]);
 
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
+  const resetFormError = () => {
+    clearErrors(['password', 'confirmPassword']);
+  };
 
+  const onSubmit = async (data: resetFormData) => {
+    console.log(data, 'dataaa');
     setIsSubmitting(true);
+    const resetdata = {
+      ...data,
+      password: data.password,
+      token: token,
+    };
 
-    try {
-      // In a real app, this would verify the token and update the password
-      // For demo purposes, we'll just simulate a successful request
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-      toast.success('Password has been reset successfully');
-      navigate.push('/login');
-    } catch (error) {
-      console.error('Password reset failed:', error);
-      toast.error('Failed to reset password. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    resetPass(resetdata, {
+      onSuccess(response) {
+        console.log(response, 'respoo');
+        reset();
+        toast.success('Password has been reset successfully');
+      },
+      onError(error: any, variables, context) {
+        const {data} = error?.response ?? {};
+        console.log(data, 'error data');
+        if (data?.message) {
+          errorHandler(data.message);
+          return;
+        }
+        toast.error('Failed to reset password. Please try again.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
+  };
+
+  const errorHandler = (message: string) => {
+    if (message === 'User not found') {
+      setError('password', {
+        type: 'server',
+        message: message,
+      });
+      return;
     }
+    toast.error(message || 'Failed to reset password. Please try again.');
   };
 
   // Toggle password visibility
@@ -139,21 +202,20 @@ export const ResetPasswordPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="password">
-                    New Password
-                  </label>
+                  <InputLabel label="New Password" htmlFor="password" />
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
-                      onChange={e => setPassword(e.target.value)}
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      disabled={isSubmitting}
                       className="form-input"
                       required
+                      {...register('password')}
                     />
                     <Button
                       type="button"
@@ -164,24 +226,25 @@ export const ResetPasswordPage = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </Button>
                   </div>
+                  <InputMessage field={password} errorField={errors.password} />
                 </div>
 
                 <div className="space-y-2">
-                  <label
-                    className="text-sm font-medium"
-                    htmlFor="confirmPassword">
-                    Confirm New Password
-                  </label>
+                  <InputLabel
+                    label="Confirm New Password"
+                    htmlFor="confirmPassword"
+                  />
                   <div className="relative">
                     <Input
                       id="confirmPassword"
                       type={showPassword ? 'text' : 'password'}
                       value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
+                      disabled={isSubmitting}
                       placeholder="••••••••"
                       autoComplete="new-password"
                       className="form-input"
                       required
+                      {...register('confirmPassword')}
                     />
                     <Button
                       type="button"
@@ -192,12 +255,16 @@ export const ResetPasswordPage = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </Button>
                   </div>
+                  <InputMessage
+                    field={confirmPassword}
+                    errorField={errors.confirmPassword}
+                  />
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-app hover:bg-app/90 text-white"
-                  disabled={isSubmitting}>
+                  disabled={isSubmitting || !isValid}>
                   {isSubmitting ? 'Resetting...' : 'Reset Password'}
                 </Button>
               </form>

@@ -2654,4 +2654,24 @@ export const resourceItems = [
 
     path: '/community-guidelines',
   },
+  {
+    label: 'About Us',
+
+    path: '/about-us',
+  },
+  {
+    label: 'Privacy Policy',
+
+    path: '/privacy',
+  },
+  {
+    label: 'Terms Of Service',
+
+    path: '/terms',
+  },
+  {
+    label: 'Ad Guidelines',
+
+    path: '/ad-guidelines',
+  },
 ];

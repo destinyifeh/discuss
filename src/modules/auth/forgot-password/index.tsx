@@ -11,37 +11,81 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {InputLabel, InputMessage} from '@/modules/components/form-info';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useMutation} from '@tanstack/react-query';
 import Link from 'next/link';
 import {useState} from 'react';
+import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
+import {z} from 'zod';
+import {forgotPasswordRequestAction} from '../actions';
+
+const formSchema = z.object({
+  email: z.string().trim().email({message: 'Invalid email address'}),
+});
+type forgotFormData = z.infer<typeof formSchema>;
 
 export const ForgotPasswordPage = () => {
-  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {mutate: forgotPass} = useMutation({
+    mutationFn: forgotPasswordRequestAction,
+  });
 
-    if (!email) {
-      toast.error('Please enter your email address');
+  const {
+    register,
+    handleSubmit,
+    watch,
+    clearErrors,
+    reset,
+    setError,
+    formState: {errors, isValid},
+  } = useForm<forgotFormData>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const [email = ''] = watch(['email']);
+
+  const onSubmit = async (data: forgotFormData) => {
+    console.log(data, 'dataaa');
+    setIsSubmitting(true);
+    forgotPass(data, {
+      onSuccess(response) {
+        console.log(response, 'respoo');
+        setEmailSent(true);
+        reset();
+        toast.success('Password reset link sent to your email');
+      },
+      onError(error: any, variables, context) {
+        const {data} = error?.response ?? {};
+        console.log(data, 'error data');
+        if (data?.message) {
+          errorHandler(data.message);
+          return;
+        }
+        toast.error('Failed to send reset link. Please try again.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
+  };
+
+  const errorHandler = (message: string) => {
+    if (message === 'User not found') {
+      setError('email', {
+        type: 'server',
+        message: message,
+      });
       return;
     }
-
-    setIsSubmitting(true);
-
-    try {
-      // In a real app, this would send a reset password email
-      // For demo purposes, we'll just simulate a successful request
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-      toast.success('Password reset link sent to your email');
-      setEmailSent(true);
-    } catch (error) {
-      console.error('Password reset request failed:', error);
-      toast.error('Failed to send reset link. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.error(message || 'Oops! Something went wrong, please try again');
   };
 
   return (
@@ -119,26 +163,26 @@ export const ForgotPasswordPage = () => {
             </CardHeader>
             <CardContent>
               {!emailSent ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="email">
-                      Email address
-                    </label>
+                    <InputLabel label="Email address" htmlFor="email" />
                     <Input
                       id="email"
                       type="email"
+                      disabled={isSubmitting}
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
                       placeholder="name@example.com"
                       className="form-input"
                       required
+                      {...register('email')}
                     />
+                    <InputMessage field={email} errorField={errors.email} />
                   </div>
 
                   <Button
                     type="submit"
                     className="w-full bg-app hover:bg-app/90 text-white"
-                    disabled={isSubmitting}>
+                    disabled={isSubmitting || !isValid}>
                     {isSubmitting ? 'Sending...' : 'Send Reset Link'}
                   </Button>
                 </form>

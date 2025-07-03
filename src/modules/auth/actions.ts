@@ -1,0 +1,106 @@
+'use server';
+
+import api from '@/lib/client/api';
+import {
+  removeCookieAccessToken,
+  removeCookieRefreshToken,
+  saveCookieAccessToken,
+  saveCookieRefreshToken,
+} from '@/lib/server/cookies';
+import {AxiosResponse} from 'axios';
+import {redirect} from 'next/navigation';
+import {
+  LoginRequestProps,
+  RegisterRequestProps,
+  ResetRequestProps,
+  UserUpdateRequestProps,
+} from './types';
+
+export async function registerRequestAction(
+  data: RegisterRequestProps,
+): Promise<AxiosResponse> {
+  const formData = new FormData();
+
+  formData.append('username', data.username);
+  formData.append('email', data.email);
+  formData.append('password', data.password);
+
+  if (data.avatar) {
+    formData.append('avatar', data.avatar);
+  }
+
+  return await api.post('/auth/register', formData, {
+    headers: {'Content-Type': 'multipart/form-data'},
+  });
+}
+
+export async function loginRequestAction(data: LoginRequestProps) {
+  try {
+    // 1. plain fetch to your NestJS /auth/login
+    const res = await api.post('/auth/login', data);
+    const {access_token, refresh_token, user} = res.data;
+
+    // 2. set cookie (`await`, cookies() is asynchronous)
+
+    await saveCookieAccessToken(access_token);
+    await saveCookieRefreshToken(refresh_token);
+
+    // 3. return a SERIALISABLE payload, not AxiosResponse
+    return {user, access_token, refresh_token};
+  } catch (err) {
+    console.error('loginRequestAction failed:', err);
+    throw err;
+  }
+}
+
+export async function logoutRequestAction() {
+  console.log('herrree');
+  await removeCookieAccessToken();
+  await removeCookieRefreshToken();
+  redirect('/login');
+}
+
+export async function forgotPasswordRequestAction(
+  data: object,
+): Promise<AxiosResponse> {
+  return await api.post('/auth/forgot-password', data);
+}
+
+export async function resetPasswordRequestAction(
+  data: ResetRequestProps,
+): Promise<AxiosResponse> {
+  return await api.post('/auth/reset-password', data);
+}
+export async function refreshTokenRequest(
+  token: string,
+): Promise<AxiosResponse> {
+  return await api.post('/auth/refresh-token', token);
+}
+
+export async function updateUserRequest(
+  data: UserUpdateRequestProps,
+): Promise<AxiosResponse> {
+  const form = new FormData();
+
+  // ---- string fields -------------------------------------------------
+  if (data.username) form.append('username', data.username);
+  if (data.bio) form.append('bio', data.bio);
+  if (data.dob) form.append('dob', data.dob);
+  if (data.gender) form.append('gender', data.gender);
+  if (data.website) form.append('website', data.website);
+  if (data.location) form.append('location', data.location);
+
+  // ---- file fields ---------------------------------------------------
+  if (data.avatar) form.append('avatar', data.avatar); // File
+  if (data.coverAvatar) form.append('coverAvatar', data.coverAvatar); // File
+
+  return await api.patch('/users/update', form, {
+    headers: {'Content-Type': 'multipart/form-data'},
+  });
+}
+
+export async function deleteUserRequest(
+  userId: string,
+): Promise<AxiosResponse> {
+  return await api.delete(`/auth/${userId}`);
+}

@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import {Sections} from '@/constants/data';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden';
 import {Bell, BookmarkIcon, Home, LogOut, Search, User} from 'lucide-react';
@@ -23,9 +24,9 @@ interface MainLayoutProps {
 }
 
 const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
-  const navigate = useRouter();
+  const router = useRouter();
   const location = usePathname();
-
+  const {logout} = useAuthStore(state => state);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [user] = useState({
     following: ['2'],
@@ -40,8 +41,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   const isActive = (path: string) => location === path;
 
   const handleLogout = () => {
-    // logout();
-    navigate.push('/login');
+    logout();
   };
 
   const toggleTheme = () => {
@@ -52,7 +52,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   };
 
   if (!user) {
-    navigate.push('/login');
+    router.push('/login');
     return null;
   }
 
@@ -86,8 +86,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     <div
       // className={clsx('min-h-screen flex lg:hidden', {
       className="lg:hidden">
-      <div className=// 'fixed top-0 left-0 right-0 border-b  flex justify-between items-center p-3 z-30',
-      "sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30 border-app-border">
+      <div className="sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30 border-app-border">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="p-0">
@@ -152,7 +151,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate.push('/notifications')}>
+          onClick={() => router.push('/notifications')}>
           <Bell size={24} />
         </Button>
       </div>

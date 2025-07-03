@@ -7,14 +7,9 @@ import ProfileSkeleton from '@/components/skeleton/profile-skeleton';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Posts} from '@/constants/data';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {PostProps} from '@/types/post-item.type';
-import {
-  ArrowUp,
-  Calendar,
-  Link as LinkIcon,
-  MapPin,
-  Settings,
-} from 'lucide-react';
+import {ArrowUp, Calendar, Link as LinkIcon, Settings} from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {Fragment, useEffect, useRef, useState} from 'react';
@@ -29,6 +24,7 @@ export const PostPlaceholder = ({
   isOwnProfile?: boolean;
 }) => {
   const navigate = useRouter();
+
   return (
     <div className="p-8 text-center">
       {tab === 'posts' && (
@@ -70,7 +66,7 @@ export const PostPlaceholder = ({
 export const ProfilePage = () => {
   const {user} = useParams<{user: string}>();
   const [users] = useState({username: 'dez'});
-
+  const {currentUser} = useAuthStore(state => state);
   const [activeTab, setActiveTab] = useState('posts');
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
@@ -226,16 +222,20 @@ export const ProfilePage = () => {
                     </div>
 
                     <div className="mt-16">
-                      <h2 className="font-bold text-xl">
-                        {profileUser.displayName}
+                      <h2 className="font-bold text-xl capitalize">
+                        {currentUser.username}
                       </h2>
-                      <p className="text-app-gray">@{profileUser.username}</p>
+                      {/* <p className="text-app-gray">@{profileUser.username}</p> */}
 
                       <div className="mt-3 text-app-gray">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <MapPin size={16} />
-                            <span>New York, USA</span>
+                            {/* <MapPin size={16} /> */}
+                            <p className="text-base text-foreground">
+                              Software developer passionate about web
+                              technologies and AI. Love to share knowledge and
+                              learn new things.
+                            </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <LinkIcon size={16} />

@@ -5,7 +5,8 @@ import {
   AdPerformancePlaceholder,
 } from '@/components/ad/ad-performace-card';
 import {PageHeader} from '@/components/app-headers';
-import AdPerformanceSkeleton from '@/components/skeleton/adperformance-skeleton';
+
+import AdPerformanceSkeleton from '@/components/skeleton/adPerformance-skeleton';
 import {Button} from '@/components/ui/button';
 import {AdPerformanceData} from '@/types/ad-types';
 import {

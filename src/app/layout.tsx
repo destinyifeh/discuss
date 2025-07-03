@@ -1,4 +1,4 @@
-import {ThemeProvider} from '@/components/theme-provider';
+import {ThemeProvider} from '@/app/providers/theme-provider';
 import type {Metadata} from 'next';
 import {
   DM_Sans,
@@ -12,6 +12,7 @@ import {
   Roboto,
 } from 'next/font/google';
 import './globals.css';
+import {QueryProvider} from './providers/query-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -79,7 +80,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange>
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
       </body>
     </html>

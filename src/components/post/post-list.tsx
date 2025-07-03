@@ -2,6 +2,7 @@
 import {mockAds, Posts, SectionOptions, Sections} from '@/constants/data';
 import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 //import {VariableSizeList as List} from 'react-window';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {
   insertAdsAtRandomPositions,
@@ -230,6 +231,8 @@ export const HomePostList = () => {
   const [showGoUp, setShowGoUp] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useRouter();
+  const {currentUser} = useAuthStore(state => state);
+  console.log(currentUser, 'currentooo');
 
   useEffect(() => {
     // Simulate loading

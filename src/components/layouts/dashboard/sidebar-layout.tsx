@@ -139,7 +139,6 @@ export const SidebarLayoutLeft = () => {
 
   const handleLogout = () => {
     logout();
-    navigate.push('/login');
   };
 
   const onToggleTheme = () => {

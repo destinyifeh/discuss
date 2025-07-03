@@ -1,7 +1,5 @@
 'use client';
 
-import {useState} from 'react';
-
 import {AppLogo} from '@/components/app-logo';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
@@ -14,65 +12,147 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
-import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {InputLabel, InputMessage} from '@/modules/components/form-info';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useMutation} from '@tanstack/react-query';
 import {Camera} from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
+import {useState} from 'react';
+import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
+import {z} from 'zod';
+import {registerRequestAction} from '../actions';
+
+const formSchema = z
+  .object({
+    username: z
+      .string()
+      .trim()
+      .min(3, {message: 'Username must be at least 3 characters'}),
+    //phone: z.string().min(11, {message: 'Must be 10 or more characters long'}),
+    password: z
+      .string()
+      .trim()
+      .min(4, {message: 'Password must be 4 or more characters long'})
+      .regex(/[A-Z]/, {
+        message: 'Password must contain at least one uppercase letter',
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: 'Password must contain at least one special character',
+      }),
+    // .regex(/[0-9]/, {message: 'Password must contain at least one number'}),
+    email: z.string().trim().email({message: 'Invalid email address'}),
+    confirmPassword: z.string().trim(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords does not match',
+    path: ['confirmPassword'], // This sets the error message on the `confirmPassword` field
+  });
+
+type signupFormData = z.infer<typeof formSchema>;
 export const RegisterPage = () => {
-  const [username, setUsername] = useState('');
+  const [avatar, setAvatar] = useState<File | null>(null);
   const [displayName, setDisplayName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  // const [password, setPassword] = useState('');
+  //const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const {register, loginWithGoogle} = useAuthStore(state => state);
+
   const navigate = useRouter();
+  const {mutate: createUser} = useMutation({
+    mutationFn: registerRequestAction,
+  });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    clearErrors,
+    reset,
+    setError,
+    formState: {errors, isValid},
+  } = useForm<signupFormData>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const [username = '', email = '', password = '', confirmPassword] = watch([
+    'username',
+    'email',
+    'password',
+    'confirmPassword',
+  ]);
 
-    if (!username || !displayName || !password || !confirmPassword) {
-      toast.error('Please fill in all fields');
-      return;
-    }
+  const resetFormError = () => {
+    clearErrors(['username', 'email', 'password', 'confirmPassword']);
+  };
 
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (username.includes(' ')) {
-      toast.error('Username cannot contain spaces');
-      return;
-    }
-
+  const handleRegister = async (data: signupFormData) => {
+    console.log(data, 'dataaa');
     setIsSubmitting(true);
+    resetFormError();
+    const registerData = {
+      ...data,
+      avatar,
+    };
 
-    try {
-      await register(username, password, displayName);
-      navigate.push('/home');
-    } catch (error) {
-      console.error('Registration failed:', error);
-      // Error is already handled in the auth context
-    } finally {
-      setIsSubmitting(false);
-    }
+    createUser(registerData, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'success data');
+        reset();
+        toast.success('Account created');
+        navigate.push('/login');
+      },
+      onError(error: any, variables, context) {
+        const {data} = error?.response ?? null;
+        console.log(data, 'error data');
+        if (data?.message) {
+          errorHandler(data.message);
+          return;
+        }
+        toast.error('Oops! Something went wrong, please try again');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   const handleGoogleRegister = async () => {
     setIsGoogleLoading(true);
 
     try {
-      await loginWithGoogle();
+      // await loginWithGoogle();
       navigate.push('/home');
     } catch (error) {
       console.error('Google registration failed:', error);
-      // Error is already handled in the auth context
     } finally {
       setIsGoogleLoading(false);
     }
+  };
+
+  const errorHandler = (message: string) => {
+    if (message === 'Email is already in use') {
+      setError('email', {
+        type: 'server',
+        message: message,
+      });
+      return;
+    }
+    if (message === 'Username is already taken') {
+      setError('username', {
+        type: 'server',
+        message: message,
+      });
+    }
+    toast.error(message);
   };
 
   const getInitials = () => {
@@ -81,7 +161,8 @@ export const RegisterPage = () => {
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0] ?? null;
+    console.log(file, 'filoo');
     if (file) {
       // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
@@ -94,6 +175,7 @@ export const RegisterPage = () => {
         toast.error('Please select a valid image file');
         return;
       }
+      setAvatar(file);
 
       const reader = new FileReader();
       reader.onload = e => {
@@ -219,7 +301,9 @@ export const RegisterPage = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleRegister} className="space-y-4">
+              <form
+                onSubmit={handleSubmit(handleRegister)}
+                className="space-y-4">
                 {/* Profile Photo Upload */}
                 {/* Profile Photo Upload */}
                 <div className="flex flex-col items-center mb-4">
@@ -268,74 +352,82 @@ export const RegisterPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="email">
-                    Email
-                  </label>
+                  <InputLabel label="Email" htmlFor="email" />
                   <Input
+                    disabled={isSubmitting}
                     id="email"
                     type="email"
-                    value={displayName}
-                    onChange={e => setDisplayName(e.target.value)}
+                    value={email}
                     placeholder="Johndoe@mail.com"
                     className="form-input"
                     required
+                    {...register('email')}
                   />
+                  <InputMessage field={email} errorField={errors.email} />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="username">
-                    Username
-                  </label>
+                  <InputLabel label="Username" htmlFor="username" />
+
                   <Input
+                    disabled={isSubmitting}
                     id="username"
                     type="text"
                     value={username}
-                    onChange={e => setUsername(e.target.value)}
                     placeholder="johndoe"
                     autoComplete="username"
                     className="form-input"
                     required
+                    {...register('username')}
                   />
+
+                  <InputMessage field={username} errorField={errors.username} />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="password">
-                    Password
-                  </label>
+                  <InputLabel label="Password" htmlFor="password" />
+
                   <Input
+                    disabled={isSubmitting}
                     id="password"
                     type="password"
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
                     className="form-input"
                     required
+                    {...register('password')}
                   />
+                  <InputMessage field={password} errorField={errors.password} />
                 </div>
 
                 <div className="space-y-2">
-                  <label
-                    className="text-sm font-medium"
-                    htmlFor="confirmPassword">
-                    Confirm Password
-                  </label>
+                  <InputLabel
+                    label="Confirm Password"
+                    htmlFor="confirmPassword"
+                  />
+
                   <Input
+                    disabled={isSubmitting}
                     id="confirmPassword"
                     type="password"
                     value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="new-password"
                     className="form-input"
                     required
+                    {...register('confirmPassword')}
+                  />
+                  <InputMessage
+                    field={confirmPassword}
+                    errorField={errors.confirmPassword}
                   />
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-app hover:bg-app/90 text-white"
-                  disabled={isSubmitting}>
+                  disabled={isSubmitting || !isValid}>
                   {isSubmitting ? 'Creating account...' : 'Sign up'}
                 </Button>
               </form>

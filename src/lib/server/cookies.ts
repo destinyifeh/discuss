@@ -8,14 +8,14 @@ import {cookies} from 'next/headers';
 /* ------------ access‑token cookie ------------ */
 
 export const saveCookieAccessToken = async (token: string) => {
-  console.log(token, 'token dee');
   const cookieStore = await cookies();
   cookieStore.set(ACCESS_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60, // 1 hour
+    // maxAge: 60 * 60, // 1 hour
+    maxAge: 60 * 5,
   });
   console.log(token, 'token dee finall');
 };
@@ -23,6 +23,7 @@ export const saveCookieAccessToken = async (token: string) => {
 export async function getCookieAccessToken(): Promise<string | undefined> {
   const cookieStore = await cookies();
   const token = cookieStore.get(ACCESS_COOKIE)?.value;
+  console.log(token, 'tokeenn');
   return token;
 }
 

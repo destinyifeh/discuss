@@ -26,31 +26,90 @@ import {Input} from '@/components/ui/input';
 import {Separator} from '@/components/ui/separator';
 import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {ChangePasswordErrorMessages} from '@/lib/constants/api';
+import {changePasswordRequestAction} from '@/modules/auth/actions';
+import {InputMessage} from '@/modules/components/form-info';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useMutation} from '@tanstack/react-query';
 import {AlertTriangle, HelpCircle, Lock, Moon, Sun} from 'lucide-react';
 import {useTheme} from 'next-themes';
 import {useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
+import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
+import {z} from 'zod';
+
+const formSchema = z
+  .object({
+    currentPassword: z.string().trim(),
+
+    password: z
+      .string()
+      .trim()
+      .min(4, {message: 'Password must be 4 or more characters long'})
+      .regex(/[A-Z]/, {
+        message: 'Password must contain at least one uppercase letter',
+      })
+      .regex(/[a-z]/, {
+        message: 'Password must contain at least one lowercase letter',
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: 'Password must contain at least one special character',
+      }),
+
+    confirmPassword: z.string().trim(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'], // This sets the error message on the `confirmPassword` field
+  });
+
+type changePasswordFormData = z.infer<typeof formSchema>;
 export const SettingsPage = () => {
-  const [user] = useState('dez');
-  const navigate = useRouter();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {logout} = useAuthStore(state => state);
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const {theme, setTheme} = useTheme();
+
+  const {mutate: chagePass} = useMutation({
+    mutationFn: changePasswordRequestAction,
+  });
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    clearErrors,
+    reset,
+    setError,
+    formState: {errors, isValid},
+  } = useForm<changePasswordFormData>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+      currentPassword: '',
+    },
+  });
+
   if (!mounted) return null; // prevent SSR mismatch
 
-  if (!user) return null;
+  const [password, confirmPassword, currentPassword] = watch([
+    'password',
+    'confirmPassword',
+    'currentPassword',
+  ]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -63,31 +122,58 @@ export const SettingsPage = () => {
     toast.success(`Notifications ${!notifications ? 'enabled' : 'disabled'}`);
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleChangePassword = async (data: changePasswordFormData) => {
+    console.log(data, 'dataaa');
+    setIsSubmitting(true);
 
-    if (!currentPassword) {
-      toast.error('Please enter your current password');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error("New passwords don't match");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters');
-      return;
-    }
-
-    // Simulate password change
-    toast.success('Password changed successfully');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    chagePass(data, {
+      onSuccess(response) {
+        console.log(response, 'respoo');
+        reset();
+        toast.success('Password has been reset successfully');
+        logout();
+      },
+      onError(error: any, variables, context) {
+        const {data} = error?.response ?? {};
+        console.log(data, 'error data');
+        if (data?.message) {
+          errorHandler(data.message);
+          return;
+        }
+        toast.error('Failed to change password. Please try again.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
+  const errorHandler = (message: string | string[]) => {
+    const messages = Array.isArray(message) ? message : [message];
+
+    // 2  Look for the first message we recognise
+    const matched = messages.find(msg =>
+      ChangePasswordErrorMessages.includes(msg),
+    );
+
+    if (matched) {
+      // If it’s a password‑specific error
+      setError('password', {
+        type: 'server',
+        message: matched,
+      });
+      return;
+    }
+    if (message === 'Old password is incorrect') {
+      setError('currentPassword', {
+        type: 'server',
+        message,
+      });
+      return;
+    }
+
+    toast.error(message || 'Failed to change password. Please try again.');
+  };
   const handleReportAbuse = () => {
     toast.success('Report submitted. Our team will review it shortly.');
   };
@@ -127,7 +213,9 @@ export const SettingsPage = () => {
         <div className="p-4">
           <h2 className="font-semibold text-lg mb-4">Security</h2>
 
-          <form onSubmit={handleChangePassword} className="space-y-4">
+          <form
+            onSubmit={handleSubmit(handleChangePassword)}
+            className="space-y-4">
             <div>
               <label
                 htmlFor="current-password"
@@ -139,7 +227,11 @@ export const SettingsPage = () => {
                 id="current-password"
                 type="password"
                 value={currentPassword}
-                onChange={e => setCurrentPassword(e.target.value)}
+                {...register('currentPassword')}
+              />
+              <InputMessage
+                field={currentPassword}
+                errorField={errors.currentPassword}
               />
             </div>
 
@@ -153,9 +245,11 @@ export const SettingsPage = () => {
                 id="new-password"
                 type="password"
                 className="form-input"
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
+                disabled={isSubmitting}
+                value={password}
+                {...register('password')}
               />
+              <InputMessage field={password} errorField={errors.password} />
             </div>
 
             <div>
@@ -169,13 +263,21 @@ export const SettingsPage = () => {
                 type="password"
                 className="form-input"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                disabled={isSubmitting}
+                {...register('confirmPassword')}
+              />
+              <InputMessage
+                field={confirmPassword}
+                errorField={errors.confirmPassword}
               />
             </div>
 
-            <Button type="submit" className="bg-app hover:bg-app/90 text-white">
+            <Button
+              disabled={isSubmitting}
+              type="submit"
+              className="bg-app hover:bg-app/90 text-white">
               <Lock className="h-4 w-4 mr-2" />
-              Change Password
+              {isSubmitting ? 'Please wait...' : 'Change Password'}
             </Button>
           </form>
         </div>
@@ -188,7 +290,7 @@ export const SettingsPage = () => {
             <Button
               variant="outline"
               className="flex items-center gap-2 w-full justify-start border-app-border"
-              onClick={() => navigate.push('/help')}>
+              onClick={() => router.push('/help')}>
               <HelpCircle size={18} />
               Help Center
             </Button>

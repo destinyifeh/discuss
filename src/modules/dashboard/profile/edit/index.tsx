@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {PageHeader} from '@/components/app-headers';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -17,6 +17,7 @@ import {
 import {Input} from '@/components/ui/input';
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {Textarea} from '@/components/ui/textarea';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
@@ -24,8 +25,8 @@ import {toast} from 'sonner';
 import * as z from 'zod';
 
 const profileSchema = z.object({
-  displayName: z.string().min(2, {
-    message: 'Display name must be at least 2 characters.',
+  username: z.string().min(2, {
+    message: 'Username must be at least 2 characters.',
   }),
   bio: z.string().max(160, {
     message: 'Bio must not be longer than 160 characters.',
@@ -42,23 +43,31 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export const EditProfilePage = () => {
-  const [user] = useState({
-    displayName: 'john doe',
-    username: 'johnny',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-  });
+  const {currentUser} = useAuthStore(state => state);
+
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      displayName: user?.displayName || '',
+      username: '', // start blank
       bio: '',
       location: '',
       website: '',
     },
   });
+
+  useEffect(() => {
+    if (currentUser) {
+      form.reset({
+        username: currentUser.username ?? '',
+        bio: currentUser.bio ?? '',
+        location: currentUser.location ?? '',
+        website: currentUser.website ?? '',
+      });
+    }
+  }, [currentUser, form]);
 
   const onSubmit = (data: ProfileFormValues) => {
     setIsSubmitting(true);
@@ -66,11 +75,9 @@ export const EditProfilePage = () => {
     setTimeout(() => {
       toast.success('Profile updated successfully!');
       setIsSubmitting(false);
-      navigate.push(`/profile/${user?.username}`);
+      navigate.push(`/profile/${currentUser?.username}`);
     }, 1000);
   };
-
-  if (!user) return null;
 
   return (
     <div>
@@ -85,8 +92,12 @@ export const EditProfilePage = () => {
             {/* Avatar */}
             <div className="absolute left-4 bottom-0 transform translate-y-1/2">
               <Avatar className="h-20 w-20 border-4 border-app-border">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+                {currentUser?.avatar && (
+                  <AvatarImage src={currentUser.avatar} />
+                )}
+                <AvatarFallback className="capitalize">
+                  {currentUser?.username.charAt(0)}
+                </AvatarFallback>
               </Avatar>
             </div>
 
@@ -107,10 +118,10 @@ export const EditProfilePage = () => {
               className="space-y-6 mt-8">
               <FormField
                 control={form.control}
-                name="displayName"
+                name="username"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Display name</FormLabel>
+                    <FormLabel className="capitalize">Username</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Your name"
@@ -152,7 +163,7 @@ export const EditProfilePage = () => {
                 name="location"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel className="capitalize">Location</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Where you're based"
@@ -188,7 +199,9 @@ export const EditProfilePage = () => {
                   type="button"
                   variant="outline"
                   className="border-app-border"
-                  onClick={() => navigate.push(`/profile/${user.username}`)}>
+                  onClick={() =>
+                    navigate.push(`/profile/${currentUser?.username}`)
+                  }>
                   Cancel
                 </Button>
                 <Button

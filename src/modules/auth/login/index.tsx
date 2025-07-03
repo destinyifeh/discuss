@@ -13,12 +13,16 @@ import {
 import {Input} from '@/components/ui/input';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {saveAccessToken, saveRefreshToken} from '@/lib/client/local-storage';
+import {
+  saveCookieAccessToken,
+  saveCookieRefreshToken,
+} from '@/lib/server/cookies';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
 import {z} from 'zod';
@@ -34,16 +38,22 @@ type loginFormData = z.infer<typeof formSchema>;
 export const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const {setUser} = useAuthStore(state => state);
+  const {setUser, sessionExpiredAction} = useAuthStore(state => state);
 
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const next = searchParams.get('next') || '/home';
 
+  const sessionExpired = searchParams.get('reason') === 'sessionExpired';
+
   const {mutate: loginUser} = useMutation({
     mutationFn: loginRequestAction,
   });
+
+  useEffect(() => {
+    if (sessionExpired) sessionExpiredAction();
+  }, [sessionExpired]);
 
   const {
     register,
@@ -74,7 +84,7 @@ export const LoginPage = () => {
 
     loginUser(credentials, {
       onSuccess(response) {
-        const {access_token, refresh_token, user} = response ?? {};
+        const {access_token, refresh_token, user} = response?.data ?? {};
 
         if (!user || !access_token || !refresh_token) {
           toast.error('Login failed: incomplete response');
@@ -82,16 +92,16 @@ export const LoginPage = () => {
         }
         reset();
         setUser(user);
+        saveCookieAccessToken(access_token);
+        saveCookieRefreshToken(refresh_token);
         saveAccessToken(access_token);
         saveRefreshToken(refresh_token);
-
         toast.success('Login successful!');
-        //router.push('/home');
         router.replace(next);
       },
       onError(error: any, variables, context) {
+        console.log(error, 'error');
         const {data} = error?.response ?? {};
-        console.log(data, 'error data');
         if (data?.message) {
           errorHandler(data.message);
           return;

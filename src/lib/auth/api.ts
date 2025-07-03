@@ -1,13 +1,23 @@
 // lib/api.ts
 
-//import {saveAccessToken, saveRefreshToken} from '@/services/local-store';
 import axios, {AxiosError, AxiosInstance, AxiosRequestConfig} from 'axios';
-import {getCookieAccessToken} from '../server/cookies';
+import {redirect} from 'next/navigation';
 import {
   getAccessToken,
+  getRefreshToken,
+  removeAccessToken,
+  removeRefreshToken,
   saveAccessToken,
   saveRefreshToken,
-} from './local-storage';
+} from '../client/local-storage';
+import {
+  getCookieAccessToken,
+  getCookieRefreshToken,
+  removeCookieAccessToken,
+  removeCookieRefreshToken,
+  saveCookieAccessToken,
+  saveCookieRefreshToken,
+} from '../server/cookies';
 
 /* ------------------------------------------------------------------ */
 /* 0 . Tell TypeScript about our private _retry flag                   */
@@ -34,12 +44,13 @@ api.interceptors.request.use(
     console.log(config, 'config');
     if (typeof window !== 'undefined') {
       // —— client ——
-      // const token = localStorage.getItem('accessToken');
       const token = getAccessToken();
+      console.log(token, 'destoo333');
       if (token) config.headers!['Authorization'] = `Bearer ${token}`;
     } else {
       // —— server ——
-      const token = await getCookieAccessToken(); // no await in Next 14
+      const token = await getCookieAccessToken();
+      console.log(token, 'destoo3555');
       if (token) config.headers!['Authorization'] = `Bearer ${token}`;
     }
     return config;
@@ -85,9 +96,20 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         // ----  refresh call  ----
+        let refresh_token;
+
+        if (typeof window !== 'undefined') {
+          // —— client ——
+          refresh_token = getRefreshToken();
+        } else {
+          // —— server ——
+          refresh_token = getCookieRefreshToken();
+          console.log(refresh_token, 'refresh...35');
+        }
+
         const {data} = await axios.post(
           `${process.env.NEXT_PUBLIC_API_BASE}/auth/refresh-token`,
-          {},
+          {refresh_token},
           {withCredentials: true},
         );
 
@@ -99,16 +121,9 @@ api.interceptors.response.use(
           saveRefreshToken(refreshToken);
         } else {
           // keep it server‑side in an HTTP‑only cookie
-          //   const cookieStore = await cookies();
-          //   cookieStore.set('accessToken', newToken, {
-          //     httpOnly: true,
-          //     secure: process.env.NODE_ENV === 'production',
-          //     sameSite: 'lax',
-          //     path: '/', // or '/api/private' if you want to scope it
-          //     maxAge: 60 * 60, // 1 h – match your JWT exp
-          //   });
-          // await saveCookieAccessToken(newToken);
-          // await saveCookieRefreshToken(refreshToken);
+
+          await saveCookieAccessToken(newToken);
+          await saveCookieRefreshToken(refreshToken);
         }
 
         api.defaults.headers['Authorization'] = `Bearer ${newToken}`;
@@ -117,6 +132,19 @@ api.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         //logout
+        removeCookieAccessToken();
+        removeCookieRefreshToken();
+        removeAccessToken();
+        removeRefreshToken();
+        // Redirect appropriately
+        if (typeof window !== 'undefined') {
+          // On client
+          window.location.href = '/login?reason=sessionExpired';
+        } else {
+          // On server (e.g. if using this API call in a server action)
+          redirect('/login?reason=sessionExpired');
+        }
+
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

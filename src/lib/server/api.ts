@@ -1,128 +1,112 @@
-// src/lib/api-server.ts
-// This file is for server-side code only (Next.js API Routes, Server Components)
-// It makes requests directly to your NestJS backend.
+// lib/api.ts
 
 import axios, {AxiosError, AxiosInstance, AxiosRequestConfig} from 'axios';
-import {cookies} from 'next/headers'; // This is allowed here!
+import {redirect} from 'next/navigation';
+import {
+  getCookieAccessToken,
+  removeCookieAccessToken,
+  removeCookieRefreshToken,
+  saveCookieAccessToken,
+  saveCookieRefreshToken,
+} from '../server/cookies';
 
-import {ACCESS_TOKEN, REFRESH_TOKEN} from '../constants/api';
-
+/* ------------------------------------------------------------------ */
+/* 0 . Tell TypeScript about our private _retry flag                   */
+/* ------------------------------------------------------------------ */
 declare module 'axios' {
   export interface AxiosRequestConfig {
     _retry?: boolean;
   }
 }
 
-const NESTJS_BASE_URL = process.env.NESTJS_BACKEND_URL; // Your actual NestJS backend URL
-
-const apiServer: AxiosInstance = axios.create({
+/* ------------------------------------------------------------------ */
+/* 1 . Create base instance                                            */
+/* ------------------------------------------------------------------ */
+const api: AxiosInstance = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_BASE}/api`, // e.g. https://api.example.com
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 seconds timeout
+  withCredentials: true, // send cookies
 });
 
-// Request Interceptor: Attach HttpOnly access token from cookies
-apiServer.interceptors.request.use(
+/* ------------------------------------------------------------------ */
+/* 2 . REQUEST – attach access token                                   */
+/* ------------------------------------------------------------------ */
+api.interceptors.request.use(
   async config => {
-    // This code runs ONLY on the server
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get(ACCESS_TOKEN)?.value;
+    console.log(config, 'config');
 
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
+    // —— server ——
+    const token = await getCookieAccessToken();
+    console.log(token, 'destoo3555');
+    if (token) config.headers!['Authorization'] = `Bearer ${token}`;
+
     return config;
   },
   error => Promise.reject(error),
 );
 
-// Response Interceptor: (Optional) Handle 401 for server-side refresh flow
-// This would involve calling your NestJS refresh endpoint and then
-// setting new HttpOnly cookies via `cookies().set()`
-let isRefreshingServer = false;
-let failedQueueServer: Array<
-  [(token?: string) => void, (err: unknown) => void]
-> = [];
+/* ------------------------------------------------------------------ */
+/* 3 . Simple single‑flight refresh queue                              */
+/* ------------------------------------------------------------------ */
+let isRefreshing = false;
+let failedQueue: Array<[(token?: string) => void, (err: unknown) => void]> = [];
 
-const processQueueServer = (err: unknown, token: string | null = null) => {
-  failedQueueServer.forEach(([res, rej]) => (err ? rej(err) : res(token!)));
-  failedQueueServer = [];
+const processQueue = (err: unknown, token: string | null = null) => {
+  failedQueue.forEach(([res, rej]) => (err ? rej(err) : res(token!)));
+  failedQueue = [];
 };
 
-apiServer.interceptors.response.use(
+/* ------------------------------------------------------------------ */
+/* 4 . RESPONSE – handle 401 once, queue the rest                      */
+/* ------------------------------------------------------------------ */
+api.interceptors.response.use(
   res => res,
   async (error: AxiosError) => {
+    console.log(error, 'destoo');
     const orig = error.config as AxiosRequestConfig;
 
-    // This 401 handling is for when your *NestJS backend* returns a 401.
-    // You'd attempt to refresh the token directly with NestJS.
     if (error.response?.status === 401 && !orig._retry) {
       orig._retry = true;
 
-      if (isRefreshingServer) {
+      if (isRefreshing) {
         return new Promise((resolve, reject) => {
-          failedQueueServer.push([
+          failedQueue.push([
             token => {
               if (token) orig.headers!['Authorization'] = `Bearer ${token}`;
-              resolve(apiServer(orig));
+              resolve(api(orig));
             },
             reject,
           ]);
         });
       }
 
-      isRefreshingServer = true;
+      isRefreshing = true;
       try {
-        // ----  refresh call to NestJS backend ----
+        // ----  refresh call  ----
         const {data} = await axios.post(
-          `${NESTJS_BASE_URL}/auth/refresh-token`,
+          `${process.env.NEXT_PUBLIC_API_BASE}/auth/refresh-token`,
           {},
-          {
-            withCredentials: true, // Send refresh token cookie to NestJS
-            headers: {
-              // You might need to manually get the refresh token from cookies here
-              // if your NestJS refresh endpoint expects it in a header,
-              // otherwise `withCredentials: true` will send the HttpOnly refresh token cookie.
-            },
-          },
+          {withCredentials: true},
         );
 
         const newToken = data.accessToken as string;
-        const newRefreshToken = data.refreshToken as string; // Assuming NestJS returns new refresh token
+        const refreshToken = data.refreshToken as string;
 
-        // Set new HttpOnly cookies on the Next.js server response
-        const cookieStore = await cookies();
-        cookieStore.set(ACCESS_TOKEN, newToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30, // Match your JWT exp
-        });
-        cookieStore.set(REFRESH_TOKEN, newRefreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30, // Match your refresh token exp
-        });
+        // keep it server‑side in an HTTP‑only cookie
+        await saveCookieAccessToken(newToken);
+        await saveCookieRefreshToken(refreshToken);
 
-        apiServer.defaults.headers['Authorization'] = `Bearer ${newToken}`;
-        processQueueServer(null, newToken);
-        return apiServer(orig); // retry original
+        api.defaults.headers['Authorization'] = `Bearer ${newToken}`;
+        processQueue(null, newToken);
+        return api(orig); // retry original
       } catch (err) {
-        processQueueServer(err, null);
-        // On refresh failure, clear cookies and potentially redirect
-        const cookieStore = await cookies();
-        cookieStore.delete(ACCESS_TOKEN);
-        cookieStore.delete(REFRESH_TOKEN);
-        // In a Server Component, you'd use `redirect('/login')`
-        // In an API Route, you might return a 401 and let the client handle redirection.
-        return Promise.reject(err);
+        processQueue(err, null);
+        //logout
+        removeCookieAccessToken();
+        removeCookieRefreshToken();
+        redirect('/login?reason=sessionExpired');
+        //return Promise.reject(err);
       } finally {
-        isRefreshingServer = false;
+        isRefreshing = false;
       }
     }
 
@@ -130,4 +114,4 @@ apiServer.interceptors.response.use(
   },
 );
 
-export default apiServer;
+export default api;

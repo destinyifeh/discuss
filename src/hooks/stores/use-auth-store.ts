@@ -1,25 +1,17 @@
 // stores/useAuthStore.ts
 import {logoutRequestAction} from '@/modules/auth/actions';
+import {UserProps} from '@/types/user.types';
 import {toast} from 'sonner';
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 
-type User2 = {
-  id: string;
-  username: string;
-  displayName: string;
-  avatar: string;
-  following: string[];
-  followers: string[];
-  verified: boolean;
-};
-
 type AuthState = {
-  currentUser: any;
+  currentUser: UserProps | null;
   isLoading: boolean;
 
   setUser: (data: any) => Promise<void>;
   logout: () => void;
+  sessionExpiredAction: () => void;
   isAuthenticated: boolean;
   hasHydrated: boolean;
 };
@@ -40,7 +32,10 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({currentUser: null, isAuthenticated: false});
         logoutRequestAction();
-        toast.info('You have been logged out');
+      },
+      sessionExpiredAction: () => {
+        set({currentUser: null, isAuthenticated: false});
+        toast.info('Session expired. Please log in again');
       },
     }),
     {

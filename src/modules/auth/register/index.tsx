@@ -151,6 +151,7 @@ export const RegisterPage = () => {
         type: 'server',
         message: message,
       });
+      return;
     }
     toast.error(message);
   };

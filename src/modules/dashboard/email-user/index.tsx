@@ -3,50 +3,79 @@
 import {useState} from 'react';
 
 import {PageHeader} from '@/components/app-headers';
+import EmailMessageSkeleton from '@/components/skeleton/email-message-skeleton';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
+import {InputMessage} from '@/modules/components/form-info';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useQuery} from '@tanstack/react-query';
 import {AlertTriangle, Send} from 'lucide-react';
 import {useParams, useRouter} from 'next/navigation';
+import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
+import {z} from 'zod';
+import {userService} from '../actions/user.actions';
+
+const formSchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .min(3, {message: 'Message must be at least 3 characters'}),
+
+  subject: z
+    .string()
+    .trim()
+    .min(3, {message: 'Subject must be 3 or more characters long'}),
+});
+
+type emailFormData = z.infer<typeof formSchema>;
 
 export const EmailMessage = () => {
   const {user} = useParams<{user: string}>();
-  const [username] = useState('deee');
+
   const navigate = useRouter();
 
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   console.log(user, 'my userr');
-  if (!user) return null;
 
-  // Find the recipient user (using our mock data, in real app would fetch from backend)
-  const recipientUser = [
-    {
-      id: '1',
-      username: 'johndoe',
-      displayName: 'John Doe',
-      email: 'john.doe@example.com',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-    },
-    {
-      id: '2',
-      username: 'janedoe',
-      displayName: 'Jane Doe',
-      email: 'jane.doe@example.com',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    },
-    {
-      id: '3',
-      username: 'theresatekenah',
-      displayName: 'Theresa Tekenah',
-      email: 'theresa.tekenah@example.com',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Theresa',
-    },
-  ].find(u => u.username === user);
+  const shouldQuery = !!user;
+  const {
+    isLoading,
+    error,
+    data: userData,
+  } = useQuery({
+    queryKey: ['user', user],
+    queryFn: () => userService.getUserByUsername(user),
+    retry: false,
+    enabled: shouldQuery,
+  });
+  console.log(shouldQuery, 'should query', error);
 
-  if (!recipientUser) {
+  console.log(userData, 'should query dataa');
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    clearErrors,
+    reset,
+    setError,
+    formState: {errors, isValid},
+  } = useForm<emailFormData>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      subject: '',
+      message: '',
+    },
+  });
+
+  if (isLoading) {
+    return <EmailMessageSkeleton />;
+  }
+
+  if (error?.message === 'User not found') {
     return (
       <div className="p-8 text-center">
         <h2 className="text-xl font-bold mb-2">User not found</h2>
@@ -57,45 +86,66 @@ export const EmailMessage = () => {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  if (userData?.code !== '200') {
+    return (
+      <div>
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">Oops! Something went wrong</h2>
+          <Button variant="outline" onClick={() => navigate.push('/home')}>
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-    if (!subject.trim()) {
-      toast.error('Subject cannot be empty');
-      return;
-    }
+  const {username, email} = userData.user;
 
-    if (!message.trim()) {
-      toast.error('Message cannot be empty');
-      return;
-    }
+  const [subject = '', message = ''] = watch(['subject', 'message']);
 
+  const resetFormError = () => {
+    clearErrors(['subject', 'message']);
+  };
+
+  const onSubmit = (data: emailFormData) => {
+    console.log(data, 'email data');
     setIsSending(true);
+    resetFormError();
+    const payload = {
+      ...data,
+      username: username,
+      email: email,
+    };
+
+    console.log(payload, 'email payload');
 
     // Simulate sending email
     setTimeout(() => {
-      toast.success(`Email sent to ${recipientUser.displayName}`);
+      toast.success(
+        `Email sent to ${username.charAt(0).toUpperCase() + username.slice(1)}`,
+      );
+      reset();
       setIsSending(false);
-      navigate.push(`/profile/${recipientUser.username}`);
+      navigate.back();
     }, 1500);
   };
 
   return (
     <div>
-      <PageHeader title={`Email ${recipientUser.displayName}`} />
+      <PageHeader title={`Email ${username}`} />
 
       <div className="p-4">
         <div className="rounded-lg border p-4 border-app-border">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label htmlFor="to" className="block text-sm font-medium mb-1">
                 To:
               </label>
               <Input
                 id="to"
-                value={`${recipientUser.displayName} <${recipientUser.email}>`}
+                value={`${username}`}
                 disabled
-                className="form-input"
+                className="form-input capitalize"
               />
             </div>
 
@@ -122,8 +172,10 @@ export const EmailMessage = () => {
                 id="subject"
                 placeholder="Enter subject"
                 value={subject}
-                onChange={e => setSubject(e.target.value)}
+                disabled={isSending}
+                {...register('subject')}
               />
+              <InputMessage field={subject} errorField={errors.subject} />
             </div>
 
             <div>
@@ -136,16 +188,18 @@ export const EmailMessage = () => {
                 id="message"
                 placeholder="Type your message here..."
                 value={message}
-                onChange={e => setMessage(e.target.value)}
+                disabled={isSending}
                 className="min-h-[200px] resize-none form-input"
+                {...register('message')}
               />
+              <InputMessage field={message} errorField={errors.message} />
             </div>
 
             <div className="flex justify-end pt-4">
               <Button
                 type="submit"
                 className="bg-app hover:bg-app/90 text-white"
-                disabled={isSending || !subject.trim() || !message.trim()}>
+                disabled={isSending || !isValid}>
                 {isSending ? (
                   'Sending...'
                 ) : (

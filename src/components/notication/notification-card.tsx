@@ -1,9 +1,9 @@
 'use client';
 
-import {formatTimeAgo} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
 import {NotificationItemProps} from '@/types/user.types';
 import {BellIcon} from 'lucide-react';
+import moment from 'moment';
 import Link from 'next/link';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 
@@ -14,30 +14,32 @@ export const NotificationCard = ({
 }) => {
   return (
     <div
-      key={notification.id}
+      key={notification._id}
       className={cn(
         'p-4 cursor-pointer hover:bg-app-hover dark:hover:bg-app-dark-bg/10',
         !notification.read ? 'bg-blue-50 dark:bg-app-dark-bg/10' : '',
       )}>
-      <Link href={notification.postId ? `/post/${notification.postId}` : '#'}>
-        <div className="flex gap-3">
+      <div className="flex gap-3">
+        <Link href={`/user/${notification.senderName}`}>
           <Avatar>
-            <AvatarImage src={notification.user.avatar} />
-            <AvatarFallback>
-              {notification.user.displayName.charAt(0)}
-            </AvatarFallback>
+            <AvatarImage src={notification.senderAvatar} />
+            <AvatarFallback>{notification.senderName.charAt(0)}</AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <div className="flex flex-wrap gap-1">
-              <span className="font-bold">{notification.user.displayName}</span>
-              <span className="text-app-gray">{notification.content}</span>
-            </div>
-            <p className="text-xs text-app-gray mt-1">
-              {formatTimeAgo(notification.timestamp)}
-            </p>
+        </Link>
+        <div className="flex-1">
+          <div className="flex flex-wrap gap-1">
+            <Link href={`/user/${notification.senderName}`}>
+              <span className="font-bold capitalize">
+                {notification.senderName}
+              </span>
+            </Link>
+            <span className="text-app-gray">{notification.content}</span>
           </div>
+          <p className="text-xs text-app-gray mt-1">
+            {moment(notification.createdAt).fromNow()}
+          </p>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

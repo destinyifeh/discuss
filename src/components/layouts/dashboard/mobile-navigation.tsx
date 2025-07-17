@@ -3,6 +3,7 @@ import {usePathname, useRouter} from 'next/navigation';
 import React, {useState} from 'react';
 
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {
   Sheet,
@@ -14,10 +15,11 @@ import {
 import {Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
+import {getUnreadNotificationsCounntRequestAction} from '@/modules/dashboard/notifications/actions';
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden';
+import {useQuery} from '@tanstack/react-query';
 import {Bell, BookmarkIcon, Home, LogOut, Search, User} from 'lucide-react';
 import Link from 'next/link';
-import {toast} from 'sonner';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -26,35 +28,20 @@ interface MainLayoutProps {
 const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   const router = useRouter();
   const location = usePathname();
-  const {logout} = useAuthStore(state => state);
+  const {logout, currentUser} = useAuthStore(state => state);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [user] = useState({
-    following: ['2'],
-    Id: 2,
-    displayName: 'Dez',
-    username: 'johndoe',
+
+  const {error, data: unreadCount} = useQuery({
+    queryKey: ['unreadCount'],
+    queryFn: () => getUnreadNotificationsCounntRequestAction(),
+    retry: 1,
   });
-  // Check if we're on a post details page
-  const isSection =
-    location.includes('/discuss/') && !location.includes('/reply');
 
   const isActive = (path: string) => location === path;
 
   const handleLogout = () => {
     logout();
   };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    toast(null, {
-      description: `Theme changed to ${!isDarkMode ? 'dark' : 'light'} mode.`,
-    });
-  };
-
-  if (!user) {
-    router.push('/login');
-    return null;
-  }
 
   // Get Technology section for the resources section
   const techSection = Sections.find(cat => cat.name === 'Technology');
@@ -78,7 +65,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     {
       icon: <User size={24} />,
       label: 'Profile',
-      path: `/profile/${user.username}`,
+      path: `/profile/${currentUser?.username}`,
     },
   ];
 
@@ -91,10 +78,10 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="p-0">
               <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={'https://api.dicebear.com/7.x/avataaars/svg?seed=mercy'}
-                />
-                <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+                <AvatarImage src={currentUser?.avatar ?? undefined} />
+                <AvatarFallback className="capitalize text-app text-2xl">
+                  {currentUser?.username.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               {/* <Menu size={24} /> */}
             </Button>
@@ -106,20 +93,22 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
             <div className="flex flex-col h-full">
               <div className="p-4 flex items-center gap-2">
                 <Avatar>
-                  <AvatarImage
-                    src={'https://api.dicebear.com/7.x/avataaars/svg?seed=paul'}
-                  />
-                  <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={currentUser?.avatar ?? undefined} />
+                  <AvatarFallback className="capitalize text-app text-3xl">
+                    {currentUser?.username.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-bold">{user.displayName}</p>
-                  <p className="text-app-gray">@{user.username}</p>
+                  <p className="font-bold capitalize">
+                    {currentUser?.username}
+                  </p>
+                  {/* <p className="text-app-gray">@{currentUser?.username}</p> */}
                 </div>
               </div>
 
               <nav className="flex-1 space-y-1 p-2">
                 {navItems.map((item, index) => (
-                  <SheetClose asChild key={index}>
+                  <SheetClose asChild key={item.label}>
                     <Link
                       href={item.path}
                       className={cn(
@@ -151,8 +140,20 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.push('/notifications')}>
+          onClick={() => router.push('/notifications')}
+          className="relative">
           <Bell size={24} />
+
+          {unreadCount && unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className={cn(
+                'absolute -top-1 -right-1 h-5 flex items-center justify-center p-0 text-xs font-bold rounded-full',
+                unreadCount > 99 ? 'w-7' : 'w-5',
+              )}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
         </Button>
       </div>
     </div>

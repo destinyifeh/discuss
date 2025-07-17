@@ -1,12 +1,12 @@
 export interface UserUpdateRequestProps {
   username?: string;
-  avatar?: File;
+  avatar?: File | null;
   bio?: string;
   dob?: string;
   gender?: string;
   website?: string;
   location?: string;
-  coverAvatar?: File;
+  coverAvatar?: File | null;
 }
 
 export interface RegisterRequestProps {

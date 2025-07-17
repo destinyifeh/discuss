@@ -52,9 +52,14 @@ export const ForgotPasswordPage = () => {
 
   const [email = ''] = watch(['email']);
 
+  const resetFormError = () => {
+    clearErrors(['email']);
+  };
+
   const onSubmit = async (data: forgotFormData) => {
     console.log(data, 'dataaa');
     setIsSubmitting(true);
+    resetFormError();
     forgotPass(data, {
       onSuccess(response) {
         console.log(response, 'respoo');

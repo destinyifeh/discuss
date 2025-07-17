@@ -272,3 +272,18 @@ export function parseComment(commentString: string) {
     };
   }
 }
+
+export function normalizeDomain(input?: string | null): string {
+  if (!input) return '';
+  // 1. Make sure there's a protocol so URL can parse it
+  const withProto = /^[a-z][a-z0-9+.-]*:\/\//i.test(input)
+    ? input
+    : `https://${input}`;
+  try {
+    const host = new URL(withProto).hostname; // "www.gg.com" or "gg.com"
+    return host.replace(/^www\./i, ''); // strip leading "www."
+  } catch {
+    // If parsing fails, return the raw input (or "")
+    return input;
+  }
+}

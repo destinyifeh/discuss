@@ -2,6 +2,8 @@
 
 import {PageHeader} from '@/components/app-headers';
 import PostCard from '@/components/post/post-card';
+import ProfileSkeleton from '@/components/skeleton/profile-skeleton';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {
   Dialog,
@@ -15,21 +17,27 @@ import {
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Textarea} from '@/components/ui/textarea';
 import {Posts} from '@/constants/data';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {queryClient} from '@/lib/client/query-client';
+import {normalizeDomain} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
 import {PostProps} from '@/types/post-item.type';
+import {UserProps} from '@/types/user.types';
+import {useMutation, useQuery} from '@tanstack/react-query';
 import {
   AlertTriangle,
   ArrowUp,
   Calendar,
   Link as LinkIcon,
   Mail,
-  MapPin,
 } from 'lucide-react';
+import moment from 'moment';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {Fragment, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
+import {userService} from '../actions/user.actions';
 
 export const PostPlaceholder = ({
   tab,
@@ -79,42 +87,33 @@ export const PostPlaceholder = ({
 
 export const PeoplePage = () => {
   const {user} = useParams<{user: string}>();
-  const [users] = useState({username: 'dez'});
 
+  const {currentUser, setUser} = useAuthStore(state => state);
   const [activeTab, setActiveTab] = useState('posts');
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const [isPending, setIsPending] = useState(false);
+
+  const {mutate} = useMutation({
+    mutationFn: userService.followUserRequestAction,
+  });
   // Find the user profile (using our mock data, in real app would fetch from backend)
-  const profileUser = [
-    {
-      id: '1',
-      username: 'johndoe',
-      displayName: 'John Doe',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-      following: ['2', '3'],
-      followers: ['2'],
-      verified: true,
-    },
-    {
-      id: '2',
-      username: 'janedoe',
-      displayName: 'Jane Doe',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-      following: ['1'],
-      followers: ['1', '3'],
-      verified: false,
-    },
-    {
-      id: '3',
-      username: 'gamerpro',
-      displayName: 'Theresa Tekenah',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Theresa',
-      following: ['2'],
-      followers: ['1'],
-      verified: true,
-    },
-  ].find(u => u.username === user);
+
+  const shouldQuery = !!user;
+  const {
+    isLoading,
+    error,
+    data: userData,
+  } = useQuery({
+    queryKey: ['user', user],
+    queryFn: () => userService.getUserByUsername(user),
+    retry: false,
+    enabled: shouldQuery,
+  });
+  console.log(shouldQuery, 'should query', error);
+
+  console.log(userData, 'should query dataa');
 
   // Get posts by this user
   const userPosts = Posts.filter(post => post.username === user);
@@ -137,8 +136,11 @@ export const PeoplePage = () => {
     default:
       data = [];
   }
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
-  if (!profileUser) {
+  if (error?.message === 'User not found') {
     return (
       <div>
         <div className="p-8 text-center">
@@ -151,9 +153,18 @@ export const PeoplePage = () => {
     );
   }
 
-  const isOwnProfile = user === profileUser.username;
-  const userFollowing = profileUser.following || [];
-  const isFollowing = userFollowing.includes(profileUser.id);
+  if (userData?.code !== '200') {
+    return (
+      <div>
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">Oops! Something went wrong</h2>
+          <Button variant="outline" onClick={() => navigate.push('/home')}>
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleReportUser = () => {
     toast.success('Report submitted. Our team will review it shortly.');
@@ -166,12 +177,82 @@ export const PeoplePage = () => {
     setShowGoUp(scrollTop > 300);
   };
 
+  const {
+    username,
+    avatar,
+    cover_avatar,
+    createdAt,
+    followers,
+    following,
+    website,
+    bio,
+    email,
+    _id,
+  } = userData.user;
+
+  const isOwnProfile = username === currentUser?.username;
+
+  const isFollowing = currentUser?.following?.includes(_id?.toString());
+
+  console.log(followers, 'datameeefollowers');
+  console.log(following, 'datameeelowing');
+  console.log(
+    currentUser?.following,
+    'cyurrrrreeellowers',
+    isFollowing,
+    currentUser?._id,
+    _id,
+  );
+  const handleEmailNavigation = () => {
+    navigate.push(`/email/${username}`);
+  };
+
+  const handleFollowUser = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    mutate(_id, {
+      onSuccess(response, variables, context) {
+        console.log(response, 'datameee');
+
+        const {
+          currentUserFollowers,
+          currentUserFollowings,
+          message,
+          isFollowing,
+          following,
+          followers,
+        } = response.data;
+
+        setUser({
+          ...(currentUser as UserProps),
+          following: currentUserFollowings,
+        });
+
+        // Invalidate the cached user data
+        //queryClient.invalidateQueries({queryKey: ['user', username]});
+        queryClient.setQueryData(['user', username], (oldData: any) => ({
+          ...oldData,
+          user: {
+            ...oldData.user,
+            followers,
+            following,
+          },
+        }));
+
+        toast.success(message);
+      },
+
+      onError(error, variables, context) {
+        console.log(error, 'err');
+      },
+      onSettled(data, error, variables, context) {
+        setIsPending(false);
+      },
+    });
+  };
   return (
     <div className="pb-10">
-      <PageHeader
-        title={profileUser.displayName}
-        description={`${userPosts.length} posts`}
-      />
+      <PageHeader title={username} description={`${userPosts.length} posts`} />
 
       <Virtuoso
         className="custom-scrollbar"
@@ -183,121 +264,135 @@ export const PeoplePage = () => {
           Header: () => (
             <Fragment>
               <div className="border-b overflow-y-auto border-app-border">
-                <div className="h-40 bg-app/20"></div>
+                <div className="h-40 bg-app/20 relative overflow-hidden">
+                  {cover_avatar ? (
+                    <img
+                      src={cover_avatar}
+                      alt="Cover avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
+                </div>
                 <div className="px-4 pb-4">
                   <div className="flex justify-between relative">
-                    <div className="w-24 h-24 rounded-full border-4 border-white bg-white absolute -top-12">
-                      <img
-                        src={profileUser.avatar}
-                        alt={profileUser.displayName}
-                        className="w-full h-full rounded-full"
-                      />
+                    <div className="w-24 h-24 rounded-full absolute -top-12">
+                      <Avatar className="h-24 w-24 border-4 border-white">
+                        <AvatarImage src={avatar ?? undefined} />
+                        <AvatarFallback className="capitalize text-app text-3xl">
+                          {username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
                     </div>
 
                     <div className="flex-1"></div>
+                    {!isOwnProfile && (
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          onClick={handleFollowUser}
+                          disabled={isPending}
+                          className={cn(
+                            'rounded-full',
+                            isFollowing
+                              ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black dark:text-white'
+                              : 'bg-app text-white hover:bg-app/90',
+                          )}>
+                          {isFollowing ? 'Following' : 'Follow'}
+                        </Button>
 
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        className={cn(
-                          'rounded-full',
-                          isFollowing
-                            ? 'bg-transparent text-black border border-gray-300 hover:bg-gray-100 hover:text-black dark:text-white'
-                            : 'bg-app text-white hover:bg-app/90',
-                        )}>
-                        {isFollowing ? 'Following' : 'Follow'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="rounded-full"
-                        onClick={() =>
-                          navigate.push(`/email/${profileUser.username}`)
-                        }>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Email
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full text-red-500 hover:bg-red-50 hover:text-red-600">
-                            <AlertTriangle className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>
-                              Report {profileUser.displayName}
-                            </DialogTitle>
-                            <DialogDescription>
-                              Please provide details about why you're reporting
-                              this user. Our moderation team will review your
-                              report.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="py-4">
-                            <label
-                              htmlFor="reason"
-                              className="block text-sm font-medium mb-1">
-                              Reason for reporting:
-                            </label>
-                            <select
-                              id="reason"
-                              className="w-full mb-4 p-2 border border-gray-300 rounded-md form-input">
-                              <option value="spam">Spam</option>
-                              <option value="harassment">Harassment</option>
-                              <option value="misinformation">
-                                Misinformation
-                              </option>
-                              <option value="hate_speech">Hate speech</option>
-                              <option value="other">Other</option>
-                            </select>
-
-                            <label
-                              htmlFor="details"
-                              className="block text-sm font-medium mb-1">
-                              Details:
-                            </label>
-                            <Textarea
-                              id="details"
-                              placeholder="Please provide additional details..."
-                              className="min-h-[100px] form-input"
-                            />
-                          </div>
-                          <DialogFooter>
-                            <Button variant="outline">Cancel</Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={handleEmailNavigation}>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Email
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
                             <Button
-                              onClick={handleReportUser}
-                              className="text-white bg-red-600 hover:bg-red-700  dark:bg-red-700 dark:hover:bg-red-600">
-                              Submit Report
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-full text-red-500 hover:bg-red-50 hover:text-red-600">
+                              <AlertTriangle className="h-4 w-4" />
                             </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle className="capitalize">
+                                Report {username}
+                              </DialogTitle>
+                              <DialogDescription>
+                                Please provide details about why you're
+                                reporting this user. Our moderation team will
+                                review your report.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                              <label
+                                htmlFor="reason"
+                                className="block text-sm font-medium mb-1">
+                                Reason for reporting:
+                              </label>
+                              <select
+                                id="reason"
+                                className="w-full mb-4 p-2 border border-gray-300 rounded-md form-input">
+                                <option value="spam">Spam</option>
+                                <option value="harassment">Harassment</option>
+                                <option value="misinformation">
+                                  Misinformation
+                                </option>
+                                <option value="hate_speech">Hate speech</option>
+                                <option value="other">Other</option>
+                              </select>
+
+                              <label
+                                htmlFor="details"
+                                className="block text-sm font-medium mb-1">
+                                Details:
+                              </label>
+                              <Textarea
+                                id="details"
+                                placeholder="Please provide additional details..."
+                                className="min-h-[100px] form-input"
+                              />
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline">Cancel</Button>
+                              <Button
+                                onClick={handleReportUser}
+                                className="text-white bg-red-600 hover:bg-red-700  dark:bg-red-700 dark:hover:bg-red-600">
+                                Submit Report
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-16">
-                    <h2 className="font-bold text-xl">
-                      {profileUser.displayName}
-                    </h2>
-                    <p className="text-app-gray">@{profileUser.username}</p>
+                    <h2 className="font-bold text-xl capitalize">{username}</h2>
 
                     <div className="mt-3 text-app-gray">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <MapPin size={16} />
-                          <span>New York, USA</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <LinkIcon size={16} />
-                          <Link href="#" className="text-app">
-                            example.com
-                          </Link>
-                        </div>
+                        {bio && (
+                          <div className="flex items-center gap-2">
+                            {/* <MapPin size={16} /> */}
+                            <p className="text-base text-foreground">{bio}</p>
+                          </div>
+                        )}
+                        {website && (
+                          <div className="flex items-center gap-2">
+                            <LinkIcon size={16} />
+                            <Link href={website} className="text-app">
+                              {normalizeDomain(website)}
+                            </Link>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2">
                           <Calendar size={16} />
-                          <span>Joined April 2023</span>
+                          <span>
+                            Joined {moment(createdAt).format('MMMM YYYY')}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -305,17 +400,17 @@ export const PeoplePage = () => {
                     <div className="flex gap-4 mt-3">
                       <Link
                         className="flex items-center gap-1 cursor-pointer hover:underline"
-                        href={`/profile/${profileUser.username}/following`}>
+                        href={`/user/${username}/following`}>
                         <span className="font-bold">
-                          {profileUser.following?.length || 0}
+                          {following?.length ?? 0}
                         </span>
                         <span className="text-app-gray">Following</span>
                       </Link>
                       <Link
                         className="flex items-center gap-1 cursor-pointer hover:underline"
-                        href={`/profile/${profileUser.username}/followers`}>
+                        href={`/user/${username}/followers`}>
                         <span className="font-bold">
-                          {profileUser.followers?.length || 0}
+                          {followers?.length ?? 0}
                         </span>
                         <span className="text-app-gray">Followers</span>
                       </Link>

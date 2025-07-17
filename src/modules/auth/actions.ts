@@ -1,16 +1,11 @@
 import api from '@/lib/auth/api';
 import {
-  removeAccessToken,
-  removeRefreshToken,
-} from '@/lib/client/local-storage';
-import {
   removeCookieAccessToken,
   removeCookieRefreshToken,
-  saveCookieAccessToken,
-  saveCookieRefreshToken,
 } from '@/lib/server/cookies';
 import {AxiosResponse} from 'axios';
 import {redirect} from 'next/navigation';
+import {toast} from 'sonner';
 import {
   LoginRequestProps,
   RegisterRequestProps,
@@ -37,44 +32,25 @@ export async function registerRequestAction(
 }
 
 export async function loginRequestAction2(data: LoginRequestProps) {
-  try {
-    const {
-      data: {access_token, refresh_token, user},
-    } = await api.post('/auth/login', data);
-
-    await saveCookieAccessToken(access_token);
-    await saveCookieRefreshToken(refresh_token);
-
-    return {user, access_token, refresh_token};
-  } catch (err) {
-    // ① Is it an Axios error?
-    // if (axios.isAxiosError(err)) {
-    //   const status = err.response?.status ?? 500;
-    //   const message =
-    //     err.response?.data?.message ?? err.response?.data?.error ?? err.message;
-
-    //   console.error('loginRequestAction Axios error:', status, message);
-
-    //   // ② Forward a clean, serialisable error object
-    //   throw new Error(message);
-    // }
-
-    // ③ Non‑Axios error – rethrow as is
-    console.error('loginRequestAction failed:', err);
-    throw err;
-  }
+  return await api.post('/auth/login', data);
 }
 
 export async function loginRequestAction(data: LoginRequestProps) {
   return await api.post('/auth/login', data);
 }
 
-export async function logoutRequestAction() {
-  await removeCookieAccessToken();
-  await removeCookieRefreshToken();
-  removeAccessToken();
-  removeRefreshToken();
-  redirect('/login');
+export async function logoutRequest() {
+  const res = await logoutRequestAction();
+  if (res?.data?.code === '200') {
+    removeCookieAccessToken();
+    removeCookieRefreshToken();
+    toast.success('Successfully logged out.');
+    redirect('/login');
+  } else {
+    toast.error(
+      'Something went wrong while logging you out. Please try again.',
+    );
+  }
 }
 
 export async function forgotPasswordRequestAction(
@@ -83,15 +59,18 @@ export async function forgotPasswordRequestAction(
   return await api.post('/auth/forgot-password', data);
 }
 
+export async function logoutRequestAction(): Promise<AxiosResponse> {
+  return await api.post('/auth/logout');
+}
+
+export async function googleSignInRequestAction(): Promise<AxiosResponse> {
+  return await api.get('/auth/google/login');
+}
+
 export async function resetPasswordRequestAction(
   data: ResetRequestProps,
 ): Promise<AxiosResponse> {
   return await api.post('/auth/reset-password', data);
-}
-export async function refreshTokenRequest(
-  token: string,
-): Promise<AxiosResponse> {
-  return await api.post('/auth/refresh-token', token);
 }
 
 export async function updateUserRequest(
@@ -126,4 +105,9 @@ export async function changePasswordRequestAction(
   data: object,
 ): Promise<AxiosResponse> {
   return await api.patch('/auth/change-password', data);
+}
+
+export async function getGoogleUserRequestAction(token: string) {
+  const response = await api.get(`/auth/google/user/${token}`);
+  return response.data;
 }

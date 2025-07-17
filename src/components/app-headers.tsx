@@ -10,7 +10,7 @@ export const PageHeader = ({
   description,
   href,
 }: {
-  title: string;
+  title: string | undefined;
   description?: string | number;
   href?: string;
 }) => {
@@ -26,7 +26,7 @@ export const PageHeader = ({
           <ChevronLeft />
         </Button>
         <div>
-          <h1 className="text-xl font-bold">{title}</h1>
+          <h1 className="text-xl font-bold capitalize">{title}</h1>
           {description && (
             <p className="text-sm text-app-gray">{description}</p>
           )}

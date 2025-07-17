@@ -1,5 +1,7 @@
 'use client';
 
+import {PageHeader} from '@/components/app-headers';
+import {FallbackMessage} from '@/components/fallbacks';
 import {
   NotificationCard,
   NotificationPlaceholder,
@@ -7,47 +9,78 @@ import {
 import NotificationSkeleton from '@/components/skeleton/notification-skeleton';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {notificationData} from '@/constants/data';
+import {queryClient} from '@/lib/client/query-client';
 import {NotificationItemProps} from '@/types/user.types';
+import {useMutation, useQuery} from '@tanstack/react-query';
 import {ArrowUp} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {Fragment, useEffect, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
+import {
+  getNotificationsRequestAction,
+  markAllAsReadRequestAction,
+} from './actions';
 
 export const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const navigate = useRouter();
-  const [notifications, setNotifications] = useState(notificationData);
+
   const [showGoUp, setShowGoUp] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map(notification => ({...notification, read: true})),
-    );
-  };
+  const {
+    mutate: markAllAsRead,
+    isSuccess,
+    isError,
+    error: markError,
+  } = useMutation({
+    mutationFn: markAllAsReadRequestAction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['notifications']});
+      queryClient.invalidateQueries({queryKey: ['unreadCount']});
+    },
+  });
 
-  const hasUnread = notifications.some(notification => !notification.read);
+  const {
+    isLoading,
+    error,
+    data: notificationsData,
+  } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => getNotificationsRequestAction(),
+    retry: false,
+  });
+  console.log('query err', error);
 
-  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
-    const scrollTop = event.currentTarget.scrollTop;
-
-    // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
-  };
+  console.log(notificationsData, 'query dataa');
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 800);
-  }, []);
+    if (notificationsData?.some((n: any) => !n.read)) {
+      markAllAsRead();
+      console.log('mark err', markError, isSuccess);
+    }
+  }, [notificationsData]);
+
+  if (isLoading) {
+    return <NotificationSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
 
   let data: NotificationItemProps[] | [];
 
   switch (activeTab) {
     case 'all':
-      data = notifications;
+      data = notificationsData;
       break;
     case 'mentions':
       data = [];
@@ -56,9 +89,14 @@ export const NotificationsPage = () => {
       data = [];
   }
 
-  if (isLoading) {
-    return <NotificationSkeleton />;
-  }
+  const hasUnread = data.some(notification => !notification.read);
+
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
+  };
   return (
     <div>
       <Virtuoso
@@ -70,10 +108,13 @@ export const NotificationsPage = () => {
         components={{
           Header: () => (
             <Fragment>
-              <div className="border-b p-4 flex justify-between items-center border-app-border">
-                <h1 className="text-xl font-bold">Notifications</h1>
+              <div className=" flex justify-between items-center ">
+                <PageHeader title="Notifications" />
                 {hasUnread && (
-                  <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => markAllAsRead()}>
                     Mark all as read
                   </Button>
                 )}

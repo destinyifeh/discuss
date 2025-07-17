@@ -1,20 +1,15 @@
 'use client';
 import {usePathname} from 'next/navigation';
-import {useState} from 'react';
 
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {BookmarkIcon, Home, PenSquare, Search, User} from 'lucide-react';
 import Link from 'next/link';
 
 export const MobileBottomTab = () => {
   const location = usePathname();
+  const {currentUser} = useAuthStore(state => state);
 
-  const [user] = useState({
-    following: ['2'],
-    Id: 2,
-    displayName: 'Dez',
-    username: 'johndoe',
-  });
   // Check if we're on a post details page
   const isPostDetail =
     location.includes('/post/') && !location.includes('/reply');
@@ -47,10 +42,10 @@ export const MobileBottomTab = () => {
             <BookmarkIcon size={24} />
           </Link>
           <Link
-            href={`/profile/${user.username}`}
+            href={`/profile/${currentUser?.username}`}
             className={cn(
               'p-2',
-              isActive(`/profile/${user.username}`) && 'text-app',
+              isActive(`/profile/${currentUser?.username}`) && 'text-app',
             )}>
             <User size={24} />
           </Link>

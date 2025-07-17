@@ -10,6 +10,8 @@ import {
 import {resourceItems, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
+import {getUnreadNotificationsCounntRequestAction} from '@/modules/dashboard/notifications/actions';
+import {useQuery} from '@tanstack/react-query';
 import {
   BarChart2,
   Bell,
@@ -74,8 +76,14 @@ export const SidebarLayoutLeft = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isActive = (path: string) => location === path;
   //const {theme, setTheme} = useGlobalStore(state => state);
-  const {logout} = useAuthStore(state => state);
+  const {logout, currentUser} = useAuthStore(state => state);
   const [mounted, setMounted] = useState(false);
+
+  const {error, data: unreadCount} = useQuery({
+    queryKey: ['unreadCount'],
+    queryFn: () => getUnreadNotificationsCounntRequestAction(),
+    retry: 1,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -118,7 +126,7 @@ export const SidebarLayoutLeft = () => {
       icon: <Bell size={24} className="mr-4" />,
       label: 'Notifications',
       path: '/notifications',
-      badge: 2,
+      badge: unreadCount,
     },
     // {
     //   icon: <Mail size={24} className="mr-4" />,
@@ -133,7 +141,7 @@ export const SidebarLayoutLeft = () => {
     {
       icon: <User size={24} className="mr-4" />,
       label: 'Profile',
-      path: `/profile/${'johndoe'}`,
+      path: `/profile/${currentUser?.username}`,
     },
   ];
 
@@ -188,7 +196,7 @@ export const SidebarLayoutLeft = () => {
                 <span className="text-lg">{item.label}</span>
                 {item.badge !== undefined && item.badge > 0 && (
                   <span className="ml-auto bg-app text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {item.badge}
+                    {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}
               </div>
@@ -254,14 +262,15 @@ export const SidebarLayoutLeft = () => {
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-3 cursor-pointer p-2 rounded-full">
                 <Avatar>
-                  <AvatarImage
-                    src="/placeholder.svg?height=40&width=40"
-                    alt="@johndoe"
-                  />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage src={currentUser?.avatar ?? undefined} />
+                  <AvatarFallback className="capitalize text-app text-3xl">
+                    {currentUser?.username.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="font-medium">John Doe</span>
+                  <span className="font-medium capitalize">
+                    {currentUser?.username}
+                  </span>
                 </div>
               </div>
             </DropdownMenuTrigger>

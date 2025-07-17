@@ -89,6 +89,7 @@ export const ResetPasswordPage = () => {
   const onSubmit = async (data: resetFormData) => {
     console.log(data, 'dataaa');
     setIsSubmitting(true);
+    resetFormError();
     const resetdata = {
       ...data,
       password: data.password,

@@ -11,12 +11,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {saveAccessToken, saveRefreshToken} from '@/lib/client/local-storage';
-import {
-  saveCookieAccessToken,
-  saveCookieRefreshToken,
-} from '@/lib/server/cookies';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -84,18 +80,16 @@ export const LoginPage = () => {
 
     loginUser(credentials, {
       onSuccess(response) {
-        const {access_token, refresh_token, user} = response?.data ?? {};
+        console.log(response, 'respoo');
+        const {user} = response?.data ?? {};
 
-        if (!user || !access_token || !refresh_token) {
+        if (!user) {
           toast.error('Login failed: incomplete response');
           return;
         }
         reset();
         setUser(user);
-        saveCookieAccessToken(access_token);
-        saveCookieRefreshToken(refresh_token);
-        saveAccessToken(access_token);
-        saveRefreshToken(refresh_token);
+
         toast.success('Login successful!');
         router.replace(next);
       },
@@ -122,27 +116,19 @@ export const LoginPage = () => {
       });
       return;
     }
-    if (message === 'User not found') {
+    if (message === 'User not found' || message.startsWith('Your account')) {
       setError('username', {
         type: 'server',
         message: message,
       });
+      return;
     }
     toast.error(message);
   };
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
-
-    try {
-      //  await loginWithGoogle();
-      router.push('/home');
-    } catch (error) {
-      console.error('Google login failed:', error);
-      // Error is already handled in the auth context
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    window.location.href = GOOGLE_SIGNIN_URL;
   };
 
   return (

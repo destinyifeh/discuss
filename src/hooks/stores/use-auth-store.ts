@@ -1,5 +1,5 @@
 // stores/useAuthStore.ts
-import {logoutRequestAction} from '@/modules/auth/actions';
+import {logoutRequest} from '@/modules/auth/actions';
 import {UserProps} from '@/types/user.types';
 import {toast} from 'sonner';
 import {create} from 'zustand';
@@ -7,9 +7,10 @@ import {persist} from 'zustand/middleware';
 
 type AuthState = {
   currentUser: UserProps | null;
+  selectedUser: any;
   isLoading: boolean;
-
-  setUser: (data: any) => Promise<void>;
+  setSelectedUser: (data: any) => void;
+  setUser: (data: UserProps) => void;
   logout: () => void;
   sessionExpiredAction: () => void;
   isAuthenticated: boolean;
@@ -23,15 +24,21 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       isAuthenticated: false,
       hasHydrated: false,
+      selectedUser: null,
 
-      setUser: async (data: any) => {
+      setUser: (data: UserProps) => {
         console.log(data, 'currentUser data');
         set({currentUser: data, isAuthenticated: true});
       },
 
+      setSelectedUser: (data: any) => {
+        console.log(data, 'selected user data');
+        set({selectedUser: data});
+      },
+
       logout: () => {
-        set({currentUser: null, isAuthenticated: false});
-        logoutRequestAction();
+        set({});
+        logoutRequest();
       },
       sessionExpiredAction: () => {
         set({currentUser: null, isAuthenticated: false});

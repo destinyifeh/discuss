@@ -1,0 +1,23 @@
+import api from '@/lib/auth/api';
+import {AdPlan} from '@/types/ad-types';
+
+class FeedService {
+  async getHomePostFeeds(
+    page = 1,
+    limit = 10,
+    search?: string,
+    pattern: string = '',
+    adPlan: AdPlan = 'enterprise',
+    mode: string = 'random',
+  ) {
+    const params: any = {page, limit, mode};
+    if (search) params.search = search;
+    if (pattern) params.pattern = pattern;
+    if (adPlan) params.adPlan = adPlan;
+
+    const response = await api.get(`/feeds`, {params});
+    return response.data?.data;
+  }
+}
+
+export const feedService = new FeedService();

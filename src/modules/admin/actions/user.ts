@@ -1,5 +1,5 @@
 import api from '@/lib/auth/api';
-import {AdminUserRole} from '../admin-types';
+import {Role} from '@/types/user.types';
 
 export interface AdminUserProps {
   _id: string;
@@ -9,7 +9,7 @@ export interface AdminUserProps {
   avatar?: string;
   postCount: number;
   email?: string;
-  role: string;
+  role: Role;
 }
 
 export interface AccountRestrictionPayloadProps {
@@ -54,7 +54,7 @@ class AdminUserService {
     }
   }
 
-  async updateUserRole(payload: {userId: string; role: AdminUserRole}) {
+  async updateUserRole(payload: {userId: string; role: Role}) {
     try {
       const response = await api.patch(
         `/admin/update-role/${payload.userId}?role=${payload.role}`,

@@ -1,5 +1,6 @@
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {CommentProps} from '@/types/post-item.type';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {CommentFeedProps} from '@/types/post-item.type';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {toast} from 'sonner';
@@ -9,7 +10,7 @@ import CommentEditForm from './comment-edit-form';
 import CommentHeader from './comment-header';
 
 interface CommentCardProps {
-  comment: CommentProps;
+  comment: CommentFeedProps;
   onQuote?: () => void;
   handleQuoteClick: (quote: string) => void;
 }
@@ -20,13 +21,12 @@ const CommentCard2 = ({
   handleQuoteClick,
 }: CommentCardProps) => {
   const [user] = useState({id: '3'});
-
+  const {currentUser} = useAuthStore(state => state);
   const [liked, setLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
-  const [editImagePreview, setEditImagePreview] = useState<string | undefined>(
-    comment.image,
-  );
+  const [editImagePreview, setEditImagePreview] = useState<string>();
+  // default to an empty array if undefined
   const navigate = useRouter();
 
   const handleLike = () => {
@@ -43,7 +43,7 @@ const CommentCard2 = ({
   const handleEdit = () => {
     setIsEditing(true);
     setEditContent(comment.content);
-    setEditImagePreview(comment.image);
+    // setEditImagePreview(comment.images || []);
   };
   const updateComment = (updatedComment: Comment) => {
     // setComments(prevComments =>
@@ -102,7 +102,7 @@ const CommentCard2 = ({
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditContent(comment.content);
-    setEditImagePreview(comment.image);
+    // setEditImagePreview(comment.images || []);
   };
 
   const handleQuote = () => {
@@ -111,11 +111,9 @@ const CommentCard2 = ({
       return;
     }
 
-    const postId = comment.postId;
-
     // Extract only the direct content, not any nested quotes
     const contentToQuote = extractDirectContent(comment.content);
-    const quoteText = `> ${comment.username}: ${contentToQuote}`;
+    //const quoteText = `> ${comment.username}: ${contentToQuote}`;
 
     // Navigate to reply page with quoted text
     // navigate(`/post/${postId}/reply`, {
@@ -167,16 +165,18 @@ const CommentCard2 = ({
     }
   };
 
-  const isOwnComment = user?.id === comment.userId;
+  const isOwnComment = currentUser?._id === comment.commentBy._id;
 
   return (
     <div
       className="border-b border-app-border p-4 hover:bg-app-hover transition-colors"
-      data-username={comment.username}>
+      data-username={comment.commentBy.username}>
       <div className="flex gap-3">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={comment.avatar} />
-          <AvatarFallback>{comment.displayName.charAt(0)}</AvatarFallback>
+          <AvatarImage src={comment.commentBy.avatar ?? undefined} />
+          <AvatarFallback className="capitalize text-app text-3xl">
+            {comment.commentBy.username.charAt(0)}
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex-1">
@@ -193,13 +193,13 @@ const CommentCard2 = ({
             editContent={editContent}
             onEditContentChange={setEditContent}
             onQuoteClick={handleQuoteClick}
-            commentId={comment.commentId}
+            commentId={comment._id}
           />
 
-          {!isEditing && comment.image && (
+          {!isEditing && comment.images && (
             <div className="mt-3 rounded-lg overflow-hidden">
               <img
-                src={comment.image}
+                // src={comment.images}
                 alt="Comment attachment"
                 className="max-h-60 object-contain"
               />
@@ -210,7 +210,7 @@ const CommentCard2 = ({
             <CommentEditForm
               onSave={handleSaveEdit}
               onCancel={handleCancelEdit}
-              imagePreview={editImagePreview}
+              // imagePreview={editImagePreview}
               onImageUpload={handleImageUpload}
               onImageRemove={handleImageRemove}
             />

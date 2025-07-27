@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
-import {CommentProps} from '@/types/post-item.type';
+import {CommentFeedProps} from '@/types/post-item.type';
 import React, {useState} from 'react';
 
 import {formatTimeAgo2} from '@/lib/formatter';
@@ -25,22 +25,56 @@ import {
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {queryClient} from '@/lib/client/query-client';
+import {usePostActions} from '@/modules/posts/post-hooks';
 import {toast} from 'sonner';
 import {PostContent} from './post-content';
 
 interface CommentCardProps {
-  comment: CommentProps;
+  comment: CommentFeedProps;
   onQuote?: () => void;
   onEdit?: () => void;
+  handleQuoteClick: (quote: string) => void;
 }
 
-const CommentCard = ({comment, onQuote, onEdit}: CommentCardProps) => {
+const CommentCard = ({
+  comment,
+  onQuote,
+  onEdit,
+  handleQuoteClick,
+}: CommentCardProps) => {
   const {theme} = useGlobalStore(state => state);
   const [liked, setLiked] = useState(false);
   const navigate = useRouter();
-
+  const {likeCommentRequest, dislikeCommentRequest} = usePostActions();
+  const {currentUser} = useAuthStore(state => state);
   const handleLike = () => {
-    setLiked(!liked);
+    likeCommentRequest.mutate(comment._id, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'comment like');
+
+        queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
+      },
+      onError(error, variables, context) {
+        console.log(error, 'err');
+        toast.error('Oops! Something went wrong, try again');
+      },
+    });
+  };
+
+  const handleDisLike = () => {
+    dislikeCommentRequest.mutate(comment._id, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'comment like');
+
+        queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
+      },
+      onError(error, variables, context) {
+        console.log(error, 'err');
+        toast.error('Oops! Something went wrong, try again');
+      },
+    });
   };
 
   const handleReport = () => {
@@ -53,101 +87,134 @@ const CommentCard = ({comment, onQuote, onEdit}: CommentCardProps) => {
   const handleQuote = () => {
     if (onQuote) {
       onQuote();
-      return;
     }
   };
 
   const handleEdit = () => {
     if (onEdit) {
       onEdit();
-      return;
     }
   };
 
-  // Function to parse and format any quoted content in the comment
   const renderCommentContent = () => {
-    // console.log(comment.content, '333');
-    // Check if the comment starts with a quote
-    if (comment.content.startsWith('> ')) {
-      //console.log(comment.content, 'yes sir');
-      // Find the name and content in the quoted text
-      const quoteContentStartIndex = comment.content.indexOf(': ');
+    if (comment) {
+      const theComment = comment.content;
 
-      if (quoteContentStartIndex !== -1) {
-        // Extract the quoted person's name
-        const quoteName = comment.content.substring(2, quoteContentStartIndex);
+      if (comment.quotedComment?.quotedContent) {
+        const quoteName = comment.quotedComment?.quotedUser;
 
-        // Look for a double newline to separate quoted content from reply
-        // const quoteEndIndex = comment.content.indexOf('\n\n');
+        const regularContent = comment.content;
 
-        const quoteEndIndex = comment.content.indexOf('---QUOTE_END---');
-
-        if (quoteEndIndex !== -1) {
-          // If found, split into quote and reply
-          const quoteContent = comment.content.substring(
-            quoteContentStartIndex + 2,
-            quoteEndIndex,
-          );
-          //const regularContent = comment.content.substring(quoteEndIndex + 2);
-          const regularContent = comment.content.substring(quoteEndIndex + 15);
-
-          return (
-            <>
-              <div className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background">
-                <p className="text-sm font-semibold text-app mb-1">
-                  @{quoteName}
+        const {quotedImage, quotedContent} = comment.quotedComment;
+        return (
+          <>
+            <div
+              className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background"
+              onClick={() =>
+                handleQuoteClick(comment.quotedComment?.quotedId as string)
+              }>
+              <div className="flex items-center gap-1 mb-1">
+                <Link href={`/user/${quoteName}`}>
+                  <Avatar className="w-5 h-5">
+                    <AvatarImage
+                      src={comment.quotedComment.quotedUserImage ?? undefined}
+                    />
+                    <AvatarFallback className="text-sm font-semibold text-app capitalize bg-gray-200">
+                      {comment.quotedComment.quotedUser.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+                <p className="text-sm font-semibold text-app capitalize">
+                  <Link href={`/user/${quoteName}`}>{quoteName}</Link>
                 </p>
-                {/* <p className="text-gray-700">{quoteContent}</p> */}
-                <PostContent content={quoteContent} />
               </div>
-              {/* <p className="whitespace-pre-wrap">{regularContent}</p> */}
-              <PostContent content={regularContent} />
-            </>
-          );
-        } else {
-          // If no newline separation, all content after the name is the quote
-          // If no delimiter separation, all content after the name is the quote
-          const quoteContent = comment.content.substring(
-            quoteContentStartIndex + 2,
-          );
-
-          return (
-            <div className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background">
-              <p className="text-sm font-semibold text-app mb-1">
-                @{quoteName}
-              </p>
               {/* <p className="text-gray-700">{quoteContent}</p> */}
-              <PostContent content={quoteContent} />
-            </div>
-          );
-        }
-      }
-    }
+              <PostContent content={quotedContent} />
 
-    // If no quote or formatting needed, return content as is
-    // return <p className="whitespace-pre-wrap">{comment.content}</p>;
-    return <PostContent content={comment.content} />;
+              {quotedImage && quotedImage.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {quotedImage?.map((url: string, index: number) => (
+                    <div
+                      key={index}
+                      className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
+                      <img
+                        src={url}
+                        alt={`Comment attachment ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* <p className="whitespace-pre-wrap">{regularContent}</p> */}
+
+            <div className="mt-3">
+              <PostContent content={regularContent} />
+            </div>
+          </>
+        );
+      }
+
+      if (!theComment && comment.quotedComment?.quotedContent) {
+        const quoteName = comment.quotedComment?.quotedUser;
+        // If no newline separation, all content after the name is the quote
+        // If no delimiter separation, all content after the name is the quote
+        const quoteContent = comment.quotedComment?.quotedContent;
+
+        return (
+          <div className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background">
+            {/* <p className="text-sm font-semibold text-app mb-1">@{quoteName}</p> */}
+
+            <div className="flex items-center gap-1 mb-1">
+              <Link href={`/user/${quoteName}`}>
+                <Avatar className="w-5 h-5">
+                  <AvatarImage
+                    src={comment.quotedComment.quotedUserImage ?? undefined}
+                  />
+                  <AvatarFallback className="text-sm font-semibold text-app capitalize bg-gray-200">
+                    {comment.quotedComment.quotedUser.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+              <p className="text-sm font-semibold text-app capitalize">
+                <Link href={`/user/${quoteName}`}>{quoteName}</Link>
+              </p>
+            </div>
+
+            <PostContent content={quoteContent} />
+          </div>
+        );
+      }
+
+      // If no quote or formatting needed, return content as is
+      // return <p className="whitespace-pre-wrap">{comment.content}</p>;
+      return <PostContent content={comment.content} />;
+    }
   };
 
+  const isLiked = comment.likedBy.includes(currentUser?._id as string);
   return (
-    <div className="border-b py-4 px-2 pb-10 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
+    <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={comment.avatar} />
-          <AvatarFallback>{comment.displayName.charAt(0)}</AvatarFallback>
+          <AvatarImage src={comment.commentBy.avatar} />
+          <AvatarFallback className="capitalize text-app text-3xl">
+            {comment.commentBy.username.charAt(0)}
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Link
-                href={`/profile/${comment.username}`}
-                className="font-bold hover:underline">
-                {comment.displayName}
+                href={`/profile/${comment.commentBy.username}`}
+                className="font-bold hover:underline capitalize">
+                {comment.commentBy.username}
               </Link>
 
               <span className="text-app-gray">
-                · replied {formatTimeAgo2(comment.timestamp as string)}
+                · replied {formatTimeAgo2(comment.createdAt as string)}
               </span>
             </div>
 
@@ -178,15 +245,20 @@ const CommentCard = ({comment, onQuote, onEdit}: CommentCardProps) => {
 
           <div className="mt-1">
             {renderCommentContent()}
-            {comment.image && (
-              <div className="mt-3 rounded-lg overflow-hidden">
-                <img
-                  src={comment.image}
-                  alt="Comment attachment"
-                  className="max-h-60 object-contain"
-                />
-              </div>
-            )}
+
+            {comment.images &&
+              comment.images?.length > 0 &&
+              comment.images.map((img, idx) => (
+                <div
+                  className="mt-3 rounded-lg overflow-hidden"
+                  key={img.public_id || idx}>
+                  <img
+                    src={img.secure_url}
+                    alt={`comment attachment ${idx + 1}`}
+                    className="w-full h-auto max-h-96 object-cover rounded-lg"
+                  />
+                </div>
+              ))}
           </div>
 
           <div className="flex gap-6 mt-3">
@@ -214,15 +286,15 @@ const CommentCard = ({comment, onQuote, onEdit}: CommentCardProps) => {
               size="sm"
               className={cn(
                 'text-app-gray hover:text-red-500 p-0 h-auto',
-                liked && 'text-red-500',
+                isLiked && 'text-red-500',
               )}
               onClick={handleLike}>
               <Heart
                 size={16}
                 className="mr-1"
-                fill={liked ? 'currentColor' : 'none'}
+                fill={isLiked ? 'currentColor' : 'none'}
               />
-              <span className="text-xs">{comment.likes}</span>
+              <span className="text-xs">{comment.likedBy.length || 0}</span>
             </Button>
 
             {/* <Button
@@ -235,9 +307,17 @@ const CommentCard = ({comment, onQuote, onEdit}: CommentCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto">
-              <ThumbsDown size={16} />
-              <span className="text-xs">{comment.likes}</span>
+              className="text-app-gray hover:text-app p-0 h-auto"
+              onClick={handleDisLike}>
+              <ThumbsDown
+                size={16}
+                fill={
+                  comment.dislikedBy.includes(currentUser?._id as string)
+                    ? 'currentColor'
+                    : 'none'
+                }
+              />
+              <span className="text-xs">{comment.dislikedBy.length || 0}</span>
             </Button>
           </div>
         </div>

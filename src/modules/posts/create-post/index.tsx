@@ -1,7 +1,9 @@
 'use client';
+import {FallbackMessage} from '@/components/fallbacks';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import {AddPostField} from '@/components/post/add-post-field';
 import CommunityGuidelines from '@/components/post/community-guidelines';
+import CreatePostSkeleton from '@/components/skeleton/create-post-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent} from '@/components/ui/card';
@@ -12,79 +14,111 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {Posts, Sections} from '@/constants/data';
-import {PostProps} from '@/types/post-item.type';
+import {Sections} from '@/constants/data';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {queryClient} from '@/lib/client/query-client';
+import {SectionName} from '@/types/section';
+import {useQuery} from '@tanstack/react-query';
 import {FileImage, Trash2, X} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {toast} from 'sonner';
+import {postService} from '../actions';
+import {PostDto, UpdatePostDto} from '../dto/post-dto';
+import {usePostActions} from '../post-hooks';
 
 export const CreatePostPage = () => {
+  const {currentUser} = useAuthStore(state => state);
   const [content, setContent] = useState('');
-  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedSection, setSelectedSection] = useState<SectionName>();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [videoUrls, setVideoUrls] = useState<string[]>([]);
 
+  const [images, setImages] = useState<File[]>([]);
+  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]); // Track removed public_ids
+  const [originalImages, setOriginalImages] = useState<
+    {secure_url: string; public_id: string}[]
+  >([]);
   const [isEditing, setIsEditing] = useState(false);
   const [postToEdit, setPostToEdit] = useState<any>(null);
   const [showGuidelines, setShowGuidelines] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  const [posts, setPosts] = useState<PostProps[]>([]);
   const navigate = useRouter();
   const location = useSearchParams();
 
-  // Check if we're editing an existing post
+  const {createPostRequest, updatePostRequest} = usePostActions();
+  const postId = location.get('postId');
+
+  const shouldQuery = !!postId;
+  const {
+    isLoading,
+    error,
+    data: post,
+  } = useQuery({
+    queryKey: ['edit-post', postId],
+    queryFn: () => postService.getPostRequestAction(postId as string),
+    retry: 1,
+    enabled: shouldQuery,
+  });
+  console.log(shouldQuery, 'should query', error);
+
+  console.log(post, 'should query dataa');
+
   useEffect(() => {
-    const postId = location.get('postId');
-    if (postId) {
-      const post = Posts.find(p => p.id === postId);
-      if (post) {
-        setIsEditing(true);
-        setPostToEdit(post);
-        setContent(post.content);
-        setSelectedSection(post.sectionId);
-        setImageUrls(post.images || []);
-        setVideoUrls(post.links || []);
-      }
+    if (post) {
+      setIsEditing(true);
+      setPostToEdit(post);
+      setContent(post.content);
+      setSelectedSection(post.section as SectionName);
+      const originals = post.images || [];
+      setOriginalImages(originals);
+      setImageUrls(originals.map((img: any) => img.secure_url));
     }
-  }, [location, Posts]);
+  }, [post]);
 
-  const addPost = (
-    post: Omit<
-      PostProps,
-      'id' | 'timestamp' | 'likes' | 'reposts' | 'bookmarks'
-    >,
-  ) => {
-    const newPost: PostProps = {
-      id: '2',
-      timestamp: new Date(),
-      likes: 0,
-      reposts: 0,
-      bookmarks: 0,
-      ...post,
-    };
-    setPosts([...posts, newPost]);
-  };
-
-  const user = {
-    id: '1',
-    username: 'johndoe',
-    displayName: 'John Doe',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-    verified: true,
-    bio: 'Tech enthusiast and coffee lover',
-    followers: ['4', '3', '5'],
-    following: ['1', '2', '3'],
-    joined: new Date('2022-03-15'),
-    email: 'john@example.com',
-  };
-
-  const updatePost = (updatedPost: PostProps) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post => (post.id === updatedPost.id ? updatedPost : post)),
+  if (isEditing && (error?.message === 'Post not found' || !postId)) {
+    return (
+      <FallbackMessage
+        message="Post not found"
+        buttonText="Back to Home"
+        page="/home"
+      />
     );
+  }
+
+  if (isLoading) {
+    return <CreatePostSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
+
+  const updatePost = (data: UpdatePostDto) => {
+    console.log(data, 'dataa');
+    setIsSubmitting(true);
+    updatePostRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'post data');
+        queryClient.invalidateQueries({queryKey: ['edit-post', postId]});
+        toast.success('Your post has been updated successfully.');
+        navigate.push('/home');
+      },
+      onError(error, variables, context) {
+        console.log(error, 'update post err');
+        toast.error(error.message ?? 'Oops! Something went wrong.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,21 +130,52 @@ export const CreatePostPage = () => {
       return;
     }
 
-    // For demo, we'll just use file names as URLs
-    // In a real app, you would upload to a server/storage
     Array.from(files).forEach(file => {
       // Create a blob URL for the image
       const imageUrl = URL.createObjectURL(file);
       console.log(imageUrl, 'imagerrrr');
+      setImages(prev => [...prev, file]);
       setImageUrls(prev => [...prev, imageUrl]);
     });
   };
 
   const removeImage = (index: number) => {
-    const updatedImages = [...imageUrls];
-    updatedImages.splice(index, 1);
-    setImageUrls(updatedImages);
-    toast.success('Image removed successfully');
+    const urlToRemove = imageUrls[index];
+
+    // If the removed image is from the original post
+    const original = originalImages.find(img => img.secure_url === urlToRemove);
+    if (original) {
+      setRemovedImageIds(prev => [...prev, original.public_id]);
+      setOriginalImages(prev =>
+        prev.filter(img => img.secure_url !== urlToRemove),
+      );
+    } else {
+      // Removing a newly uploaded image
+      setImages(prev =>
+        prev.filter((_, i) => i !== index - originalImages.length),
+      );
+    }
+
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addPost = (data: PostDto) => {
+    console.log(data, 'dataa');
+    setIsSubmitting(true);
+    createPostRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'post data');
+        toast.success('Your post has been published successfully.');
+        navigate.push('/home');
+      },
+      onError(error, variables, context) {
+        console.log(error, 'post err');
+        toast.error(error.message ?? 'Oops! Something went wrong.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   const handleSubmitPost = () => {
@@ -119,43 +184,40 @@ export const CreatePostPage = () => {
       return;
     }
 
+    if (content.length < 20) {
+      toast.error('Minimum of 20 characters is required.');
+      return;
+    }
+
     if (isEditing && postToEdit) {
       // Update existing post
       updatePost({
-        ...postToEdit,
         content: content,
-        sectionId: selectedSection,
-        images: imageUrls,
-        links: videoUrls,
+        title: content.split(' ').slice(0, 5).join(' ') + '...',
+        images: images,
+        section: selectedSection,
+        postId: postId as string,
+        removedImageIds: removedImageIds,
       });
-
-      toast.success('Your post has been updated successfully.');
     } else {
       // Create new post
       addPost({
-        userId: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        avatar: user.avatar,
-        verified: user.verified,
         content: content,
         title: content.split(' ').slice(0, 5).join(' ') + '...', // Generate title from content
-        sectionId: selectedSection,
-        images: imageUrls,
-        links: videoUrls,
+        section: selectedSection,
+        images: images,
       });
-
-      toast.success('Your post has been published successfully.');
     }
-
-    navigate.push('/home');
   };
 
-  if (!user) return null;
-
-  console.log(content, 'kkkkk');
+  const getButtonLabel = () => {
+    if (isEditing) {
+      return isSubmitting ? 'Updating...' : 'Update';
+    }
+    return isSubmitting ? 'Posting...' : 'Post';
+  };
   return (
-    <div className="">
+    <div className="pb-25">
       <div className="sticky top-0 backdrop-blur-sm border-b z-10 bg-white/80 border-app-border dark:bg-background">
         <div className="px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold">
@@ -165,8 +227,8 @@ export const CreatePostPage = () => {
           <Button
             className="rounded-full bg-app hover:bg-app/90 md:hidden text-white"
             onClick={handleSubmitPost}
-            disabled={!content.trim() || !selectedSection}>
-            {isEditing ? 'Update' : 'Post'}
+            disabled={!content.trim() || !selectedSection || isSubmitting}>
+            {getButtonLabel()}
           </Button>
         </div>
       </div>
@@ -174,47 +236,12 @@ export const CreatePostPage = () => {
       <div className="p-4">
         <div className="flex flex-col md:flex-row md:gap-4">
           <Avatar className="h-10 w-10 md:h-12 md:w-12 mb-4 md:mb-0">
-            <AvatarImage src={user.avatar} />
-            <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+            <AvatarImage src={currentUser?.avatar ?? undefined} />
+            <AvatarFallback className="capitalize text-app text-3xl">
+              {currentUser?.username.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            {/* <Textarea
-              ref={textareaRef}
-              placeholder="What's on your mind?"
-              className="border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 min-h-20 px-3"
-              value={content}
-              onChange={e => setContent(e.target.value)}
-            /> */}
-
-            {/* <div className="relative w-full">
-              <div
-                style={{fontSize: '0.875rem', lineHeight: '1.25rem'}}
-                className={clsx(
-                  'absolute inset-0 p-3 pointer-events-none text-sm whitespace-pre-wrap break-words',
-                  {
-                    'text-white': theme.type === 'dark',
-                    'text-gray-900': theme.type === 'default',
-                  },
-                )}
-                dangerouslySetInnerHTML={{__html: highlightLinks(content)}}
-              />
-              <Textarea
-                ref={textareaRef}
-                placeholder="What's on your mind?"
-                className="border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full text-transparent caret-app"
-                onChange={e => setContent(e.target.value)}
-                style={{
-                  padding: '12px', // match overlay div padding
-                  fontSize: '0.875rem',
-                  lineHeight: '1.25rem',
-                  fontFamily: 'inherit',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  overflow: 'hidden', // to avoid scroll jumps
-                }}
-              />
-            </div> */}
-
             <AddPostField setContent={setContent} content={content} />
 
             {/* Hidden file input for image uploads */}
@@ -229,23 +256,24 @@ export const CreatePostPage = () => {
             />
 
             {/* Display image previews */}
+
             {imageUrls.length > 0 && (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {imageUrls.map((url, index) => (
                   <div
-                    key={url}
-                    className="relative rounded-lg overflow-hidden">
+                    key={index}
+                    className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
                     <img
                       src={url}
                       alt={`Post attachment ${index + 1}`}
-                      className="w-full h-36 object-cover"
+                      className="w-full h-full object-cover"
                     />
                     <Button
                       variant="destructive"
                       size="icon"
-                      className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-red-600"
+                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-red-600 w-6 h-6"
                       onClick={() => removeImage(index)}>
-                      <Trash2 size={18} />
+                      <Trash2 size={12} />
                     </Button>
                   </div>
                 ))}
@@ -287,13 +315,15 @@ export const CreatePostPage = () => {
 
                 <Select
                   value={selectedSection}
-                  onValueChange={setSelectedSection}>
+                  onValueChange={(value: SectionName) =>
+                    setSelectedSection(value)
+                  }>
                   <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm">
                     <SelectValue placeholder="Select section" className="" />
                   </SelectTrigger>
                   <SelectContent>
                     {Sections.map(section => (
-                      <SelectItem key={section.id} value={section.id}>
+                      <SelectItem key={section.name} value={section.name}>
                         {section.name}
                       </SelectItem>
                     ))}
@@ -303,8 +333,10 @@ export const CreatePostPage = () => {
                 <Button
                   className="hidden md:block rounded-full bg-app hover:bg-app/90 text-white"
                   onClick={handleSubmitPost}
-                  disabled={!content.trim() || !selectedSection}>
-                  {isEditing ? 'Update' : 'Post'}
+                  disabled={
+                    !content.trim() || !selectedSection || isSubmitting
+                  }>
+                  {getButtonLabel()}
                 </Button>
               </div>
             </div>
@@ -325,15 +357,6 @@ export const CreatePostPage = () => {
         </div>
       </div>
 
-      {/* <div
-        style={{
-          margin: 0,
-          padding: 0,
-          lineHeight: '1.25rem',
-          whiteSpace: 'pre-wrap',
-        }}>
-        <div dangerouslySetInnerHTML={{__html: extractLinks2(content)}} />
-      </div> */}
       <MobileBottomTab />
     </div>
   );

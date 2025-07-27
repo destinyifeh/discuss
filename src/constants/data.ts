@@ -1,8 +1,6 @@
 import {AdCTA, AdProps} from '@/types/ad-types';
 import {CommentProps, PostProps} from '@/types/post-item.type';
 import {Section} from '@/types/section';
-import {UserTypes} from '@/types/user.types';
-import {NotificationItemProps} from './../types/user.types';
 
 export const mockAds: AdProps[] = [
   {
@@ -234,7 +232,7 @@ export const Sections: Section[] = [
   },
 ];
 
-export const SectionOptions: Section[] = [
+export const SectionOptions = [
   {
     id: '1',
     name: 'Create Ad',
@@ -2514,112 +2512,6 @@ while limiting added sugars, unhealthy fats, and excessive sodium.`,
     timestamp: '2025-05-15T18:03:45.078452',
     likes: 45,
     verified: true,
-  },
-];
-
-export const Users: UserTypes[] = [
-  {
-    id: '1',
-    username: 'johndoe',
-    displayName: 'John Doe',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-    verified: true,
-    bio: 'Tech enthusiast and coffee lover',
-    followers: ['4', '3', '5'],
-    following: ['1', '2', '3'],
-    joined: new Date('2022-03-15'),
-    email: 'john@example.com',
-  },
-  {
-    id: '2',
-    username: 'janedoe',
-    displayName: 'Jane Doe',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    verified: false,
-    bio: 'Travel blogger and photographer',
-    followers: ['4', '3', '5'],
-    following: ['1', '2', '3'],
-    joined: new Date('2022-05-20'),
-    email: 'jane@example.com',
-  },
-  {
-    id: '3',
-    username: 'gamerpro',
-    displayName: 'GamerPro',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Gamer',
-    verified: true,
-    bio: 'Professional gamer and streamer',
-    followers: ['4', '3', '5'],
-    following: ['1', '2', '3'],
-    joined: new Date('2021-10-05'),
-    email: 'gamer@example.com',
-  },
-];
-
-export const notificationData: NotificationItemProps[] = [
-  {
-    id: '1',
-    type: 'like',
-    user: {
-      username: 'janedoe',
-      displayName: 'Jane Doe',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    },
-    content: 'liked your post',
-    postId: '2',
-    timestamp: new Date().toISOString(),
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'follow',
-    user: {
-      username: 'theresatekenah',
-      displayName: 'Theresa Tekenah',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Theresa',
-    },
-    content: 'followed you',
-    timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    read: true,
-  },
-  {
-    id: '3',
-    type: 'reply',
-    user: {
-      username: 'janedoe',
-      displayName: 'Jane Doe',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    },
-    content: 'replied to your post',
-    postId: '1',
-    timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-    read: true,
-  },
-  {
-    id: '4',
-    type: 'like',
-    user: {
-      username: 'janedoe',
-      displayName: 'Jane Doe',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    },
-    content: 'liked your post',
-    postId: '2',
-    timestamp: new Date().toISOString(),
-    read: false,
-  },
-  {
-    id: '5',
-    type: 'like',
-    user: {
-      username: 'janedoe',
-      displayName: 'Jane Doe',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
-    },
-    content: 'liked your post',
-    postId: '2',
-    timestamp: new Date().toISOString(),
-    read: false,
   },
 ];
 

@@ -1,11 +1,11 @@
 import {Button} from '@/components/ui/button';
 import {Heart, MessageSquare, Quote, Share} from 'lucide-react';
 
-import {CommentProps} from '@/types/post-item.type';
+import {CommentFeedProps} from '@/types/post-item.type';
 import {useRouter} from 'next/navigation';
 
 interface CommentActionsProps {
-  comment: CommentProps;
+  comment: CommentFeedProps;
   liked: boolean;
   onLike: () => void;
   onQuote: () => void;
@@ -25,7 +25,7 @@ const CommentActions = ({
         variant="ghost"
         size="sm"
         className="text-app-gray hover:text-app p-0 h-auto"
-        onClick={() => navigate.push(`/post/${comment.postId}/reply`)}>
+        onClick={() => navigate.push(`/post/${comment.post._id}/reply`)}>
         <MessageSquare size={16} className="mr-1" />
         <span className="text-xs">Reply</span>
       </Button>
@@ -51,7 +51,7 @@ const CommentActions = ({
           className="mr-1"
           fill={liked ? 'currentColor' : 'none'}
         />
-        <span className="text-xs">{comment.likes}</span>
+        <span className="text-xs">{comment.likedBy.length}</span>
       </Button>
 
       <Button

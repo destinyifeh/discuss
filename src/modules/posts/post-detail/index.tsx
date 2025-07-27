@@ -1,32 +1,31 @@
 'use client';
 
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
 import {AppBannerAd} from '@/components/ad/banner';
 import {PageHeader} from '@/components/app-headers';
+import {FallbackMessage} from '@/components/fallbacks';
 import {AddCommentField} from '@/components/post/add-comment-field';
-import CommentCard2 from '@/components/post/comments/comment-card2';
+import CommentCard from '@/components/post/comment-card';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import PostCard from '@/components/post/post-card';
 import {PostContent2} from '@/components/post/post-content';
 import {CommentPlaceholder} from '@/components/post/post-list';
 import PostDetailSkeleton from '@/components/skeleton/post-detail-skeleton';
+import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
-import {Comments, mockAds, Posts} from '@/constants/data';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import {parseComment} from '@/lib/formatter';
-import {insertAdsAtRandomCommentsPositions} from '@/lib/helpers';
-import {CommentProps} from '@/types/post-item.type';
+import {queryClient} from '@/lib/client/query-client';
+import {
+  CommentFeedProps,
+  CommentProps,
+  ImageProps,
+} from '@/types/post-item.type';
+import {useInfiniteQuery, useQuery} from '@tanstack/react-query';
 import clsx from 'clsx';
 import {ImagePlus, MessageSquare, Reply, Send, X} from 'lucide-react';
 import Link from 'next/link';
@@ -34,8 +33,14 @@ import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
+import {postService} from '../actions';
+import {CommentDto, UpdateCommentDto} from '../dto/post-dto';
+import {usePostActions} from '../post-hooks';
+import {MobileCommentSection} from './components/mobile-comment-section';
+import {WebCommentSection} from './components/web-comment-section';
 
 export const PostDetailPage = () => {
+  const {currentUser} = useAuthStore(state => state);
   const {theme} = useGlobalStore(state => state);
   const {postId} = useParams<{postId: string}>();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -44,126 +49,210 @@ export const PostDetailPage = () => {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quoteContent, setQuoteContent] = useState('');
+  const [quotedImages, setQuotedImages] = useState<string[]>([]);
   const [quotedUser, setQuotedUser] = useState('');
   const [showWebComment, setShowWebComment] = useState(false);
   const [showMobileComment, setShowMobileComment] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [comments, setComments] = useState<CommentProps[]>([...Comments]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [editComment, setEditComment] = useState<CommentProps>();
+  const [comments, setComments] = useState<CommentProps[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]); // Track removed public_ids
+  const [originalImages, setOriginalImages] = useState<ImageProps[]>([]);
+  const [editComment, setEditComment] = useState<CommentFeedProps | null>();
+  const [isEditing, setIsEditing] = useState(false);
+  const [quoteId, setQuoteId] = useState('');
+  const [quotedUserId, setQuotedUserId] = useState('');
+  const [quotedUserImage, setQuotedUserImage] = useState('');
+  const {createComment, updateCommentRequest} = usePostActions();
 
-  useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 800);
-  }, []);
-  const user = {
-    id: '1',
-    username: 'johndoe',
-    displayName: 'John Doe',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-    verified: true,
-    bio: 'Tech enthusiast and coffee lover',
-    followers: ['4', '3', '5'],
-    following: ['1', '2', '3'],
-    joined: new Date('2022-03-15'),
-    email: 'john@example.com',
+  const shouldQuery = !!postId;
+  const {
+    isLoading,
+    error,
+    data: post,
+  } = useQuery({
+    queryKey: ['post-details', postId],
+    queryFn: () => postService.getPostRequestAction(postId),
+    retry: 1,
+    enabled: shouldQuery,
+  });
+  console.log(shouldQuery, 'should query', error);
+
+  console.log(post, 'should query dataa');
+
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error: commentErr,
+  } = useInfiniteQuery({
+    queryKey: ['comment-feed-posts', postId],
+    queryFn: ({pageParam = 1}) =>
+      postService.getCommentFeeds(postId, pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+  });
+
+  const commentsData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.comments) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  console.log('get comment error', commentErr);
+
+  console.log(commentsData, 'comments dataa', totalCount);
+
+  const addComment = (data: CommentDto) => {
+    console.log(data, 'dataa');
+    setIsSubmitting(true);
+    createComment.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'comment data');
+        queryClient.invalidateQueries({
+          queryKey: ['comment-feed-posts', postId],
+        });
+        // Clear input and close comment section if open on mobile
+        setComment('');
+        setQuoteContent('');
+        setQuotedUser('');
+        setImagePreview(null);
+        setShowWebComment(false);
+        setImageUrls([]);
+        setImages([]);
+        setShowMobileComment(false);
+        setQuotedImages([]);
+        toast.success('Comment added successfully');
+      },
+      onError(error, variables, context) {
+        console.log(error, 'comment post err');
+
+        toast.error(
+          error.message ?? 'Failed to add comment. Please try again.',
+        );
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
-  const addComment = (comment: any) => {
-    const newComment = {
-      id: Math.floor(Math.random() * (10 - 1 + 1)) + 1,
-      timestamp: new Date(),
-      likes: 0,
-      ...comment,
-    };
-    console.log(newComment, 'newerrrr22');
-    setComments([...comments, newComment]);
-  };
+  const updateComment = (data: UpdateCommentDto) => {
+    console.log(data, 'dataa');
+    setIsSubmitting(true);
+    updateCommentRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'update comment data');
+        queryClient.invalidateQueries({
+          queryKey: ['comment-feed-posts', postId],
+        });
+        // Clear input and close comment section if open on mobile
+        setComment('');
+        setQuoteContent('');
+        setQuotedUser('');
+        setImagePreview(null);
+        setShowWebComment(false);
+        setImageUrls([]);
+        setImages([]);
+        setIsEditing(false);
+        setEditComment(null);
+        setShowMobileComment(false);
+        setQuotedImages([]);
+        toast.success('Comment updated successfully');
+      },
+      onError(error, variables, context) {
+        console.log(error, 'comment update err');
 
-  const getCommentsForPost = (postId: string): CommentProps[] => {
-    return comments.filter(comment => comment.postId === postId);
-  };
-  const post = Posts.find(p => p.id === postId);
-  const commentts = getCommentsForPost(postId || '');
-
-  // Sort comments by timestamp (newest first)
-  const sortedComments = [...commentts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
-
-  // Helper function to extract user's added content from a comment
-  const extractUserAddedContent = (content: string): string => {
-    console.log(content, 'contyyy');
-    // If content has a quote block (starts with >)
-    if (content.startsWith('> ')) {
-      const quoteEndIndex = content.indexOf('---QUOTE_END---');
-      // const quoteEndIndex = content.indexOf('\n\n');
-      console.log(quoteEndIndex, 'contyyy22');
-      if (quoteEndIndex !== -1) {
-        // Return only the content after the quote (the user's added text)
-        // return content.substring(quoteEndIndex + 2);
-        return content.substring(quoteEndIndex + 15);
-      }
-    }
-    return content;
+        toast.error(
+          error.message ?? 'Failed to update comment. Please try again.',
+        );
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   const handleEditComment = useCallback(
-    (commentId: string) => {
-      console.log(commentId, 'cocooid');
-      const comment = comments.find(c => c.id === commentId);
-      console.log(comment, 'heeeree');
-      if (comment) {
-        const isQuotedComment = parseComment(comment.content);
-        console.log(isQuotedComment, 'comm');
+    (comment: CommentFeedProps) => {
+      console.log(comment, 'cocooid');
 
-        if (comment.content.startsWith('> ') && isQuotedComment.isQuoted) {
-          setQuoteContent(isQuotedComment.quotedText as string);
-          setQuotedUser(isQuotedComment.quotedUsername as string);
-          setComment(isQuotedComment.commentText);
+      if (comment) {
+        if (comment.quotedComment) {
+          console.log(comment.quotedComment, 'quotedCom');
+          const quotedImg = comment.quotedComment.quotedImage
+            ? comment.quotedComment.quotedImage.map((url: string) => url)
+            : [];
+
+          setQuotedUser(comment.quotedComment.quotedUser);
+          setQuoteContent(comment.quotedComment.quotedContent);
+          setQuoteId(comment.quotedComment.quotedId);
+          setQuotedUserImage(comment.quotedComment.quotedUserImage as string);
+          setQuotedImages(quotedImg);
+          setComment(comment.content);
           setShowMobileComment(true);
           setShowWebComment(true);
+          setIsEditing(true);
+          setEditComment(comment);
+          const originals = comment.images || [];
+          setOriginalImages(originals);
+          setImageUrls(originals.map((img: any) => img.secure_url));
+
           return;
         }
         setComment(comment.content);
         setShowMobileComment(true);
         setShowWebComment(true);
         setEditComment(comment);
+        setIsEditing(true);
+        const originals = comment.images || [];
+        setOriginalImages(originals);
+        setImageUrls(originals.map((img: any) => img.secure_url));
       }
     },
     [comments, setComment, setShowMobileComment, setShowWebComment],
   );
 
   const handleQuoteComment = useCallback(
-    (commentId: string) => {
-      console.log(commentId, 'cocooid');
-      const commentToQuote = comments.find(c => c.id === commentId);
+    (comment: CommentFeedProps) => {
+      console.log(comment, 'cocooid');
+      const commentToQuote = comment;
       console.log(commentToQuote, 'heeeree');
       if (commentToQuote) {
-        // Extract only the direct content, ignoring any nested quotes
-        let contentToQuote = extractUserAddedContent(commentToQuote.content);
-        console.log(contentToQuote, 'cocooid33');
-        // Format quote consistently for both mobile and desktop
-        const formattedQuote = `> ${commentToQuote.username}: ${contentToQuote}`;
-        console.log(formattedQuote, 'cocooid35');
-        setQuoteContent(formattedQuote);
-        setQuotedUser(commentToQuote.username);
+        setQuoteContent(commentToQuote.content);
+        setQuotedUser(commentToQuote.commentBy.username);
+        setQuotedUserImage(commentToQuote.commentBy.avatar as string);
+        setQuotedUserId(commentToQuote.commentBy._id);
+        setQuoteId(commentToQuote._id);
         setShowMobileComment(true);
         setShowWebComment(true);
-
-        if (isMobile) {
-          setShowMobileComment(true);
-        }
+        setShowMobileComment(true);
+        const originals = comment.images || [];
+        console.log(originals, 'ooriiih');
+        setOriginalImages(originals);
+        setQuotedImages(originals.map((img: any) => img.secure_url));
       }
     },
     [
       comments,
-      extractUserAddedContent,
+
       setQuoteContent,
       setQuotedUser,
       setShowMobileComment,
       setShowWebComment,
+      setQuotedImages,
+      setQuotedUserId,
+      setQuoteId,
+      setQuotedUserImage,
     ],
   );
 
@@ -175,117 +264,94 @@ export const PostDetailPage = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Format the comment content to include the quote if present
-      // const finalComment = quoteContent
-      //   ? `${quoteContent}\n\n${comment.trim()}`
-      //   : comment.trim();
-
-      const finalComment = quoteContent
-        ? `${quoteContent}---QUOTE_END---${comment.trim()}`
-        : comment.trim();
-
-      console.log(finalComment, 'finalCom');
-      console.log(quoteContent, 'finalCom33');
-
-      // Add comment to app context
-      addComment({
-        postId: postId || 1,
-        userId: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        avatar: user.avatar,
-        content: finalComment,
-        verified: user.verified || false,
-        image: imagePreview || undefined,
-      });
-
-      // Clear input and close comment section if open on mobile
-      setComment('');
-      setQuoteContent('');
-      setQuotedUser('');
-      setImagePreview(null);
-      setShowWebComment(false);
-      if (isMobile) {
-        setShowMobileComment(false);
+      let quotePayload = null;
+      if (quoteContent) {
+        quotePayload = {
+          quotedContent: quoteContent,
+          quotedImage: quotedImages,
+          quotedUser: quotedUser,
+          quotedId: quoteId,
+          quotedUserId: quotedUserId,
+          quotedUserImage: quotedUserImage,
+        };
       }
-      toast.success('Comment added successfully');
+
+      if (isEditing) {
+        updateComment({
+          postId: postId,
+          content: comment.trim(),
+          images: images,
+          commentId: editComment?._id as string,
+          removedImageIds: removedImageIds,
+        });
+        return;
+      }
+
+      addComment({
+        postId: postId,
+        content: comment.trim(),
+        images: images,
+        quotedComment: quotePayload,
+      });
     } catch (error) {
       console.error('Error adding comment:', error);
-      toast.error('Failed to add comment. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image too large', {
-        description: 'Please select an image less than 5MB',
-      });
+    if (imageUrls.length + files.length > 2) {
+      toast.error('You can only upload a maximum of 2 images');
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Invalid file type', {
-        description: 'Please select an image file',
-      });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = event => {
-      if (event.target?.result) {
-        setImagePreview(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    Array.from(files).forEach(file => {
+      // Create a blob URL for the image
+      const imageUrl = URL.createObjectURL(file);
+      console.log(imageUrl, 'imagerrrr');
+      setImages(prev => [...prev, file]);
+      setImageUrls(prev => [...prev, imageUrl]);
+    });
   };
 
-  const removeImage = () => {
+  const removeImage2 = () => {
     setImagePreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
+  const removeImage = (index: number) => {
+    console.log(index, 'remove imageee');
+    const urlToRemove = imageUrls[index];
+
+    // If the removed image is from the original post
+    const original = originalImages.find(img => img.secure_url === urlToRemove);
+    if (original) {
+      setRemovedImageIds(prev => [...prev, original.public_id]);
+      setOriginalImages(prev =>
+        prev.filter(img => img.secure_url !== urlToRemove),
+      );
+    } else {
+      // Removing a newly uploaded image
+      setImages(prev =>
+        prev.filter((_, i) => i !== index - originalImages.length),
+      );
+    }
+
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
+  };
   const allowInlineCom = false;
-
-  const sponsoredAd = mockAds.filter(
-    ad => ad.type === 'Sponsored' && ad.section === 'home',
-  );
-
-  // const mergedItems2 = useMemo(() => {
-  //   return mergeCommentsWithAds(sortedComments, shuffleArray(sponsoredAd));
-  // }, [Comments, mockAds]);
-
-  const mergedItems = useMemo(() => {
-    return insertAdsAtRandomCommentsPositions(sortedComments, sponsoredAd);
-  }, [Comments, mockAds]);
-
-  if (isLoading) {
-    return <PostDetailSkeleton />;
-  }
-
-  if (!post) {
-    return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold mb-2">Post not found</h2>
-        <Button variant="outline" onClick={() => navigate.push('/home')}>
-          Back to Home
-        </Button>
-      </div>
-    );
-  }
 
   const handleQuoteClick = (quotedCommentId: string) => {
     // 1. Find the index of the first comment by the quotedUsername
-    const targetIndex = comments.findIndex(c => c.id === quotedCommentId);
+    console.log(quotedCommentId, 'tarrr22');
+    const targetIndex = commentsData.findIndex(
+      (c: any) => c.data._id === quotedCommentId,
+    );
     console.log(targetIndex, 'tarrr');
     if (targetIndex !== -1) {
       // 2. Use Virtuoso's scrollToIndex method
@@ -304,6 +370,34 @@ export const PostDetailPage = () => {
       console.log(`Comment by user "${quotedCommentId}" not found.`);
     }
   };
+
+  const onComment = () => {
+    navigate.push(`/post/${postId}/reply`);
+  };
+
+  const getButtonLabel = () => {
+    if (isEditing) {
+      return isSubmitting ? 'Updating...' : 'Update';
+    }
+    return isSubmitting ? 'Replying...' : 'Reply';
+  };
+
+  const allowMainCom = false;
+  const mob = true;
+
+  if (error?.message === 'Post not found' || !postId) {
+    return (
+      <FallbackMessage
+        message="Post not found"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
+
+  if (isLoading) {
+    return <PostDetailSkeleton />;
+  }
   return (
     <Fragment>
       <PageHeader title="Post" />
@@ -314,8 +408,8 @@ export const PostDetailPage = () => {
           ref={virtuosoRef}
           // onScroll={handleScroll}
           // initialTopMostItemIndex={0}
-          // data={sortedComments}
-          data={mergedItems}
+
+          data={commentsData}
           // itemContent={(index, comment) => (
           //   <div>
           //     <CommentCard
@@ -326,26 +420,44 @@ export const PostDetailPage = () => {
           //   </div>
           // )}
 
-          itemContent={(index, item) => {
-            if (item.type === 'ad') {
-              return <AdCard ad={item.data} />;
+          endReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
             }
-            return (
-              <CommentCard2
-                comment={item.data}
-                key={item.data.id}
-                onQuote={() => handleQuoteComment(item.data.id)}
-                handleQuoteClick={handleQuoteClick}
-                // onEdit={() => handleEditComment(item.data.id)}
-              />
-            );
           }}
-          // computeItemKey={(index, item) => {
-          //   // Ensure unique & stable keys
-          //   if (item.type === 'ad') return `ad-${item.data.id}`;
-          //   return `comment-${item.data.id}`;
-          // }}
+          itemContent={(index, comment) => {
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            } else {
+              if (!comment || !comment.data) {
+                return null;
+              }
+              if (comment._type === 'ad') {
+                return (
+                  <AdCard
+                    key={comment.data._id || `ad-${index}`}
+                    ad={comment.data}
+                  />
+                );
+              }
+              return (
+                <CommentCard
+                  key={comment.data._id || `comment-${index}`}
+                  comment={comment.data}
+                  onQuote={() => handleQuoteComment(comment.data)}
+                  handleQuoteClick={handleQuoteClick}
+                  onEdit={() => handleEditComment(comment.data)}
+                />
+              );
+            }
+          }}
           components={{
+            Footer: () =>
+              isFetchingNextPage ? (
+                <div className="py-4 text-center text-sm text-gray-500">
+                  Loading more...
+                </div>
+              ) : null,
             Header: () => (
               <Fragment>
                 <div>
@@ -374,9 +486,9 @@ export const PostDetailPage = () => {
                       className="mt-4 space-y-4">
                       <div className="flex gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={user.avatar} />
-                          <AvatarFallback>
-                            {user.displayName.charAt(0)}
+                          <AvatarImage src={currentUser?.avatar ?? undefined} />
+                          <AvatarFallback className="capitalize text-app text-3xl">
+                            {currentUser?.username.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -423,7 +535,7 @@ export const PostDetailPage = () => {
                                 type="button"
                                 variant="destructive"
                                 size="icon"
-                                onClick={removeImage}
+                                //onClick={removeImage}
                                 className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
                                 <X size={16} />
                               </Button>
@@ -473,282 +585,336 @@ export const PostDetailPage = () => {
         />
       </div>
 
-      {/* {sortedComments.length > 0 ? (
-        <div className="divide-y divide-app-border">
-          {sortedComments.map(comment => (
-            <CommentCard
-              key={comment.id}
-              comment={comment}
-              onQuote={() => handleQuoteComment(comment.id)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">No replies yet</h2>
-          <p className="text-app-gray">Be the first to reply!</p>
-        </div>
-      )} */}
-
       {/* Mobile comment section - slides up from bottom */}
-
-      <div className="lg:hidden">
-        {/* Comment button for mobile */}
+      {!mob ? (
         <Button
           className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
           size="icon"
-          onClick={() => {
-            setShowMobileComment(!showMobileComment);
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-          }}>
+          onClick={onComment}>
           <MessageSquare size={24} />
         </Button>
+      ) : (
+        <MobileCommentSection
+          showMobileComment={showMobileComment}
+          setShowMobileComment={setShowMobileComment}
+          setQuoteContent={setQuoteContent}
+          setQuotedUser={setQuotedUser}
+          imagePreview={imagePreview}
+          isSubmitting={isSubmitting}
+          handleImageUpload={handleImageUpload}
+          removeImage={removeImage}
+          imageUrls={imageUrls}
+          setComment={setComment}
+          setImagePreview={setImagePreview}
+          quoteContent={quoteContent}
+          quotedUser={quotedUser}
+          comment={comment}
+          virtuosoRef={virtuosoRef}
+          fileInputRef={fileInputRef}
+          handleSubmitComment={handleSubmitComment}
+          setEditComment={setEditComment}
+          setIsEditing={setIsEditing}
+          setImageUrls={setImageUrls}
+          setImages={setImages}
+          isEditing={isEditing}
+          getButtonLabel={getButtonLabel}
+          quotedImages={quotedImages}
+          setQuotedImages={setQuotedImages}
+          quotedUserImage={quotedUserImage}
+        />
+      )}
 
-        {/* Mobile inline comment section that slides up from bottom */}
-        <div
-          // className={`fixed left-0 right-0 bottom-0 bg-white border-t border-app-border transition-transform duration-300 ease-in-out transform ${
-          //   showMobileComment ? 'translate-y-0' : 'translate-y-full'
-          // } z-50`}>
+      <WebCommentSection
+        showWebComment={showWebComment}
+        setShowWebComment={setShowWebComment}
+        setQuoteContent={setQuoteContent}
+        setQuotedUser={setQuotedUser}
+        imagePreview={imagePreview}
+        isSubmitting={isSubmitting}
+        handleImageUpload={handleImageUpload}
+        removeImage={removeImage}
+        setComment={setComment}
+        setImagePreview={setImagePreview}
+        quoteContent={quoteContent}
+        quotedUser={quotedUser}
+        comment={comment}
+        virtuosoRef={virtuosoRef}
+        fileInputRef={fileInputRef}
+        handleSubmitComment={handleSubmitComment}
+        imageUrls={imageUrls}
+      />
 
-          className={clsx(
-            'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform bg-app-hover border-app-border dark:bg-background',
-            {
-              'translate-y-0': showMobileComment === true,
-              'translate-y-full': showMobileComment === false,
-            },
-          )}>
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-semibold">Add a comment</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowMobileComment(false);
-                  setQuoteContent('');
-                  setQuotedUser('');
-                  setComment('');
-                  setImagePreview(null);
-                  // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-                }}>
-                Cancel
-              </Button>
-            </div>
+      {allowMainCom && (
+        <>
+          <div className="lg:hidden">
+            {/* Comment button for mobile */}
+            <Button
+              className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
+              size="icon"
+              onClick={() => {
+                setShowMobileComment(!showMobileComment);
+                virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+              }}>
+              <MessageSquare size={24} />
+            </Button>
 
-            <div className="mt-1">
-              {/* User info with community guidelines */}
-              <div className="flex items-center mb-3">
-                <Avatar className="h-8 w-8 mr-2">
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="text-sm text-app">
-                  <Link href="/community-guidelines">Community Guidelines</Link>
-                  <span className="mx-1">•</span>
-                  <span className="text-[#666]">
-                    Be respectful and constructive in your comments.
-                  </span>
+            {/* Mobile inline comment section that slides up from bottom */}
+            <div
+              // className={`fixed left-0 right-0 bottom-0 bg-white border-t border-app-border transition-transform duration-300 ease-in-out transform ${
+              //   showMobileComment ? 'translate-y-0' : 'translate-y-full'
+              // } z-50`}>
+
+              className={clsx(
+                'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform bg-app-hover border-app-border dark:bg-background',
+                {
+                  'translate-y-0': showMobileComment === true,
+                  'translate-y-full': showMobileComment === false,
+                },
+              )}>
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <p className="font-semibold">Add a comment</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowMobileComment(false);
+                      setQuoteContent('');
+                      setQuotedUser('');
+                      setComment('');
+                      setImagePreview(null);
+                      // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                    }}>
+                    Cancel
+                  </Button>
                 </div>
-              </div>
 
-              {quotedUser && (
-                <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
-                  <div className="font-semibold mb-1 text-app">
-                    @{quotedUser}
+                <div className="mt-1">
+                  {/* User info with community guidelines */}
+                  <div className="flex items-center mb-3">
+                    <Avatar className="h-8 w-8 mr-2">
+                      <AvatarImage src={currentUser?.avatar ?? undefined} />
+                      <AvatarFallback className="capitalize text-app text-3xl">
+                        {currentUser?.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="text-sm text-app">
+                      <Link href="/community-guidelines">
+                        Community Guidelines
+                      </Link>
+                      <span className="mx-1">•</span>
+                      <span className="text-[#666]">
+                        Be respectful and constructive in your comments.
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-sm">
-                    {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
-                    <PostContent2
-                      content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                    />
-                  </div>
-                </div>
-              )}
 
-              {/* <Textarea
+                  {quotedUser && (
+                    <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
+                      <div className="font-semibold mb-1 text-app">
+                        @{quotedUser}
+                      </div>
+                      <div className="text-sm">
+                        {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
+                        <PostContent2
+                          content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* <Textarea
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
               /> */}
-              <AddCommentField content={comment} setContent={setComment} />
+                  <AddCommentField content={comment} setContent={setComment} />
 
-              {imagePreview && (
-                <div className="relative mt-3 rounded-md overflow-hidden border border-app-border ">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full max-h-30 object-contain"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={removeImage}
-                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                    <X size={16} />
-                  </Button>
+                  {imagePreview && (
+                    <div className="relative mt-3 rounded-md overflow-hidden border border-app-border ">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full max-h-30 object-contain"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        // onClick={removeImage}
+                        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center mt-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      ref={fileInputRef}
+                      id="image-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-app"
+                      onClick={() => fileInputRef.current?.click()}>
+                      <ImagePlus size={18} />
+                    </Button>
+                    <Button
+                      onClick={handleSubmitComment}
+                      className="rounded-full bg-app hover:bg-app/90 text-white"
+                      disabled={
+                        isSubmitting || (!comment.trim() && !imagePreview)
+                      }>
+                      <Reply size={16} className="mr-2" />
+                      Reply
+                    </Button>
+                  </div>
                 </div>
-              )}
-
-              <div className="flex justify-between items-center mt-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  ref={fileInputRef}
-                  id="image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-app"
-                  onClick={() => fileInputRef.current?.click()}>
-                  <ImagePlus size={18} />
-                </Button>
-                <Button
-                  onClick={handleSubmitComment}
-                  className="rounded-full bg-app hover:bg-app/90 text-white"
-                  disabled={isSubmitting || (!comment.trim() && !imagePreview)}>
-                  <Reply size={16} className="mr-2" />
-                  Reply
-                </Button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="hidden lg:block">
-        {/* Comment button for web */}
-        <Button
-          className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1 bg-app hover:bg-app/90 dark:hover:bg-app dark:bg-app/90 text-white"
-          size="icon"
-          onClick={() => {
-            setShowWebComment(!showWebComment);
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-          }}>
-          <MessageSquare size={24} />
-        </Button>
+          <div className="hidden lg:block">
+            {/* Comment button for web */}
+            <Button
+              className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1 bg-app hover:bg-app/90 dark:hover:bg-app dark:bg-app/90 text-white"
+              size="icon"
+              onClick={() => {
+                setShowWebComment(!showWebComment);
+                virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+              }}>
+              <MessageSquare size={24} />
+            </Button>
 
-        {/* Web inline comment section that slides up from bottom */}
-        <div
-          className={clsx(
-            'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50 bg-app-hover dark:bg-background border-app-border',
-            {
-              'translate-y-0': showWebComment === true,
-              'translate-y-full': showWebComment === false,
-            },
-          )}>
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-semibold">Add a comment</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowWebComment(false);
-                  setQuoteContent('');
-                  setQuotedUser('');
-                  setComment('');
-                  setImagePreview(null);
-                  // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-                }}>
-                Cancel
-              </Button>
-            </div>
+            {/* Web inline comment section that slides up from bottom */}
+            <div
+              className={clsx(
+                'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50 bg-app-hover dark:bg-background border-app-border',
+                {
+                  'translate-y-0': showWebComment === true,
+                  'translate-y-full': showWebComment === false,
+                },
+              )}>
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <p className="font-semibold">Add a comment</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowWebComment(false);
+                      setQuoteContent('');
+                      setQuotedUser('');
+                      setComment('');
+                      setImagePreview(null);
+                      // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                    }}>
+                    Cancel
+                  </Button>
+                </div>
 
-            <div className="mt-1">
-              {/* User info with community guidelines */}
-              <div className="flex items-center mb-3">
-                <Avatar className="h-8 w-8 mr-2">
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
-                </Avatar>
-                {/* <div className="text-sm text-app">
+                <div className="mt-1">
+                  {/* User info with community guidelines */}
+                  <div className="flex items-center mb-3">
+                    <Avatar className="h-8 w-8 mr-2">
+                      <AvatarImage src={currentUser?.avatar ?? undefined} />
+                      <AvatarFallback className="capitalize text-app text-3xl">
+                        {currentUser?.username.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {/* <div className="text-sm text-app">
                   <span>Community Guidelines</span>
                   <span className="mx-1">•</span>
                   <span className="text-[#666]">
                     Be respectful and constructive in your comments.
                   </span>
                 </div> */}
-                <CommunityGuidelines />
-              </div>
-
-              {quotedUser && (
-                <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
-                  <div className="font-semibold mb-1 text-app">
-                    @{quotedUser}
+                    <CommunityGuidelines />
                   </div>
-                  <div className="text-sm">
-                    {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
-                    <PostContent2
-                      content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                    />
-                  </div>
-                </div>
-              )}
 
-              {/* <Textarea
+                  {quotedUser && (
+                    <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
+                      <div className="font-semibold mb-1 text-app">
+                        @{quotedUser}
+                      </div>
+                      <div className="text-sm">
+                        {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
+                        <PostContent2
+                          content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* <Textarea
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
               /> */}
-              <AddCommentField content={comment} setContent={setComment} />
+                  <AddCommentField content={comment} setContent={setComment} />
 
-              {imagePreview && (
-                <div className="relative mt-3 rounded-md overflow-hidden border py-1 border-app-border">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full max-h-30 object-contain"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={removeImage}
-                    className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                    <X size={16} />
-                  </Button>
+                  {imagePreview && (
+                    <div className="relative mt-3 rounded-md overflow-hidden border py-1 border-app-border">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full max-h-30 object-contain"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        // onClick={removeImage}
+                        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center mt-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      ref={fileInputRef}
+                      id="image-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={clsx('text-app', {
+                        'hover:bg-app-dark-bg/10 hover:text-app':
+                          theme.type === 'dark',
+                      })}
+                      onClick={() => fileInputRef.current?.click()}>
+                      <ImagePlus size={18} />
+                    </Button>
+                    <Button
+                      onClick={handleSubmitComment}
+                      className="rounded-full bg-app hover:bg-app/90 text-white"
+                      disabled={
+                        isSubmitting || (!comment.trim() && !imagePreview)
+                      }>
+                      <Reply size={16} className="mr-2" />
+                      Reply
+                    </Button>
+                  </div>
                 </div>
-              )}
-
-              <div className="flex justify-between items-center mt-3">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  ref={fileInputRef}
-                  id="image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={clsx('text-app', {
-                    'hover:bg-app-dark-bg/10 hover:text-app':
-                      theme.type === 'dark',
-                  })}
-                  onClick={() => fileInputRef.current?.click()}>
-                  <ImagePlus size={18} />
-                </Button>
-                <Button
-                  onClick={handleSubmitComment}
-                  className="rounded-full bg-app hover:bg-app/90 text-white"
-                  disabled={isSubmitting || (!comment.trim() && !imagePreview)}>
-                  <Reply size={16} className="mr-2" />
-                  Reply
-                </Button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </Fragment>
   );
 };

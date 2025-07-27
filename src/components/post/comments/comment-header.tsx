@@ -9,11 +9,11 @@ import {formatDistanceToNow} from 'date-fns';
 import {Edit, Flag, MoreHorizontal} from 'lucide-react';
 
 import {formatTimeAgo2} from '@/lib/formatter';
-import {CommentProps} from '@/types/post-item.type';
+import {CommentFeedProps} from '@/types/post-item.type';
 import Link from 'next/link';
 
 interface CommentHeaderProps {
-  comment: CommentProps;
+  comment: CommentFeedProps;
   isOwnComment: boolean;
   onEdit: () => void;
   onReport: () => void;
@@ -43,13 +43,13 @@ const CommentHeader = ({
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
         <Link
-          href={`/profile/${comment.username}`}
+          href={`/profile/${comment.commentBy.username}`}
           className="font-bold hover:underline">
-          {comment.displayName}
+          {comment.commentBy.username}
         </Link>
 
         <span className="text-app-gray">
-          · replied {formatTimeAgo2(comment.timestamp as string)}
+          · replied {formatTimeAgo2(comment.createdAt as string)}
         </span>
       </div>
 

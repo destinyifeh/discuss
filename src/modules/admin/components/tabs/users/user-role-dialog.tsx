@@ -18,15 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {AdminUserRole} from '@/modules/admin/admin-types';
+import {Role} from '@/types/user.types';
 import {Crown, Shield, User} from 'lucide-react';
 
 type RoleManagementDialogProps = {
   roleManagementDialog: boolean;
 
   setRoleManagementDialog: (action: boolean) => void;
-  newRole: AdminUserRole;
-  setNewRole: (role: AdminUserRole) => void;
+  newRole: Role;
+  setNewRole: (role: Role) => void;
   handleRoleChange: () => void;
   actionLoader: boolean;
 };
@@ -54,7 +54,7 @@ export const AdminRoleManagementDialog = ({
             <Label htmlFor="role-select">Select New Role</Label>
             <Select
               value={newRole}
-              onValueChange={value => setNewRole(value as AdminUserRole)}>
+              onValueChange={value => setNewRole(value as Role)}>
               <SelectTrigger id="role-select">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>

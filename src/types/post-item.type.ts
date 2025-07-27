@@ -23,6 +23,38 @@ export interface PostProps {
   section?: string;
 }
 
+type PostFeedAuthor = {
+  username: string;
+  avatar?: string;
+  _id: string;
+};
+
+type CommentFeedAuthor = {
+  username: string;
+  avatar: string;
+  _id: string;
+};
+
+export type ImageProps = {
+  secure_url: string;
+  public_id: string;
+};
+export interface PostFeedProps {
+  _id: string;
+  user: PostFeedAuthor;
+  title: string;
+  content: string;
+  createdAt: Date | string;
+  section: string;
+  images?: ImageProps[];
+  likedBy: string[];
+  bookmarkedBy: string[];
+  viewedBy: string[];
+  commentBy: string[];
+  commentsClosed?: boolean;
+  viewCount: number;
+}
+
 export interface CommentProps {
   id: string;
   postId: string;
@@ -36,6 +68,27 @@ export interface CommentProps {
   verified: boolean;
   image?: string;
   commentId?: string;
+}
+
+export interface QuotedCommentProps {
+  quotedContent: string;
+  quotedUser: string;
+  quotedUserImage?: string;
+  quotedId: string;
+  quotedUserId: string;
+  quotedImage?: string[];
+}
+
+export interface CommentFeedProps {
+  _id: string;
+  post: PostFeedProps;
+  content: string;
+  images?: ImageProps[];
+  commentBy: CommentFeedAuthor;
+  likedBy: string[];
+  dislikedBy: string[];
+  createdAt: Date | string;
+  quotedComment?: QuotedCommentProps | null;
 }
 
 export interface AdvertisementProps {

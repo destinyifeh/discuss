@@ -28,7 +28,6 @@ type AdProps = {
 
 export const AdTab: FC<AdProps> = ({
   searchTerm,
-
   filterSection,
   filterStatus,
   tabValue,

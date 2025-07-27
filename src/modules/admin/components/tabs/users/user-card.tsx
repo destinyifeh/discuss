@@ -7,6 +7,7 @@ import {Ban, Calendar, Crown, Shield, User} from 'lucide-react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {UserActionType} from '@/modules/admin/admin-types';
+import {Role} from '@/types/user.types';
 import {AdminUserProps} from '../../../actions/user';
 
 export const AdminUserCard = ({
@@ -43,21 +44,21 @@ export const AdminUserCard = ({
         <div className="hidden md:block">
           <Badge
             variant={
-              user.role === 'super_admin'
+              user.role === Role.SUPER_ADMIN
                 ? 'destructive'
-                : user.role === 'admin'
+                : user.role === Role.ADMIN
                 ? 'default'
                 : 'secondary'
             }
             className="flex items-center gap-1">
-            {user.role === 'super_admin' && <Crown size={12} />}
-            {user.role === 'admin' && <Shield size={12} />}
-            {user.role === 'user' && <User size={12} />}
-            {user.role === 'super_admin'
+            {user.role === Role.SUPER_ADMIN && <Crown size={12} />}
+            {user.role === Role.ADMIN && <Shield size={12} />}
+            {user.role === Role.USER && <User size={12} />}
+            {user.role === Role.SUPER_ADMIN
               ? 'Super Admin'
-              : user.role === 'admin'
+              : user.role === Role.ADMIN
               ? 'Admin'
-              : 'User'}
+              : Role.USER}
           </Badge>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -69,7 +70,7 @@ export const AdminUserCard = ({
             }>
             <User size={14} className="mr-1" /> View
           </Button>
-          {currentUser?.role === 'super_admin' && (
+          {currentUser?.role === Role.SUPER_ADMIN && (
             <Button
               variant="ghost"
               size="sm"
@@ -91,7 +92,9 @@ export const AdminUserCard = ({
               )
             }>
             <Calendar size={14} className="mr-1" />{' '}
-            {user.status === 'suspended' ? 'Unsuspend' : 'Suspend'}
+            {user.status === 'suspended'
+              ? UserActionType.UNSUSPEND
+              : UserActionType.SUSPEND}
           </Button>
           <Button
             variant="ghost"
@@ -106,7 +109,9 @@ export const AdminUserCard = ({
               )
             }>
             <Ban size={14} className="mr-1" />{' '}
-            {user.status === 'banned' ? 'Unban' : 'Ban'}
+            {user.status === 'banned'
+              ? UserActionType.UNBAN
+              : UserActionType.BAN}
           </Button>
         </div>
       </div>

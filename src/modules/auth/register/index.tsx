@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -53,9 +54,7 @@ const formSchema = z
 type signupFormData = z.infer<typeof formSchema>;
 export const RegisterPage = () => {
   const [avatar, setAvatar] = useState<File | null>(null);
-  const [displayName, setDisplayName] = useState('');
-  // const [password, setPassword] = useState('');
-  //const [confirmPassword, setConfirmPassword] = useState('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -125,19 +124,6 @@ export const RegisterPage = () => {
     });
   };
 
-  const handleGoogleRegister = async () => {
-    setIsGoogleLoading(true);
-
-    try {
-      // await loginWithGoogle();
-      navigate.push('/home');
-    } catch (error) {
-      console.error('Google registration failed:', error);
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
   const errorHandler = (message: string) => {
     if (message === 'Email is already in use') {
       setError('email', {
@@ -156,9 +142,14 @@ export const RegisterPage = () => {
     toast.error(message);
   };
 
+  const handleGoogleRegister = async () => {
+    setIsGoogleLoading(true);
+    window.location.href = GOOGLE_SIGNIN_URL;
+  };
+
   const getInitials = () => {
-    if (!displayName) return '?';
-    return displayName.charAt(0).toUpperCase();
+    if (!username) return '?';
+    return username.charAt(0).toUpperCase();
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,7 +296,6 @@ export const RegisterPage = () => {
               <form
                 onSubmit={handleSubmit(handleRegister)}
                 className="space-y-4">
-                {/* Profile Photo Upload */}
                 {/* Profile Photo Upload */}
                 <div className="flex flex-col items-center mb-4">
                   <div className="relative">

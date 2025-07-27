@@ -12,7 +12,8 @@ import {FallbackMessage} from '@/components/fallbacks';
 import {UsersSkeleton} from '@/components/skeleton/users.skeleton';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
-import {AdminUserRole, UserActionType} from '@/modules/admin/admin-types';
+import {UserActionType} from '@/modules/admin/admin-types';
+import {Role} from '@/types/user.types';
 import {useInfiniteQuery, useMutation} from '@tanstack/react-query';
 import {useRouter} from 'next/navigation';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
@@ -42,7 +43,7 @@ export const UsersTab: FC<UsersProps> = ({
   // Role management dialog states
   const [roleManagementDialog, setRoleManagementDialog] = useState(false);
   const [selectedUserForRole, setSelectedUserForRole] = useState<any>('');
-  const [newRole, setNewRole] = useState<AdminUserRole>(AdminUserRole.USER);
+  const [newRole, setNewRole] = useState<Role>(Role.USER);
   const [currentRole, setCurrentRole] = useState<string>('');
 
   const [userActionReason, setUserActionReason] = useState('');
@@ -109,7 +110,8 @@ export const UsersTab: FC<UsersProps> = ({
 
   const handleUserAction = () => {
     if (
-      (userActionType === 'suspend' || userActionType === 'ban') &&
+      (userActionType === UserActionType.SUSPEND ||
+        userActionType === UserActionType.BAN) &&
       !userActionReason
     ) {
       toast.error('Please provide a reason');
@@ -175,7 +177,7 @@ export const UsersTab: FC<UsersProps> = ({
     if (!selectedUserForRole) return;
 
     // Only super admins can change roles
-    if (currentUser?.role !== 'super_admin') {
+    if (currentUser?.role !== Role.SUPER_ADMIN) {
       toast.error('Only super admins can manage user roles');
       return;
     }

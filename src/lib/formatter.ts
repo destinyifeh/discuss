@@ -249,20 +249,39 @@ export function parseComment(commentString: string) {
   // Group 1: Username
   // Group 2: Quoted Text
   // Group 3: Remaining (new) Comment Text
-  const regex = /^>\s*([^:]+):\s*([\s\S]*?)---QUOTE_END---\s*([\s\S]*)$/;
-
+  //   const regex = /^>\s*([^:]+):\s*([\s\S]*?)---QUOTE_END---\s*([\s\S]*)$/;
+  const regex =
+    /^---QUOTE_START---\s*([^:]+):\s*([\s\S]*?)---QUOTE_END---\s*([\s\S]*)$/;
   const match = commentString.match(regex);
 
   if (match) {
     const quotedUsername = match[1].trim();
-    const quotedText = match[2].trim();
+    const rawQuotedText = match[2].trim();
     const commentText = match[3].trim(); // This captures everything after ---QUOTE_END---
+
+    // Match image JSON inside quoted text
+    const imageRegex = /---IMAGE:\s*(\[[\s\S]*\])---/;
+    const imageMatch = rawQuotedText.match(imageRegex);
+
+    let quotedImages = [];
+    let quotedText = rawQuotedText;
+
+    if (imageMatch) {
+      try {
+        quotedImages = JSON.parse(imageMatch[1]);
+        // Remove the image block from the quoted text
+        quotedText = quotedText.replace(imageRegex, '').trim();
+      } catch (err) {
+        console.error('Invalid image JSON in quoted text:', err);
+      }
+    }
 
     return {
       isQuoted: true,
       quotedUsername: quotedUsername,
       quotedText: quotedText,
       commentText: commentText,
+      quotedImages,
     };
   } else {
     // If it doesn't match the quoted format, assume the whole string is the comment text

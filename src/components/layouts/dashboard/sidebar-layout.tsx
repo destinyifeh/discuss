@@ -11,6 +11,7 @@ import {resourceItems, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {getUnreadNotificationsCounntRequestAction} from '@/modules/dashboard/notifications/actions';
+import {Role} from '@/types/user.types';
 import {useQuery} from '@tanstack/react-query';
 import {
   BarChart2,
@@ -75,7 +76,7 @@ export const SidebarLayoutLeft = () => {
   const location = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isActive = (path: string) => location === path;
-  //const {theme, setTheme} = useGlobalStore(state => state);
+
   const {logout, currentUser} = useAuthStore(state => state);
   const [mounted, setMounted] = useState(false);
 
@@ -103,11 +104,15 @@ export const SidebarLayoutLeft = () => {
       path: '/advertise/ad-performance',
     },
 
-    {
-      label: 'Admin',
-      icon: <User size={24} className="mr-4" />,
-      path: '/admin',
-    },
+    ...(currentUser?.role === Role.SUPER_ADMIN
+      ? [
+          {
+            label: 'Admin',
+            icon: <User size={24} className="mr-4" />,
+            path: '/admin',
+          },
+        ]
+      : []),
     {
       label: 'Settings',
       icon: <Settings size={24} className="mr-4" />,

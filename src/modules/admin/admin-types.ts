@@ -1,9 +1,3 @@
-export enum AdminUserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  SUPERADMIN = 'super_admin',
-}
-
 export enum UserActionType {
   SUSPEND = 'suspend',
   BAN = 'ban',

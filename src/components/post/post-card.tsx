@@ -1,8 +1,7 @@
 'use client';
-import {Sections} from '@/constants/data';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
-import {PostProps} from '@/types/post-item.type';
+import {PostFeedProps} from '@/types/post-item.type';
 import copy from 'copy-to-clipboard';
 import {formatDistanceToNow} from 'date-fns';
 import {
@@ -24,6 +23,11 @@ import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import React, {useState} from 'react';
 
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {queryClient} from '@/lib/client/query-client';
+import {postService} from '@/modules/posts/actions';
+import {usePostActions} from '@/modules/posts/post-hooks';
+import {useQuery} from '@tanstack/react-query';
 import {toast} from 'sonner';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
@@ -38,7 +42,7 @@ import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover';
 import {PostContent} from './post-content';
 
 interface PostCardProps {
-  post: PostProps;
+  post: PostFeedProps;
   showActions?: boolean;
   isInDetailView?: boolean;
 }
@@ -49,22 +53,64 @@ const PostCard = ({
   isInDetailView = false,
 }: PostCardProps) => {
   const {theme} = useGlobalStore(state => state);
-  const [user] = useState({id: '2', following: ['2']});
+  const {currentUser} = useAuthStore(state => state);
+
   const [expanded, setExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [likesCount, setLikesCount] = useState<number>(
+    post.likedBy.length || 0,
+  );
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
   const [liked, setLiked] = useState(
-    user ? (post?.likedBy || []).includes(user.id) : false,
+    currentUser ? (post?.likedBy || []).includes(currentUser._id) : false,
   );
+  const {likePostRequest, bookmarkPostRequest} = usePostActions();
   const [isFollowing, setIsFollowing] = useState(
-    user ? (user.following || []).includes(post.userId) : false,
+    currentUser
+      ? (currentUser.following || []).includes(post?.user._id)
+      : false,
   );
+
+  const shouldQuery = !!post._id;
+  const {error, data: commentData} = useQuery({
+    queryKey: ['post-comments-count', post._id],
+    queryFn: () => postService.getPostCommentsCountRequestAction(post._id),
+    retry: 1,
+    enabled: shouldQuery,
+  });
+
   const navigate = useRouter();
   const handleLike = () => {
-    if (!user) return;
+    likePostRequest.mutate(post._id, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'post like');
+        // setLikesCount(data.likesCount);
+        queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
+      },
+      onError(error, variables, context) {
+        console.log(error, 'err');
+        toast.error('Oops! Something went wrong, try again');
+      },
+    });
+  };
 
-    setLiked(!liked);
-    // likePost(post.id, user.id);
+  const handleBookmark = () => {
+    bookmarkPostRequest.mutate(post._id, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'post like');
+        queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
+        if (data.bookmarked === true) {
+          toast.success('Post bookmarked');
+        }
+        if (data.bookmarked === false) {
+          toast.success('Bookmark removed');
+        }
+      },
+      onError(error, variables, context) {
+        console.log(error, 'err');
+        toast.error('Oops! Something went wrong, try again');
+      },
+    });
   };
 
   const formatNumber = (num: number): string => {
@@ -104,13 +150,13 @@ const PostCard = ({
   };
 
   const handleFollow = () => {
-    if (!user || post.userId === user.id) return;
+    if (!currentUser || post.user._id === currentUser._id) return;
 
     setIsFollowing(!isFollowing);
     toast.success(isFollowing ? 'Unfollowed' : 'Following', {
       description: isFollowing
-        ? `You unfollowed ${post.displayName}`
-        : `You're now following ${post.displayName}`,
+        ? `You unfollowed ${post.user.username}`
+        : `You're now following ${post.user.username}`,
     });
   };
 
@@ -118,24 +164,20 @@ const PostCard = ({
     e.preventDefault();
     e.stopPropagation();
 
-    navigate.push(`/create-post?postId=${post.id}`);
+    navigate.push(`/create-post?postId=${post._id}`);
   };
 
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(`/post/${post.id}`);
+    navigate.push(`/post/${post._id}`);
   };
 
   const navigateToUserProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(`/profile/${post.username}`);
+    navigate.push(`/profile/${post.user.username}`);
   };
-
-  const section = post.sectionId
-    ? Sections.find(cat => cat.id === post.sectionId)
-    : null;
 
   const shouldTruncate = post.content.length > 100;
   const displayContent =
@@ -147,7 +189,7 @@ const PostCard = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const postUrl = `${window.location.origin}/post/${post.id}`;
+    const postUrl = `${window.location.origin}/post/${post._id}`;
     try {
       copy(postUrl);
       toast('Link Copied', {
@@ -162,14 +204,17 @@ const PostCard = ({
     }
   };
 
+  const isLiked = post.likedBy.includes(currentUser?._id as string);
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background ">
       <div className="flex gap-3">
         <Avatar
           className="w-10 h-10 cursor-pointer"
           onClick={navigateToUserProfile}>
-          <AvatarImage src={post.avatar} />
-          <AvatarFallback>{post.displayName.charAt(0)}</AvatarFallback>
+          <AvatarImage src={post.user.avatar ?? undefined} />
+          <AvatarFallback className="capitalize text-app text-3xl">
+            {post.user.username.charAt(0)}
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex-1 min-w-0">
@@ -177,25 +222,25 @@ const PostCard = ({
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-1 overflow-hidden">
                 <div className="font-bold hover:underline truncate cursor-pointer">
-                  <Link href={`/user/${post.username}`} className="">
-                    {post.displayName}
+                  <Link
+                    href={`/user/${post.user.username}`}
+                    className="capitalize">
+                    {post.user.username}
                   </Link>
                 </div>
 
                 <span className="text-app-gray">·</span>
 
-                {section && (
-                  <Link
-                    href={`/discuss/${section.name.toLowerCase()}`}
-                    className="text-app hover:underline truncate"
-                    onClick={e => e.stopPropagation()}>
-                    {section.name}
-                  </Link>
-                )}
+                <Link
+                  href={`/discuss/${post.section.toLowerCase()}`}
+                  className="text-app hover:underline truncate"
+                  onClick={e => e.stopPropagation()}>
+                  {post.section.toLowerCase()}
+                </Link>
 
                 <span className="text-app-gray">·</span>
                 <span className="text-app-gray truncate">
-                  {formatTimeAgo(post.timestamp)}
+                  {formatTimeAgo(post.createdAt)}
                 </span>
               </div>
 
@@ -212,7 +257,7 @@ const PostCard = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border-app-border">
-                  {post.userId === user?.id && (
+                  {post.user._id === currentUser?._id && (
                     <>
                       <DropdownMenuItem
                         onClick={handleEditPost}
@@ -224,7 +269,7 @@ const PostCard = ({
                     </>
                   )}
 
-                  {post.userId !== user?.id && (
+                  {post.user._id !== currentUser?._id && (
                     <>
                       <DropdownMenuItem
                         onClick={handleFollow}
@@ -261,7 +306,7 @@ const PostCard = ({
             </div>
           </div>
 
-          <Link href={`/post/${post.id}`} className="block">
+          <Link href={`/post/${post._id}`} className="block">
             <div className="mt-1">
               {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}
               <PostContent content={displayContent} />
@@ -273,19 +318,32 @@ const PostCard = ({
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    navigate.push(`/post/${post.id}`);
+                    navigate.push(`/post/${post._id}`);
                   }}>
                   See more
                 </Button>
               )}
 
-              {post.images && post.images.length > 0 && (
+              {!isInDetailView && post.images && post.images.length > 0 && (
                 <div className="mt-3 rounded-xl overflow-hidden">
                   <img
-                    src={post.images[0]}
+                    src={post.images[0].secure_url}
                     alt="Post attachment"
                     className="w-full h-auto max-h-96 object-cover"
                   />
+                </div>
+              )}
+
+              {isInDetailView && post.images && post.images?.length > 0 && (
+                <div className="mt-3 rounded-xl overflow-hidden space-y-3">
+                  {post.images.map((img, idx) => (
+                    <img
+                      key={img.public_id || idx}
+                      src={img.secure_url}
+                      alt={`Post attachment ${idx + 1}`}
+                      className="w-full h-auto max-h-96 object-cover rounded-lg"
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -300,7 +358,7 @@ const PostCard = ({
                   <div className="flex items-center gap-1">
                     <MessageSquare size={18} />
                     <span className="text-xs">
-                      {formatNumber(post.comments || 0)}
+                      {commentData?.commentCount || 0}
                     </span>
                   </div>
                 </Button>
@@ -326,7 +384,7 @@ const PostCard = ({
                   size="icon"
                   className={cn(
                     'text-app-gray hover:text-red-500',
-                    liked && 'text-red-500',
+                    isLiked && 'text-red-500',
                   )}
                   onClick={e => {
                     e.preventDefault();
@@ -334,8 +392,8 @@ const PostCard = ({
                     handleLike();
                   }}>
                   <div className="flex items-center gap-1">
-                    <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
-                    <span className="text-xs">{formatNumber(post.likes)}</span>
+                    <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
+                    <span className="text-xs">{post.likedBy.length || 0}</span>
                   </div>
                 </Button>
 
@@ -349,9 +407,7 @@ const PostCard = ({
                   }}>
                   <div className="flex items-center gap-1">
                     <BarChart3 size={18} />
-                    <span className="text-xs">
-                      {formatNumber(post.views || 0)}
-                    </span>
+                    <span className="text-xs">{post.viewCount || 0}</span>
                   </div>
                 </Button>
 
@@ -362,8 +418,21 @@ const PostCard = ({
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
+                    handleBookmark();
                   }}>
-                  <Bookmark size={18} />
+                  <div className="flex items-center gap-1">
+                    <Bookmark
+                      size={18}
+                      fill={
+                        post.bookmarkedBy.includes(currentUser?._id as string)
+                          ? 'currentColor'
+                          : 'none'
+                      }
+                    />
+                    <span className="text-xs">
+                      {post.bookmarkedBy.length || 0}
+                    </span>
+                  </div>
                 </Button>
 
                 <Popover

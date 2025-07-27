@@ -9,21 +9,26 @@ import {
   mergePostsWithAds,
   shuffleArray,
 } from '@/lib/helpers';
+import {feedService} from '@/modules/dashboard/actions/feed.actions';
 import {AdProps} from '@/types/ad-types';
 import {PostProps} from '@/types/post-item.type';
+import {useInfiniteQuery} from '@tanstack/react-query';
 import {ArrowUp, BookmarkIcon, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
+import {useDebounce} from 'use-debounce';
 import {AdCard} from '../ad/ad-card';
 import {AppBannerAd, AppBannerAd4} from '../ad/banner';
 import {PageHeader} from '../app-headers';
+import {FallbackMessage} from '../fallbacks';
+import SearchBarList from '../forms/list-search-bar';
 import {MobileBottomTab} from '../layouts/dashboard/mobile-bottom-tab';
 import MobileNavigation from '../layouts/dashboard/mobile-navigation';
+import {HomeDashboardSkeleton} from '../skeleton/home-dashboard-skeleton';
 import PostSkeleton from '../skeleton/post-skeleton';
 import {Badge} from '../ui/badge';
 import {Button} from '../ui/button';
-import {Input} from '../ui/input';
 import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import PostCard from './post-card';
 
@@ -229,15 +234,56 @@ export const HomePostList = () => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useRouter();
   const {currentUser} = useAuthStore(state => state);
   console.log(currentUser, 'currentooo');
+  const [mounted, setMounted] = useState(false);
 
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['home-feed-posts'],
+    queryFn: ({pageParam = 1}) => feedService.getHomePostFeeds(pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+  });
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 800);
+    setMounted(true);
   }, []);
+
+  const postsData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.posts) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  console.log('should query', error);
+
+  console.log(postsData, 'should query dataa', totalCount);
+
+  if (!mounted) return <HomeDashboardSkeleton />;
+
+  if (status === 'error') {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
 
   const sortedPosts = [...Posts].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -248,21 +294,7 @@ export const HomePostList = () => {
   );
   const data2 = activeTab === 'for-you' ? sortedPosts : sortedPosts2;
 
-  const data = isLoading ? Array(5).fill(null) : sortedPosts;
-
-  //   const [posts, setPosts] = useState([]);
-  //   const [page, setPage] = useState(1);
-
-  //   const fetchMore = async () => {
-  //     const res = await fetch(`/api/posts?page=${page}`);
-  //     const newPosts = await res.json();
-  //     setPosts(prev => [...prev, ...newPosts]);
-  //     setPage(prev => prev + 1);
-  //   };
-
-  //   useEffect(() => {
-  //     fetchMore(); // Load initial
-  //   }, []);
+  const homeData = status === 'pending' ? Array(5).fill(null) : postsData;
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
@@ -296,12 +328,11 @@ export const HomePostList = () => {
   const allowMSearch = false;
 
   return (
-    <div className="pb-0 lg:pb-0">
+    <div className="">
       <Virtuoso
-        className="custom-scrollbar"
-        style={{height: '100vh'}}
-        //style={{height: '950px', width: '100%'}}
-        data={data}
+        className="custom-scrollbar min-h-screen"
+        totalCount={totalCount}
+        data={homeData}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
@@ -362,15 +393,16 @@ export const HomePostList = () => {
               </div>
               {!allowMSearch && (
                 <div className="pt-4 px-4">
-                  <div className="relative border-1 border-app-border rounded-full">
+                  <div className="relative border-1 border-app-border rounded-full py-1">
                     <Search
                       className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
                       size={20}
                     />
-                    <Input
-                      placeholder="Search"
-                      className="border-0 rounded-full pl-10 form-input"
-                    />
+                    <div
+                      onClick={() => navigate.push('/explore')}
+                      className="border-0 rounded-full pl-10 form-input text-gray-500">
+                      Search
+                    </div>
                   </div>
                 </div>
               )}
@@ -380,16 +412,39 @@ export const HomePostList = () => {
             </Fragment>
           ),
           EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
+
+          Footer: () =>
+            isFetchingNextPage ? (
+              <div className="py-4 text-center text-sm text-gray-500">
+                Loading more...
+              </div>
+            ) : null,
         }}
-        //endReached={fetchMore}
-        // itemContent={(index, post) => <PostCard post={post} />}
-        itemContent={(index, post) =>
-          isLoading ? (
-            <PostSkeleton /> // your loader
-          ) : (
-            <PostCard post={post} />
-          )
-        }
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        itemContent={(index, post) => {
+          if (status === 'pending') {
+            return <PostSkeleton />;
+          } else {
+            if (!post || !post.data) {
+              return null;
+            }
+            if (post._type === 'ad') {
+              return (
+                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
+              );
+            }
+            return (
+              <PostCard
+                key={post.data._id || `post-${index}`}
+                post={post.data}
+              />
+            );
+          }
+        }}
       />
       {showGoUp && (
         <button
@@ -415,25 +470,63 @@ export const ExplorePostList = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
-  const sortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
+  const [searchTerm, setSearchTerm] = useState('');
+  const [mounted, setMounted] = useState(false);
+  const [debouncedSearch] = useDebounce(searchTerm, 500);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['explore-feed-posts', debouncedSearch],
+    queryFn: ({pageParam = 1}) =>
+      feedService.getHomePostFeeds(pageParam, 10, debouncedSearch),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+  });
+  useEffect(() => {
+    setMounted(true);
+    const timer = setTimeout(() => {
+      if (searchRef.current) {
+        searchRef.current.focus();
+      }
+    }, 100);
 
-  const data = sortedPosts;
+    return () => clearTimeout(timer);
+  }, []);
 
-  //   const [posts, setPosts] = useState([]);
-  //   const [page, setPage] = useState(1);
+  const postsData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.posts) || [];
+  }, [data]);
 
-  //   const fetchMore = async () => {
-  //     const res = await fetch(`/api/posts?page=${page}`);
-  //     const newPosts = await res.json();
-  //     setPosts(prev => [...prev, ...newPosts]);
-  //     setPage(prev => prev + 1);
-  //   };
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
 
-  //   useEffect(() => {
-  //     fetchMore(); // Load initial
-  //   }, []);
+  console.log('should query', error);
+
+  console.log(postsData, 'should query dataa', totalCount);
+
+  if (!mounted) return <HomeDashboardSkeleton />;
+
+  if (status === 'error') {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
+
+  const exploreData = status === 'pending' ? Array(5).fill(null) : postsData;
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
@@ -459,29 +552,24 @@ export const ExplorePostList = () => {
   };
   return (
     <div className="lg:pb-0">
+      <PageHeader title="Search" />
+
+      <SearchBarList
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        ref={searchRef}
+      />
+
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
         //style={{height: '950px', width: '100%'}}
-        data={data}
+        data={exploreData}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
           Header: () => (
             <Fragment>
-              <PageHeader title="Search" />
-              <div className="p-4">
-                <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
-                    size={20}
-                  />
-                  <Input
-                    placeholder="Search"
-                    className="border-0 rounded-full pl-10 form-input"
-                  />
-                </div>
-              </div>
               <div className="px-4 py-3 border-b lg:hidden md:mt-7 border-app-border">
                 <h2 className="font-semibold my-2">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -506,9 +594,39 @@ export const ExplorePostList = () => {
             </Fragment>
           ),
           EmptyPlaceholder: () => <Placeholder holder={'explore'} />,
+
+          Footer: () =>
+            isFetchingNextPage ? (
+              <div className="py-4 text-center text-sm text-gray-500">
+                Loading more...
+              </div>
+            ) : null,
         }}
-        //endReached={fetchMore}
-        itemContent={(index, post) => <PostCard post={post} />}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        itemContent={(index, post) => {
+          if (status === 'pending') {
+            return <PostSkeleton />;
+          } else {
+            if (!post || !post.data) {
+              return null;
+            }
+            if (post._type === 'ad') {
+              return (
+                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
+              );
+            }
+            return (
+              <PostCard
+                key={post.data._id || `post-${index}`}
+                post={post.data}
+              />
+            );
+          }
+        }}
       />
       {showGoUp && (
         <button

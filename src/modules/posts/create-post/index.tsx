@@ -64,6 +64,7 @@ export const CreatePostPage = () => {
   console.log(shouldQuery, 'should query', error);
 
   console.log(post, 'should query dataa');
+  console.log(currentUser, 'currentooo');
 
   useEffect(() => {
     if (post) {
@@ -95,6 +96,22 @@ export const CreatePostPage = () => {
     return (
       <FallbackMessage
         message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
+
+  if (
+    isEditing && // User is trying to edit
+    post && // There is a post
+    post.user._id !== currentUser?._id && // AND the user is NOT the owner of the post
+    currentUser?.role !== 'super_admin' && // AND the user is NOT a super_admin
+    currentUser?.role !== 'admin' // AND the user is NOT an admin
+  ) {
+    return (
+      <FallbackMessage
+        message="Access Denied: You are not authorized to edit this post."
         buttonText="Back to Home"
         page="/home"
       />

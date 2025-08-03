@@ -10,17 +10,17 @@ import PostCard from '@/components/post/post-card';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {usePostStore} from '@/hooks/stores/use-post-store';
 import {useIsMobile} from '@/hooks/use-mobile';
-import {queryClient} from '@/lib/client/query-client';
 import {
   CommentFeedProps,
   ImageProps,
   PostFeedProps,
 } from '@/types/post-item.type';
 import {ImagePlus, Reply, Send, Trash2} from 'lucide-react';
+import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import React, {useEffect, useRef, useState} from 'react';
 import {toast} from 'sonner';
-import {CommentDto, QUOTE_END} from '../dto/post-dto';
+import {CommentDto, UpdateCommentDto} from '../dto/post-dto';
 import {usePostActions} from '../post-hooks';
 
 export const CreateCommentPage = () => {
@@ -46,57 +46,20 @@ export const CreateCommentPage = () => {
   const [quotedUser, setQuotedUser] = useState('');
   const {postComment, QuotedComment, thePost, resetCommentSection} =
     usePostStore(state => state);
-  const {createComment} = usePostActions();
+  const {createComment, updateCommentRequest} = usePostActions();
   // Get quote from location state if available
 
   // const quotedUser = location.state?.quotedUser || '';
   useEffect(() => {
     // setup logic here
-
-    return () => {
-      // cleanup logic here
-      // resetCommentSection(); // ✅ runs on unmount
-    };
-  }, []);
-
-  // const handleSubmitReply2 = () => {
-  //   if (!reply.trim() && !imagePreview) {
-  //     toast.error('Empty comment', {
-  //       description: 'Please write something or add an image before posting.',
-  //     });
-  //     return;
-  //   }
-
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     // Ensure the comment format is consistent
-  //     const commentContent = reply.trim();
-
-  //     addComment({
-  //       postId: post.id,
-  //       userId: user.id,
-  //       username: user.username,
-  //       displayName: user.displayName,
-  //       avatar: user.avatar,
-  //       content: commentContent,
-  //       verified: user.verified || false,
-  //       image: imagePreview || undefined,
-  //     });
-
-  //     toast.success('Comment posted', {
-  //       description: 'Your comment has been added to the discussion.',
-  //     });
-
-  //     navigate(`/post/${post.id}`);
-  //   } catch (error) {
-  //     toast.error('Error', {
-  //       description: 'Failed to post your comment. Please try again.',
-  //     });
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
+    console.log(thePost, 'theposts...');
+    if (postComment?.content) {
+      const originals = postComment.images || [];
+      setOriginalImages(originals);
+      setImageUrls(originals.map((img: any) => img.secure_url));
+      setComment(postComment.content);
+    }
+  }, [postComment, setComment]);
 
   const handleSubmitComment = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -107,23 +70,34 @@ export const CreateCommentPage = () => {
     }
 
     try {
-      // Format the comment content to include the quote if present
-      // const finalComment = quoteContent
-      //   ? `${quoteContent}\n\n${comment.trim()}`
-      //   : comment.trim();
+      let quotePayload = null;
+      if (QuotedComment.quotedContent) {
+        quotePayload = {
+          quotedContent: QuotedComment.quotedContent,
+          quotedImage: QuotedComment.quotedImage,
+          quotedUser: QuotedComment.quotedUser,
+          quotedId: QuotedComment.quotedId,
+          quotedUserId: QuotedComment.quotedUserId,
+          quotedUserImage: QuotedComment.quotedUserImage,
+        };
+      }
 
-      const finalComment = quoteContent
-        ? `${quoteContent}${QUOTE_END}${comment.trim()}`
-        : comment.trim();
+      if (postComment?.content) {
+        updateComment({
+          postId: postId,
+          content: comment.trim(),
+          images: images,
+          commentId: postComment?._id as string,
+          removedImageIds: removedImageIds,
+        });
+        return;
+      }
 
-      console.log(finalComment, 'finalCom');
-      console.log(quoteContent, 'finalCom33');
-
-      // Add comment to app context
       addComment({
-        postId: postId,
-        content: finalComment,
+        postId: thePost?._id as string,
+        content: comment.trim(),
         images: images,
+        quotedComment: quotePayload,
       });
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -136,9 +110,7 @@ export const CreateCommentPage = () => {
     createComment.mutate(data, {
       onSuccess(data, variables, context) {
         console.log(data, 'post data');
-        queryClient.invalidateQueries({
-          queryKey: ['comment-feed-posts', postId],
-        });
+
         // Clear input and close comment section if open on mobile
         setComment('');
         setQuoteContent('');
@@ -147,8 +119,11 @@ export const CreateCommentPage = () => {
 
         setImageUrls([]);
         setImages([]);
-
         toast.success('Comment added successfully');
+        navigate.back();
+        setTimeout(() => {
+          resetCommentSection();
+        }, 100);
       },
       onError(error, variables, context) {
         console.log(error, 'post err');
@@ -163,31 +138,41 @@ export const CreateCommentPage = () => {
     });
   };
 
-  const handleImageUpload2 = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const updateComment = (data: UpdateCommentDto) => {
+    console.log(data, 'dataa');
+    setIsSubmitting(true);
+    updateCommentRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'update comment data');
+        // queryClient.invalidateQueries({
+        //   queryKey: ['comment-feed-posts', postId],
+        // });
+        // Clear input and close comment section if open on mobile
+        setComment('');
+        setQuoteContent('');
+        setQuotedUser('');
+        setImagePreview(null);
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image too large', {
-        description: 'Please select an image less than 5MB',
-      });
-      return;
-    }
+        setImageUrls([]);
+        setImages([]);
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Invalid file type', {
-        description: 'Please select an image file',
-      });
-      return;
-    }
+        toast.success('Comment updated successfully');
+        navigate.back();
+        setTimeout(() => {
+          resetCommentSection();
+        }, 100);
+      },
+      onError(error, variables, context) {
+        console.log(error, 'comment update err');
 
-    const reader = new FileReader();
-    reader.onload = event => {
-      if (event.target?.result) {
-        setImagePreview(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+        toast.error(
+          error.message ?? 'Failed to update comment. Please try again.',
+        );
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
   };
 
   // Function to format the quoted text with styling that matches CommentCard.tsx
@@ -196,19 +181,55 @@ export const CreateCommentPage = () => {
 
     // Extract only the quoted content without the username prefix
     // This regex matches '---QUOTE_START---username: ' pattern at the beginning of the string
-    const quoteContent = QuotedComment.quotedContent.replace(
-      /^---QUOTE_START---[\w]+:\s/gm,
-      '',
-    );
 
     return (
       <div className="mb-4">
-        <div className="p-3 rounded-md bg-gray-100 border-l-4 border-app">
-          {QuotedComment.quotedUser && (
-            <p className="font-medium text-sm mb-1 text-app">@{quotedUser}</p>
-          )}
-          <p className="text-[#333] whitespace-pre-wrap">{quoteContent}</p>
-        </div>
+        {QuotedComment.quotedUser && (
+          <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
+            <div className="flex items-center gap-1 mb-1">
+              <Link href={`/user/${quotedUser}`}>
+                <Avatar className="w-5 h-5">
+                  <AvatarImage
+                    src={QuotedComment.quotedUserImage ?? undefined}
+                  />
+                  <AvatarFallback className="text-sm font-semibold text-app capitalize bg-gray-200">
+                    {quotedUser.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+              <p className="text-sm font-semibold text-app capitalize">
+                <Link href={`/user/${quotedUser}`}>{quotedUser}</Link>
+              </p>
+            </div>
+            <div className="text-sm">
+              <p
+                // className="text-base leading-relaxed"
+                style={{whiteSpace: 'pre-wrap'}}>
+                {QuotedComment.quotedContent.length > 120
+                  ? QuotedComment.quotedContent.slice(0, 120) + '...'
+                  : QuotedComment.quotedContent}
+              </p>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {QuotedComment.quotedImage &&
+                QuotedComment.quotedImage.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {QuotedComment.quotedImage.map((url, index) => (
+                      <div
+                        key={index}
+                        className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
+                        <img
+                          src={url}
+                          alt={`Comment attachment ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -231,13 +252,6 @@ export const CreateCommentPage = () => {
     });
   };
 
-  const removeImage2 = () => {
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
   const removeImage = (index: number) => {
     const urlToRemove = imageUrls[index];
 
@@ -256,6 +270,20 @@ export const CreateCommentPage = () => {
     }
 
     setImageUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getMobileButtonLabel = () => {
+    if (postComment?.content) {
+      return isSubmitting ? 'Updating...' : 'Update';
+    }
+    return isSubmitting ? 'Replying...' : 'Reply';
+  };
+
+  const getWebButtonLabel = () => {
+    if (postComment?.content) {
+      return isSubmitting ? 'Updating...' : 'Update';
+    }
+    return isSubmitting ? 'Posting...' : 'Post';
   };
 
   return (
@@ -285,28 +313,10 @@ export const CreateCommentPage = () => {
               {formatReplyTextarea()}
 
               <Textarea
-                placeholder="Add your comment..."
-                className="border-0 text-lg p-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px]"
-                value={
-                  QuotedComment?.quotedContent
-                    ? reply.replace(
-                        QuotedComment.quotedContent + '---QUOTE_END---',
-                        '',
-                      )
-                    : reply
-                }
-                onChange={e =>
-                  setReply(
-                    QuotedComment?.quotedContent
-                      ? QuotedComment.quotedContent +
-                          '---QUOTE_END---' +
-                          e.target.value.replace(
-                            QuotedComment.quotedContent + '---QUOTE_END---',
-                            '',
-                          )
-                      : e.target.value,
-                  )
-                }
+                placeholder="Add a comment..."
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                className="max-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
               />
 
               {imageUrls.length > 0 && (
@@ -380,12 +390,12 @@ export const CreateCommentPage = () => {
               {isMobile ? (
                 <>
                   <Reply size={16} className="mr-2" />
-                  Reply
+                  {getMobileButtonLabel()}
                 </>
               ) : (
                 <>
                   <Send size={16} className="mr-2" />
-                  Post
+                  {getWebButtonLabel()}
                 </>
               )}
             </Button>

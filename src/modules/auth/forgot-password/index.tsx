@@ -109,14 +109,15 @@ export const ForgotPasswordPage = () => {
                   />
                 </g>
               </svg> */}
-
-            <AppLogo
-              color="text-white"
-              mdSize="md:text-4xl"
-              center="text-left"
-              title="Discussday Forum"
-              mb="mb-4"
-            />
+            <Link href="/">
+              <AppLogo
+                color="text-white"
+                mdSize="md:text-4xl"
+                center="text-left"
+                title="Discussday Forum"
+                mb="mb-4"
+              />
+            </Link>
             <h1 className="text-3xl font-bold mb-4">Reset your password</h1>
             <p className="text-lg mb-6">
               Enter your email address and we'll send you a link to reset your
@@ -154,8 +155,9 @@ export const ForgotPasswordPage = () => {
                     />
                   </g>
                 </svg> */}
-
-                <AppLogo color="text-app" mdSize="md:text-4xl" mb="0" />
+                <Link href="/">
+                  <AppLogo color="text-app" mdSize="md:text-4xl" mb="0" />
+                </Link>
               </div>
               <CardTitle className="text-2xl text-center">
                 Reset your password

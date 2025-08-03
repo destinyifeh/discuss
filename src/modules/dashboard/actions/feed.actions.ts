@@ -18,6 +18,40 @@ class FeedService {
     const response = await api.get(`/feeds`, {params});
     return response.data?.data;
   }
+
+  async getSectionPostFeeds(
+    page = 1,
+    limit = 10,
+    section: string,
+    pattern: string = '',
+    adPlan: AdPlan = 'enterprise',
+    mode: string = 'random',
+  ) {
+    const params: any = {page, limit, section, mode};
+
+    if (pattern) params.pattern = pattern;
+    if (adPlan) params.adPlan = adPlan;
+
+    const response = await api.get(`/feeds`, {params});
+    return response.data?.data;
+  }
+
+  async getUserBookmarkedPostFeeds(
+    page = 1,
+    limit = 10,
+    onlyBookmarked: boolean = true,
+    pattern: string = '',
+    adPlan: AdPlan = 'enterprise',
+    mode: string = 'random',
+  ) {
+    const params: any = {page, limit, onlyBookmarked, mode};
+
+    if (pattern) params.pattern = pattern;
+    if (adPlan) params.adPlan = adPlan;
+
+    const response = await api.get(`/feeds`, {params});
+    return response.data?.data;
+  }
 }
 
 export const feedService = new FeedService();

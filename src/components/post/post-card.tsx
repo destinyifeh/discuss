@@ -25,6 +25,7 @@ import React, {useState} from 'react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
+import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {postService} from '@/modules/posts/actions';
 import {usePostActions} from '@/modules/posts/post-hooks';
 import {useQuery} from '@tanstack/react-query';
@@ -45,12 +46,14 @@ interface PostCardProps {
   post: PostFeedProps;
   showActions?: boolean;
   isInDetailView?: boolean;
+  hideMenu?: boolean;
 }
 
 const PostCard = ({
   post,
   showActions = true,
   isInDetailView = false,
+  hideMenu = false,
 }: PostCardProps) => {
   const {theme} = useGlobalStore(state => state);
   const {currentUser} = useAuthStore(state => state);
@@ -71,6 +74,8 @@ const PostCard = ({
       : false,
   );
 
+  const {reportPost} = useReportActions();
+
   const shouldQuery = !!post._id;
   const {error, data: commentData} = useQuery({
     queryKey: ['post-comments-count', post._id],
@@ -86,6 +91,18 @@ const PostCard = ({
         console.log(data, 'post like');
         // setLikesCount(data.likesCount);
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'posts'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'likes'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['public-user-posts', 'replies'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['public-user-posts', 'posts'],
+        });
       },
       onError(error, variables, context) {
         console.log(error, 'err');
@@ -99,6 +116,21 @@ const PostCard = ({
       onSuccess(data, variables, context) {
         console.log(data, 'post like');
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
+        queryClient.invalidateQueries({queryKey: ['bookmarked-feed-posts']});
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'posts'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'likes'],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ['public-user-posts', 'likes'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['public-user-posts', 'posts'],
+        });
+
         if (data.bookmarked === true) {
           toast.success('Post bookmarked');
         }
@@ -142,10 +174,28 @@ const PostCard = ({
       .replace(/\s/g, '');
   };
 
-  const handleReport = () => {
-    toast.success('Post Reported', {
-      description:
-        'Thank you for reporting this post. Our team will review it.',
+  const handleReport = (postId: string) => {
+    const payload = {
+      reason: 'No reason provided. Requires admin review.',
+      postId: postId,
+    };
+
+    reportPost.mutate(payload, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'report data');
+        toast.success('Post Reported', {
+          description:
+            'Thank you for reporting this post. Our team will review it.',
+        });
+      },
+      onError(error, variables, context) {
+        console.log(error, 'post report err');
+
+        toast.error('Report Failed', {
+          description:
+            'Sorry, we were unable to submit your report. Please try again.',
+        });
+      },
     });
   };
 
@@ -243,66 +293,69 @@ const PostCard = ({
                   {formatTimeAgo(post.createdAt)}
                 </span>
               </div>
+              {!hideMenu && (
+                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8"
+                      onClick={() => setIsMenuOpen(prev => !prev)}>
+                      <MoreHorizontal size={16} className="hidden md:block" />
+                      <EllipsisVertical size={16} className="md:hidden" />
+                      <span className="sr-only">Post menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="border-app-border">
+                    {post.user._id === currentUser?._id && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={handleEditPost}
+                          className="cursor-pointer">
+                          <Pencil size={16} className="mr-2 font-bold" />
+                          Edit post
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
 
-              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8"
-                    onClick={() => setIsMenuOpen(prev => !prev)}>
-                    <MoreHorizontal size={16} className="hidden md:block" />
-                    <EllipsisVertical size={16} className="md:hidden" />
-                    <span className="sr-only">Post menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="border-app-border">
-                  {post.user._id === currentUser?._id && (
-                    <>
-                      <DropdownMenuItem
-                        onClick={handleEditPost}
-                        className="cursor-pointer">
-                        <Pencil size={16} className="mr-2 font-bold" />
-                        Edit post
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-
-                  {post.user._id !== currentUser?._id && (
-                    <>
-                      <DropdownMenuItem
-                        onClick={handleFollow}
-                        className="cursor-pointer">
-                        {isFollowing ? (
-                          <>
-                            <UserCheck size={16} className="mr-2" />
-                            Following
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus size={16} className="mr-2" />
-                            Follow
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem
-                    onClick={handleReport}
-                    className="cursor-pointer">
-                    <Flag size={16} className="mr-2 font-bold" />
-                    Report post
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setIsMenuOpen(false)}
-                    className="cursor-pointer text-app justify-center">
-                    Cancel
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    {post.user._id !== currentUser?._id && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={handleFollow}
+                          className="cursor-pointer">
+                          {isFollowing ? (
+                            <>
+                              <UserCheck size={16} className="mr-2" />
+                              Following
+                            </>
+                          ) : (
+                            <>
+                              <UserPlus size={16} className="mr-2" />
+                              Follow
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => handleReport(post._id)}
+                      className="cursor-pointer">
+                      <Flag size={16} className="mr-2 font-bold" />
+                      Report post
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setIsMenuOpen(false)}
+                      className="cursor-pointer text-app justify-center">
+                      Cancel
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
 

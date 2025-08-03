@@ -1,12 +1,15 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
+import UserCommentCard from '@/components/post/comments/user-comment-card';
 import PostCard from '@/components/post/post-card';
+import PostSkeleton from '@/components/skeleton/post-skeleton';
 import ProfileSkeleton from '@/components/skeleton/profile-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -14,29 +17,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {Label} from '@/components/ui/label';
+import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Textarea} from '@/components/ui/textarea';
-import {Posts} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
 import {normalizeDomain} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
-import {PostProps} from '@/types/post-item.type';
 import {UserProps} from '@/types/user.types';
-import {useMutation, useQuery} from '@tanstack/react-query';
+import {useInfiniteQuery, useMutation, useQuery} from '@tanstack/react-query';
 import {
   AlertTriangle,
   ArrowUp,
   Calendar,
   Link as LinkIcon,
   Mail,
+  MoreHorizontal,
+  Shield,
 } from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
-import {Fragment, useRef, useState} from 'react';
+import {Fragment, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
+import {useReportActions} from '../actions/action-hooks/report.action-hooks';
 import {userService} from '../actions/user.actions';
 
 export const PostPlaceholder = ({
@@ -94,10 +100,27 @@ export const PeoplePage = () => {
   const navigate = useRouter();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [isPending, setIsPending] = useState(false);
+  const [reason, setReason] = useState('');
+  const [details, setDetails] = useState('');
+  const [open, setOpen] = useState(false);
 
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+
+  const reportReasons = [
+    {id: 'spam', label: 'Spam or misleading content'},
+    {id: 'harassment', label: 'Harassment or bullying'},
+    {id: 'inappropriate', label: 'Inappropriate content'},
+    {id: 'impersonation', label: 'Impersonation'},
+    {id: 'misinformation', label: 'Misinformation'},
+    {id: 'other', label: 'Other'},
+  ];
   const {mutate} = useMutation({
     mutationFn: userService.followUserRequestAction,
   });
+  const {reportUser} = useReportActions();
   // Find the user profile (using our mock data, in real app would fetch from backend)
 
   const shouldQuery = !!user;
@@ -115,27 +138,41 @@ export const PeoplePage = () => {
 
   console.log(userData, 'should query dataa');
 
-  // Get posts by this user
-  const userPosts = Posts.filter(post => post.username === user);
+  const shouldQueryPost = !!userData?.user?._id;
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error: userPostsErr,
+  } = useInfiniteQuery({
+    queryKey: ['public-user-posts', activeTab],
+    queryFn: ({pageParam = 1}) =>
+      userService.getPublicUserPosts(
+        pageParam,
+        10,
+        activeTab,
+        userData.user._id,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    retry: 1,
+    enabled: shouldQueryPost,
+  });
 
-  // Sort posts by timestamp (newest first)
-  const sortedPosts = [...userPosts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
+  const userPostData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.posts) || [];
+  }, [data]);
 
-  let data: PostProps[] | [];
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
 
-  switch (activeTab) {
-    case 'posts':
-      data = sortedPosts;
-      break;
-    case 'replies':
-    case 'likes':
-      data = [];
-      break;
-    default:
-      data = [];
-  }
+  console.log('user posts dataa', userData);
   if (isLoading) {
     return <ProfileSkeleton />;
   }
@@ -166,8 +203,28 @@ export const PeoplePage = () => {
     );
   }
 
-  const handleReportUser = () => {
-    toast.success('Report submitted. Our team will review it shortly.');
+  const handleReportUser = (userId: string) => {
+    setOpen(false);
+    const payload = {
+      reason: reason,
+      userId: userId,
+      note: details,
+    };
+
+    reportUser.mutate(payload, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'report data');
+        toast.success('Report submitted. Our team will review it shortly.');
+      },
+      onError(error, variables, context) {
+        console.log(error, 'user report err');
+
+        toast.error('Report Failed', {
+          description:
+            'Sorry, we were unable to submit your report. Please try again.',
+        });
+      },
+    });
   };
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -250,14 +307,36 @@ export const PeoplePage = () => {
       },
     });
   };
+
+  const handleReportSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!reportReason) {
+      toast.error('Please select a reason for your report');
+      return;
+    }
+
+    setIsSubmittingReport(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      toast.success(
+        `Your report against @${username} has been submitted for review`,
+      );
+      setIsSubmittingReport(false);
+      setIsReportDialogOpen(false);
+      setReportReason('');
+      setReportDetails('');
+    }, 1000);
+  };
   return (
-    <div className="pb-10">
-      <PageHeader title={username} description={`${userPosts.length} posts`} />
+    <div className="">
+      <PageHeader title={username} description={`${totalCount} ${activeTab}`} />
 
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        data={data}
+        data={userPostData}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
@@ -306,65 +385,21 @@ export const PeoplePage = () => {
                           <Mail className="h-4 w-4 mr-2" />
                           Email
                         </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="rounded-full text-red-500 hover:bg-red-50 hover:text-red-600">
-                              <AlertTriangle className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle className="capitalize">
-                                Report {username}
-                              </DialogTitle>
-                              <DialogDescription>
-                                Please provide details about why you're
-                                reporting this user. Our moderation team will
-                                review your report.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="py-4">
-                              <label
-                                htmlFor="reason"
-                                className="block text-sm font-medium mb-1">
-                                Reason for reporting:
-                              </label>
-                              <select
-                                id="reason"
-                                className="w-full mb-4 p-2 border border-gray-300 rounded-md form-input">
-                                <option value="spam">Spam</option>
-                                <option value="harassment">Harassment</option>
-                                <option value="misinformation">
-                                  Misinformation
-                                </option>
-                                <option value="hate_speech">Hate speech</option>
-                                <option value="other">Other</option>
-                              </select>
 
-                              <label
-                                htmlFor="details"
-                                className="block text-sm font-medium mb-1">
-                                Details:
-                              </label>
-                              <Textarea
-                                id="details"
-                                placeholder="Please provide additional details..."
-                                className="min-h-[100px] form-input"
-                              />
-                            </div>
-                            <DialogFooter>
-                              <Button variant="outline">Cancel</Button>
-                              <Button
-                                onClick={handleReportUser}
-                                className="text-white bg-red-600 hover:bg-red-700  dark:bg-red-700 dark:hover:bg-red-600">
-                                Submit Report
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
+                        <Button
+                          onClick={() => setOpen(true)}
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full text-red-500 hover:bg-red-50 hover:text-red-600">
+                          <AlertTriangle className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setIsReportDialogOpen(true)}>
+                          <MoreHorizontal size={18} />
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -446,13 +481,182 @@ export const PeoplePage = () => {
           ),
           EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
         }}
-        //endReached={fetchMore}
-        itemContent={(index, post) => (
-          <div>
-            <PostCard post={post} />
-          </div>
-        )}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        itemContent={(index, post) => {
+          if (status === 'pending') {
+            return <PostSkeleton />;
+          }
+
+          if (!post) return null;
+
+          const key = post._id || `${activeTab}-${index}`;
+
+          if (activeTab === 'replies' && post.commentBy?.username) {
+            return <UserCommentCard key={key} comment={post} isFrom="public" />;
+          }
+
+          if (post.user?._id) {
+            return <PostCard key={key} post={post} hideMenu={true} />;
+          }
+
+          return <PostSkeleton />;
+        }}
       />
+
+      <div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="capitalize">
+                Report {username}
+              </DialogTitle>
+              <DialogDescription>
+                Please provide details about why you're reporting this user. Our
+                moderation team will review your report.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <label
+                htmlFor="reason"
+                className="block text-sm font-medium mb-1">
+                Reason for reporting:
+              </label>
+              <select
+                id="reason"
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                className="w-full mb-4 p-2 border border-gray-300 rounded-md form-input">
+                <option value="spam">Spam</option>
+                <option value="harassment">Harassment</option>
+                <option value="misinformation">Misinformation</option>
+                <option value="hate_speech">Hate speech</option>
+                <option value="other">Other</option>
+              </select>
+
+              <label
+                htmlFor="details"
+                className="block text-sm font-medium mb-1">
+                Details:
+              </label>
+              <Textarea
+                value={details}
+                onChange={e => setDetails(e.target.value)}
+                id="details"
+                placeholder="Please provide additional details..."
+                className="min-h-[100px] form-input"
+              />
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                onClick={() => handleReportUser(_id)}
+                className="text-white bg-red-600 hover:bg-red-700  dark:bg-red-700 dark:hover:bg-red-600">
+                Submit Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div>
+        <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon">
+              <MoreHorizontal size={18} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center mb-2">
+                <Shield className="h-5 w-5 text-red-500 mr-2" />
+                <DialogTitle>Report @{username}</DialogTitle>
+              </div>
+              <DialogDescription>
+                Your report will be reviewed by our moderation team. We take all
+                reports seriously and will take appropriate action.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex items-center gap-3 mb-4 p-3 bg-forum-hover rounded-lg">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={avatar} alt={username} />
+                <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-semibold text-sm">{username}</div>
+                <div className="text-xs text-forum-gray">@{username}</div>
+              </div>
+            </div>
+
+            <form onSubmit={handleReportSubmit} className="space-y-4">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Reason for report</Label>
+                <RadioGroup
+                  value={reportReason}
+                  onValueChange={setReportReason}>
+                  {reportReasons.map(reason => (
+                    <div
+                      key={reason.id}
+                      className="flex items-center space-x-2">
+                      <RadioGroupItem value={reason.id} id={reason.id} />
+                      <Label htmlFor={reason.id} className="text-sm">
+                        {reason.label}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="details" className="text-sm font-medium">
+                  Additional details (optional)
+                </Label>
+                <Textarea
+                  id="details"
+                  placeholder="Please provide any specific details..."
+                  rows={3}
+                  value={reportDetails}
+                  onChange={e => setReportDetails(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
+                <AlertTriangle size={16} className="text-yellow-600 mt-0.5" />
+                <p className="text-xs text-yellow-800">
+                  Filing false reports may result in actions against your
+                  account.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsReportDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  disabled={isSubmittingReport}>
+                  {isSubmittingReport ? 'Submitting...' : 'Submit Report'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
       {showGoUp && (
         <button
           onClick={() => {

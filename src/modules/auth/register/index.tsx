@@ -193,14 +193,15 @@ export const RegisterPage = () => {
                   />
                 </g>
               </svg> */}
-
-            <AppLogo
-              color="text-white"
-              mdSize="md:text-4xl"
-              center="text-left"
-              title="Discussday Forum"
-              mb="mb-4"
-            />
+            <Link href="/">
+              <AppLogo
+                color="text-white"
+                mdSize="md:text-4xl"
+                center="text-left"
+                title="Discussday Forum"
+                mb="mb-4"
+              />
+            </Link>
             <h1 className="text-3xl font-bold mb-4">Join our community</h1>
             <p className="text-lg mb-6">
               Create an account to start sharing your thoughts and connect with
@@ -238,8 +239,9 @@ export const RegisterPage = () => {
                     />
                   </g>
                 </svg> */}
-
-                <AppLogo color="text-app" mdSize="md:text-4xl" mb="mb-0" />
+                <Link href="/">
+                  <AppLogo color="text-app" mdSize="md:text-4xl" mb="mb-0" />
+                </Link>
               </div>
               <CardTitle className="text-2xl">Create your account</CardTitle>
               <CardDescription>

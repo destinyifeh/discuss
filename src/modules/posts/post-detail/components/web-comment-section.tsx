@@ -5,8 +5,10 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {CommentFeedProps} from '@/types/post-item.type';
 import clsx from 'clsx';
-import {ImagePlus, MessageSquare, Reply, Trash2, X} from 'lucide-react';
+import {ImagePlus, MessageSquare, Reply, Trash2} from 'lucide-react';
+import Link from 'next/link';
 import React from 'react';
 import {VirtuosoHandle} from 'react-virtuoso';
 import {toast} from 'sonner';
@@ -21,14 +23,23 @@ type SectionProps = {
   setImagePreview: (preview: any) => void;
   comment: string;
   removeImage: (index: number) => void;
+  setImageUrls: (urls: string[]) => void;
+  setQuotedImages: (urls: string[]) => void;
+  quotedImages: string[];
+  setImages: (image: any) => void;
+  setIsEditing: (isEdit: boolean) => void;
+  setEditComment: (comment: CommentFeedProps | null) => void;
+  imageUrls: string[];
   handleSubmitComment: () => void;
+  getButtonLabel: () => string;
   isSubmitting: boolean;
+  isEditing: boolean;
   quotedUser: string;
   quoteContent: string;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   imagePreview: string | null;
   handleImageUpload: (image: React.ChangeEvent<HTMLInputElement>) => void;
-  imageUrls: string[];
+  quotedUserImage: string;
 };
 
 export const WebCommentSection = ({
@@ -49,6 +60,15 @@ export const WebCommentSection = ({
   handleImageUpload,
   quoteContent,
   imageUrls,
+  setImageUrls,
+  setImages,
+  setIsEditing,
+  setEditComment,
+  isEditing,
+  getButtonLabel,
+  quotedImages,
+  setQuotedImages,
+  quotedUserImage,
 }: SectionProps) => {
   const {currentUser} = useAuthStore(state => state);
   const allow = false;
@@ -86,6 +106,11 @@ export const WebCommentSection = ({
                 setQuotedUser('');
                 setComment('');
                 setImagePreview(null);
+                setImageUrls([]);
+                setImages([]);
+                setIsEditing(false);
+                setEditComment(null);
+                setQuotedImages([]);
                 // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
               }}>
               Cancel
@@ -113,21 +138,44 @@ export const WebCommentSection = ({
 
             {quotedUser && (
               <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
-                <div className="font-semibold mb-1 text-app">@{quotedUser}</div>
+                <div className="flex items-center gap-1 mb-1">
+                  <Link href={`/user/${quotedUser}`}>
+                    <Avatar className="w-5 h-5">
+                      <AvatarImage src={quotedUserImage ?? undefined} />
+                      <AvatarFallback className="text-sm font-semibold text-app capitalize bg-gray-200">
+                        {quotedUser.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+                  <p className="text-sm font-semibold text-app capitalize">
+                    <Link href={`/user/${quotedUser}`}>{quotedUser}</Link>
+                  </p>
+                </div>
                 <div className="text-sm">
-                  {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
-                  {/* <PostContent2
-                    content={quoteContent.replace(
-                      /^---QUOTE_START---\s[\w]+:\s/gm,
-                      '',
-                    )}
-                  /> */}
-
                   <p
                     // className="text-base leading-relaxed"
                     style={{whiteSpace: 'pre-wrap'}}>
-                    {quoteContent.replace(/^---QUOTE_START---\s[\w]+:\s/gm, '')}
+                    {quoteContent.length > 120
+                      ? quoteContent.slice(0, 120) + '...'
+                      : quoteContent}
                   </p>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {quotedImages.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {quotedImages.map((url, index) => (
+                        <div
+                          key={index}
+                          className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
+                          <img
+                            src={url}
+                            alt={`Comment attachment ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -136,27 +184,9 @@ export const WebCommentSection = ({
               placeholder="Add a comment..."
               value={comment}
               onChange={e => setComment(e.target.value)}
-              className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+              className="max-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
             />
             {/* <AddCommentField content={comment} setContent={setComment} /> */}
-
-            {allow && imagePreview && (
-              <div className="relative mt-3 rounded-md overflow-hidden border py-1 border-app-border">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full max-h-30 object-contain"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  // onClick={removeImage}
-                  className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                  <X size={16} />
-                </Button>
-              </div>
-            )}
 
             {imageUrls.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
@@ -166,7 +196,7 @@ export const WebCommentSection = ({
                     className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
                     <img
                       src={url}
-                      alt={`Post attachment ${index + 1}`}
+                      alt={`Comment attachment ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                     <Button
@@ -213,7 +243,7 @@ export const WebCommentSection = ({
                 className="rounded-full bg-app hover:bg-app/90 text-white"
                 disabled={isSubmitting || (!comment.trim() && !imagePreview)}>
                 <Reply size={16} className="mr-2" />
-                Reply
+                {getButtonLabel()}
               </Button>
             </div>
           </div>

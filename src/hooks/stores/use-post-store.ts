@@ -7,7 +7,7 @@ import {create} from 'zustand';
 
 type States = {
   postComment: CommentFeedProps | null;
-  QuotedComment: QuotedCommentProps | null;
+  QuotedComment: QuotedCommentProps;
   thePost: PostFeedProps | null;
 };
 
@@ -23,6 +23,10 @@ const initialState: States = {
   QuotedComment: {
     quotedContent: '',
     quotedUser: '',
+    quotedId: '',
+    quotedUserId: '',
+    quotedImage: [],
+    quotedUserImage: '',
   },
   thePost: null,
 };

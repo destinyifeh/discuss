@@ -13,6 +13,8 @@ import {AlertTriangle, CheckCircle} from 'lucide-react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import {useState} from 'react';
+import {toast} from 'sonner';
+import {useReportActions} from '../actions/action-hooks/report.action-hooks';
 
 export default function ReportAbusePage() {
   const searchParams = useSearchParams();
@@ -25,7 +27,7 @@ export default function ReportAbusePage() {
   const [details, setDetails] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState('');
-
+  const {reportAbuse} = useReportActions();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, this would send the report to the server
@@ -36,7 +38,26 @@ export default function ReportAbusePage() {
       details,
       email,
     });
-    setSubmitted(true);
+
+    const payload = {
+      reason: reportReason,
+      note: details,
+    };
+
+    reportAbuse.mutate(payload, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'report data');
+        setSubmitted(true);
+      },
+      onError(error, variables, context) {
+        console.log(error, 'post report err');
+
+        toast.error('Report Failed', {
+          description:
+            'Sorry, we were unable to submit your report. Please try again.',
+        });
+      },
+    });
   };
 
   const getReportHeaderText = () => {

@@ -147,14 +147,15 @@ export const LoginPage = () => {
                   />
                 </g>
               </svg> */}
-
-            <AppLogo
-              color="text-white"
-              mdSize="md:text-4xl"
-              center="text-left"
-              title="Discussday Forum"
-              mb="mb-4"
-            />
+            <Link href="/">
+              <AppLogo
+                color="text-white"
+                mdSize="md:text-4xl"
+                center="text-left"
+                title="Discussday Forum"
+                mb="mb-4"
+              />
+            </Link>
             <h1 className="text-3xl font-bold mb-4">Welcome back!</h1>
             <p className="text-lg mb-6">
               Join the conversation on the world's most interactive forum
@@ -193,7 +194,9 @@ export const LoginPage = () => {
                   </g>
                 </svg> */}
 
-                <AppLogo color="text-app" mdSize="md:text-4xl" mb="mb-0" />
+                <Link href="/">
+                  <AppLogo color="text-app" mdSize="md:text-4xl" mb="mb-0" />
+                </Link>
               </div>
               <CardTitle className="text-2xl">Sign in to Forum</CardTitle>
               <CardDescription>

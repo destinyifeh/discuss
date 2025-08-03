@@ -1,21 +1,13 @@
 'use client';
-import {mockAds, Posts, SectionOptions, Sections} from '@/constants/data';
-import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
-//import {VariableSizeList as List} from 'react-window';
+import {Posts, SectionOptions, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import {
-  insertAdsAtRandomPositions,
-  mergePostsWithAds,
-  shuffleArray,
-} from '@/lib/helpers';
 import {feedService} from '@/modules/dashboard/actions/feed.actions';
-import {AdProps} from '@/types/ad-types';
-import {PostProps} from '@/types/post-item.type';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {ArrowUp, BookmarkIcon, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
+import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
 import {AdCard} from '../ad/ad-card';
@@ -32,146 +24,69 @@ import {Button} from '../ui/button';
 import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import PostCard from './post-card';
 
-type MergedItem = {type: 'post'; data: PostProps} | {type: 'ad'; data: AdProps};
 export const SectionPostList = ({
   adSection,
   bannerAd,
+  section,
 }: {
   adSection: string;
   bannerAd: string;
+  section: string;
 }) => {
-  const stortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
-
+  const lastScrollTop = useRef(0);
   const {setShowBottomTab} = useGlobalStore(state => state);
-  const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
-  const sortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
+  const shouldQuery = !!section;
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['section-feed-posts', section],
+    queryFn: ({pageParam = 1}) =>
+      feedService.getSectionPostFeeds(pageParam, 10, section),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    enabled: shouldQuery,
+    retry: 1,
+  });
 
-  const sortedPosts2 = [...Posts].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
-  const data = activeTab === 'for-you' ? sortedPosts : sortedPosts2;
+  const sectionData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.posts) || [];
+  }, [data]);
 
-  const sponsoredAd = mockAds.filter(
-    ad => ad.type === 'Sponsored' && ad.section === adSection,
-  );
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
 
-  //   const [posts, setPosts] = useState([]);
-  //   const [page, setPage] = useState(1);
+  console.log(data, 'section dataa');
 
-  //   const fetchMore = async () => {
-  //     const res = await fetch(`/api/posts?page=${page}`);
-  //     const newPosts = await res.json();
-  //     setPosts(prev => [...prev, ...newPosts]);
-  //     setPage(prev => prev + 1);
-  //   };
-
-  //   useEffect(() => {
-  //     fetchMore(); // Load initial
-  //   }, []);
-
-  const lastScrollTop = useRef(0);
+  if (status === 'error') {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    // if (scrollTop > lastScrollTop.current + 5) {
-    //   setTimeout(() => {
-    //     setShowBottomTab(false);
-    //   }, 500);
-    // } else if (scrollTop < lastScrollTop.current - 5) {
-    //   setShowBottomTab(true);
-    // }
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
-
-  // const mergedPosts: MergedItem[] = [];
-  // const adInterval = 5;
-
-  // for (let i = 0; i < sortedPosts.length; i++) {
-  //   mergedPosts.push({type: 'post', data: sortedPosts[i]});
-
-  //   if ((i + 1) % adInterval === 0 && sponsoredAd.length > 0) {
-  //     const ad = sponsoredAd.shift();
-  //     if (ad) {
-  //       mergedPosts.push({type: 'ad', data: ad});
-  //     }
-  //   }
-  // }
-
-  // // Optionally add remaining ads at the end
-  // while (sponsoredAd.length > 0) {
-  //   const ad = sponsoredAd.shift();
-  //   if (ad) {
-  //     mergedPosts.push({type: 'ad', data: ad});
-  //   }
-  // }
-
-  const showFixedAd = false;
-
-  if (showFixedAd) {
-    const mergedPosts = useMemo(() => {
-      const sortedPosts = [...Posts].sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      );
-
-      const shuffledSponsoredAds = shuffleArray(
-        mockAds.filter(
-          ad => ad.type === 'Sponsored' && ad.section === adSection,
-        ),
-      );
-
-      const merged: MergedItem[] = [];
-      let adIndex = 0;
-      const adInterval = 5;
-
-      for (let i = 0; i < sortedPosts.length; i++) {
-        merged.push({type: 'post', data: sortedPosts[i]});
-
-        if (
-          (i + 1) % adInterval === 0 &&
-          adIndex < shuffledSponsoredAds.length
-        ) {
-          merged.push({type: 'ad', data: shuffledSponsoredAds[adIndex]});
-          adIndex++;
-        }
-      }
-
-      // Optional: Append remaining ads
-      for (; adIndex < shuffledSponsoredAds.length; adIndex++) {
-        merged.push({type: 'ad', data: shuffledSponsoredAds[adIndex]});
-      }
-
-      return merged;
-    }, [Posts, mockAds, adSection]);
-  }
-
-  const mergedPosts = useMemo(() => {
-    const sortedPosts = [...Posts].sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
-
-    const sponsoredAds = mockAds.filter(
-      ad => ad.type === 'Sponsored' && ad.section === adSection,
-    );
-
-    return insertAdsAtRandomPositions(sortedPosts, sponsoredAds);
-  }, [Posts, mockAds, adSection]);
-
-  const mergedItems = useMemo(() => {
-    return mergePostsWithAds(sortedPosts, shuffleArray(sponsoredAd));
-  }, [Posts, mockAds, adSection]);
 
   return (
     <div className="pb-15 lg:pb-0">
@@ -179,9 +94,10 @@ export const SectionPostList = ({
         className="custom-scrollbar"
         style={{height: '100vh'}}
         //style={{height: '950px', width: '100%'}}
-
+        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
+        data={sectionData}
         components={{
           Header: () => (
             <div>
@@ -190,27 +106,30 @@ export const SectionPostList = ({
           ),
           EmptyPlaceholder: () => <SectionPlaceholder />,
         }}
-        //endReached={fetchMore}
-        // data={mergedPosts}
-        data={mergedItems}
-        //   itemContent={(index, item) => {
-        //     if ('type' in item && item.type === 'ad') {
-        //       return <AdCard ad={item.data} />;
-        //     }
-        //     return <PostCard post={item as PostProps} />;
-        //   }}
-        // />
-
-        itemContent={(index, item) => {
-          if (item.type === 'ad') {
-            return <AdCard ad={item.data} />;
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
           }
-          return <PostCard post={item.data} />;
         }}
-        computeItemKey={(index, item) => {
-          // Ensure unique & stable keys
-          if (item.type === 'ad') return `ad-${item.data.id}`;
-          return `post-${item.data.id}`;
+        itemContent={(index, post) => {
+          if (status === 'pending') {
+            return <PostSkeleton />;
+          } else {
+            if (!post || !post.data) {
+              return null;
+            }
+            if (post._type === 'ad') {
+              return (
+                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
+              );
+            }
+            return (
+              <PostCard
+                key={post.data._id || `post-${index}`}
+                post={post.data}
+              />
+            );
+          }
         }}
       />
       {showGoUp && (
@@ -651,31 +570,45 @@ export const BookmarkPostList = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
   const navigate = useRouter();
-  const sortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
 
-  // Mock bookmarked posts - in a real app, this would come from user data
-  const bookmarkedPostIds = ['1', '3']; // Example IDs
-  const bookmarkedPosts = Posts.filter(post =>
-    bookmarkedPostIds.includes(post.id),
-  );
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['bookmarked-feed-posts'],
+    queryFn: ({pageParam = 1}) =>
+      feedService.getUserBookmarkedPostFeeds(pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    retry: 1,
+  });
 
-  const data = bookmarkedPosts;
+  const bookmarkedData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.posts) || [];
+  }, [data]);
 
-  //   const [posts, setPosts] = useState([]);
-  //   const [page, setPage] = useState(1);
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
 
-  //   const fetchMore = async () => {
-  //     const res = await fetch(`/api/posts?page=${page}`);
-  //     const newPosts = await res.json();
-  //     setPosts(prev => [...prev, ...newPosts]);
-  //     setPage(prev => prev + 1);
-  //   };
+  console.log(data, 'bookmarked dataa');
 
-  //   useEffect(() => {
-  //     fetchMore(); // Load initial
-  //   }, []);
+  if (status === 'error') {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
+  }
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
@@ -692,28 +625,44 @@ export const BookmarkPostList = () => {
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
-  const onSectionNavigate = (section: string) => {
-    if (section === 'Create Ad') {
-      navigate.push('/advertise');
-      return;
-    }
-    navigate.push(`/discuss/${section.toLowerCase()}`);
-  };
   return (
     <div className="lg:pb-0">
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        //style={{height: '950px', width: '100%'}}
-        data={data}
+        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
+        data={bookmarkedData}
         components={{
           Header: () => <PageHeader title="Bookmarks" />,
           EmptyPlaceholder: () => <Placeholder holder={'bookmark'} />,
         }}
-        //endReached={fetchMore}
-        itemContent={(index, post) => <PostCard post={post} />}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        itemContent={(index, post) => {
+          if (status === 'pending') {
+            return <PostSkeleton />;
+          } else {
+            if (!post || !post.data) {
+              return null;
+            }
+            if (post._type === 'ad') {
+              return (
+                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
+              );
+            }
+            return (
+              <PostCard
+                key={post.data._id || `post-${index}`}
+                post={post.data}
+              />
+            );
+          }
+        }}
       />
       {showGoUp && (
         <button
@@ -826,11 +775,7 @@ export const PostList11 = () => {
       height={containerHeight}
       itemHeight={itemHeight}
       itemKey="id">
-      {post => (
-        <div>
-          <PostCard post={post} />
-        </div>
-      )}
+      {post => <div>{/* <PostCard post={post} /> */}</div>}
     </List>
   );
 };

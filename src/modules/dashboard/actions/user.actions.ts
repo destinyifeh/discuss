@@ -77,6 +77,48 @@ class UserService {
   async deleteUserRequest(userId: string): Promise<AxiosResponse> {
     return await api.delete(`/auth/${userId}`);
   }
+
+  async getUserPosts(
+    page = 1,
+    limit = 10,
+    type: string = 'posts',
+    search?: string,
+  ) {
+    const params: any = {page, limit, type, search};
+
+    if (search) params.search = search;
+    const response = await api.get(`/posts/user-posts`, {params});
+    return response.data?.data;
+  }
+
+  async getPublicUserPosts(
+    page = 1,
+    limit = 10,
+    type: string = 'posts',
+    userId: string,
+    search?: string,
+  ) {
+    const params: any = {page, limit, type, search};
+
+    if (search) params.search = search;
+    const response = await api.get(`/posts/user-posts/${userId}`, {params});
+    return response.data?.data;
+  }
+
+  async getUserPostLikes(page = 1, limit = 10, search?: string) {
+    const params: any = {page, limit, search};
+
+    if (search) params.search = search;
+    const response = await api.get(`/posts/likes`, {params});
+    return response.data?.data;
+  }
+
+  async getUserPostReplies(page = 1, limit = 10, search?: string) {
+    const params: any = {page, limit, search};
+    if (search) params.search = search;
+    const response = await api.get(`/posts/replies`, {params});
+    return response.data?.data;
+  }
 }
 
 export const userService = new UserService();

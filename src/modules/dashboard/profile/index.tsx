@@ -3,21 +3,24 @@
 import {PageHeader} from '@/components/app-headers';
 import {FallbackMessage} from '@/components/fallbacks';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
+import UserCommentCard from '@/components/post/comments/user-comment-card';
 import PostCard from '@/components/post/post-card';
+import PostSkeleton from '@/components/skeleton/post-skeleton';
 import ProfileSkeleton from '@/components/skeleton/profile-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {Posts} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {usePostStore} from '@/hooks/stores/use-post-store';
 import {normalizeDomain} from '@/lib/formatter';
-import {PostProps} from '@/types/post-item.type';
+import {useInfiniteQuery} from '@tanstack/react-query';
 import {ArrowUp, Calendar, Link as LinkIcon, Settings} from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
-import {Fragment, useEffect, useRef, useState} from 'react';
+import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
+import {userService} from '../actions/user.actions';
 
 export const PostPlaceholder = ({
   tab,
@@ -62,6 +65,19 @@ export const PostPlaceholder = ({
           </p>
         </div>
       )}
+
+      {tab === 'mentions' && (
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">No mentions yet</h2>
+          <p className="text-app-gray">
+            When{' '}
+            {isOwnProfile
+              ? 'when someone mention you'
+              : 'this user is mentioned'}
+            , they'll show up here.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -78,10 +94,41 @@ export const ProfilePage = () => {
   const [showBottomTab, setShowBottomTab] = useState(true);
   const [mounted, setMounted] = useState(false);
   const lastScrollTop = useRef(0);
+  const {resetCommentSection} = usePostStore(state => state);
 
   useEffect(() => {
     setMounted(true);
+    resetCommentSection();
   }, []);
+
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['user-profile-posts', activeTab],
+    queryFn: ({pageParam = 1}) =>
+      userService.getUserPosts(pageParam, 10, activeTab),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    retry: 1,
+  });
+
+  const userData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.posts) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  console.log('user posts dataa', userData);
 
   const isNotCurrentUser = user !== currentUser?.username;
 
@@ -99,26 +146,14 @@ export const ProfilePage = () => {
     );
   }
 
-  // Get posts by this user
-  const userPosts = Posts.filter(post => post.username === user);
-
-  // Sort posts by timestamp (newest first)
-  const sortedPosts = [...userPosts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
-
-  let data: PostProps[] | [];
-
-  switch (activeTab) {
-    case 'posts':
-      data = sortedPosts;
-      break;
-    case 'replies':
-    case 'likes':
-      data = [];
-      break;
-    default:
-      data = [];
+  if (status === 'error') {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
   }
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -142,7 +177,8 @@ export const ProfilePage = () => {
         <Virtuoso
           className="custom-scrollbar"
           style={{height: '100vh'}}
-          data={data}
+          totalCount={totalCount}
+          data={userData}
           onScroll={handleScroll}
           ref={virtuosoRef}
           components={{
@@ -150,7 +186,7 @@ export const ProfilePage = () => {
               <Fragment>
                 <PageHeader
                   title={currentUser?.username}
-                  description={`${userPosts.length} posts`}
+                  description={`${totalCount} ${activeTab}`}
                 />
 
                 <div className="border-b overflow-y-auto border-app-border">
@@ -261,7 +297,7 @@ export const ProfilePage = () => {
                   className="w-full"
                   value={activeTab}
                   onValueChange={setActiveTab}>
-                  <TabsList className="w-full grid grid-cols-3 bg-transparent">
+                  <TabsList className="w-full grid grid-cols-4 bg-transparent">
                     <TabsTrigger
                       value="posts"
                       className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
@@ -277,18 +313,49 @@ export const ProfilePage = () => {
                       className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
                       Likes
                     </TabsTrigger>
+                    <TabsTrigger
+                      value="mentions"
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:rounded-none data-[state=active]:shadow-none py-3">
+                      Mentions
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </Fragment>
             ),
             EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
           }}
-          //endReached={fetchMore}
-          itemContent={(index, post) => (
-            <div>
-              <PostCard post={post} />
-            </div>
-          )}
+          endReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          itemContent={(index, post) => {
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            }
+
+            if (!post) return null;
+
+            const key = post._id || `${activeTab}-${index}`;
+
+            if (activeTab === 'replies' && post.commentBy?.username) {
+              return (
+                <UserCommentCard key={key} comment={post} isFrom="replies" />
+              );
+            }
+
+            if (activeTab === 'mentions' && post?.quotedComment?.quotedUser) {
+              return (
+                <UserCommentCard key={key} comment={post} isFrom="mentions" />
+              );
+            }
+
+            if (post.user?._id) {
+              return <PostCard key={key} post={post} />;
+            }
+
+            return <PostSkeleton />;
+          }}
         />
 
         {showGoUp && (

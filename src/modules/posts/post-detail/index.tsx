@@ -27,7 +27,7 @@ import {
 } from '@/types/post-item.type';
 import {useInfiniteQuery, useQuery} from '@tanstack/react-query';
 import clsx from 'clsx';
-import {ImagePlus, MessageSquare, Reply, Send, X} from 'lucide-react';
+import {ImagePlus, LockIcon, MessageSquare, Reply, Send, X} from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
@@ -477,6 +477,14 @@ export const PostDetailPage = () => {
                   <h2 className="font-bold text-lg">All replies</h2>
                 </div>
 
+                {post.commentsClosed && (
+                  <div className="text-sm text-gray-600 flex items-center gap-2 justify-center my-3">
+                    <LockIcon className="w-4 h-4 text-gray-500" />
+                    This discussion has been locked. No new comments can be
+                    added.
+                  </div>
+                )}
+
                 {/* Web view comment input area */}
                 {allowInlineCom && (
                   <div className="hidden md:block px-4 py-4 border-b border-app-border">
@@ -585,65 +593,77 @@ export const PostDetailPage = () => {
         />
       </div>
 
-      {/* Mobile comment section - slides up from bottom */}
-      {!mob ? (
-        <Button
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
-          size="icon"
-          onClick={onComment}>
-          <MessageSquare size={24} />
-        </Button>
-      ) : (
-        <MobileCommentSection
-          showMobileComment={showMobileComment}
-          setShowMobileComment={setShowMobileComment}
-          setQuoteContent={setQuoteContent}
-          setQuotedUser={setQuotedUser}
-          imagePreview={imagePreview}
-          isSubmitting={isSubmitting}
-          handleImageUpload={handleImageUpload}
-          removeImage={removeImage}
-          imageUrls={imageUrls}
-          setComment={setComment}
-          setImagePreview={setImagePreview}
-          quoteContent={quoteContent}
-          quotedUser={quotedUser}
-          comment={comment}
-          virtuosoRef={virtuosoRef}
-          fileInputRef={fileInputRef}
-          handleSubmitComment={handleSubmitComment}
-          setEditComment={setEditComment}
-          setIsEditing={setIsEditing}
-          setImageUrls={setImageUrls}
-          setImages={setImages}
-          isEditing={isEditing}
-          getButtonLabel={getButtonLabel}
-          quotedImages={quotedImages}
-          setQuotedImages={setQuotedImages}
-          quotedUserImage={quotedUserImage}
-        />
+      {!post.commentsClosed && (
+        <>
+          {/* Mobile comment section - slides up from bottom */}
+          {!mob ? (
+            <Button
+              className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
+              size="icon"
+              onClick={onComment}>
+              <MessageSquare size={24} />
+            </Button>
+          ) : (
+            <MobileCommentSection
+              showMobileComment={showMobileComment}
+              setShowMobileComment={setShowMobileComment}
+              setQuoteContent={setQuoteContent}
+              setQuotedUser={setQuotedUser}
+              imagePreview={imagePreview}
+              isSubmitting={isSubmitting}
+              handleImageUpload={handleImageUpload}
+              removeImage={removeImage}
+              imageUrls={imageUrls}
+              setComment={setComment}
+              setImagePreview={setImagePreview}
+              quoteContent={quoteContent}
+              quotedUser={quotedUser}
+              comment={comment}
+              virtuosoRef={virtuosoRef}
+              fileInputRef={fileInputRef}
+              handleSubmitComment={handleSubmitComment}
+              setEditComment={setEditComment}
+              setIsEditing={setIsEditing}
+              setImageUrls={setImageUrls}
+              setImages={setImages}
+              isEditing={isEditing}
+              getButtonLabel={getButtonLabel}
+              quotedImages={quotedImages}
+              setQuotedImages={setQuotedImages}
+              quotedUserImage={quotedUserImage}
+            />
+          )}
+
+          <WebCommentSection
+            showWebComment={showWebComment}
+            setShowWebComment={setShowWebComment}
+            setQuoteContent={setQuoteContent}
+            setQuotedUser={setQuotedUser}
+            imagePreview={imagePreview}
+            isSubmitting={isSubmitting}
+            handleImageUpload={handleImageUpload}
+            removeImage={removeImage}
+            imageUrls={imageUrls}
+            setComment={setComment}
+            setImagePreview={setImagePreview}
+            quoteContent={quoteContent}
+            quotedUser={quotedUser}
+            comment={comment}
+            virtuosoRef={virtuosoRef}
+            fileInputRef={fileInputRef}
+            handleSubmitComment={handleSubmitComment}
+            setEditComment={setEditComment}
+            setIsEditing={setIsEditing}
+            setImageUrls={setImageUrls}
+            setImages={setImages}
+            isEditing={isEditing}
+            getButtonLabel={getButtonLabel}
+            quotedImages={quotedImages}
+            setQuotedImages={setQuotedImages}
+            quotedUserImage={quotedUserImage}
+          />
+        </>
       )}
-
-      <WebCommentSection
-        showWebComment={showWebComment}
-        setShowWebComment={setShowWebComment}
-        setQuoteContent={setQuoteContent}
-        setQuotedUser={setQuotedUser}
-        imagePreview={imagePreview}
-        isSubmitting={isSubmitting}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-        setComment={setComment}
-        setImagePreview={setImagePreview}
-        quoteContent={quoteContent}
-        quotedUser={quotedUser}
-        comment={comment}
-        virtuosoRef={virtuosoRef}
-        fileInputRef={fileInputRef}
-        handleSubmitComment={handleSubmitComment}
-        imageUrls={imageUrls}
-      />
-
       {allowMainCom && (
         <>
           <div className="lg:hidden">

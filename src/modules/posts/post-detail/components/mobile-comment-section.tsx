@@ -6,7 +6,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {CommentFeedProps} from '@/types/post-item.type';
 import clsx from 'clsx';
-import {ImagePlus, MessageSquare, Reply, Trash2, X} from 'lucide-react';
+import {ImagePlus, MessageSquare, Reply, Trash2} from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import {VirtuosoHandle} from 'react-virtuoso';
@@ -70,8 +70,7 @@ export const MobileCommentSection = ({
   quotedUserImage,
 }: SectionProps) => {
   const {currentUser} = useAuthStore(state => state);
-  console.log(comment, 'commentoooo');
-  const allow = false;
+
   return (
     <div className="lg:hidden ">
       {/* Comment button for mobile */}
@@ -172,7 +171,7 @@ export const MobileCommentSection = ({
                           className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
                           <img
                             src={url}
-                            alt={`Post attachment ${index + 1}`}
+                            alt={`Comment attachment ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -200,7 +199,7 @@ export const MobileCommentSection = ({
                     className="relative rounded-lg overflow-hidden w-24 h-24 sm:w-32 sm:h-32">
                     <img
                       src={url}
-                      alt={`Post attachment ${index + 1}`}
+                      alt={`Comment attachment ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                     <Button
@@ -212,24 +211,6 @@ export const MobileCommentSection = ({
                     </Button>
                   </div>
                 ))}
-              </div>
-            )}
-
-            {allow && imagePreview && (
-              <div className="relative mt-3 rounded-md overflow-hidden border border-app-border ">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full max-h-30 object-contain"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  // onClick={removeImage}
-                  className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                  <X size={16} />
-                </Button>
               </div>
             )}
 

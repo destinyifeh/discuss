@@ -9,54 +9,58 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
-import {CommentFeedProps} from '@/types/post-item.type';
+import {CommentFeedProps, PostFeedProps} from '@/types/post-item.type';
 import React, {useState} from 'react';
 
 import {formatTimeAgo2} from '@/lib/formatter';
 import {
   EllipsisVertical,
-  Flag,
   Heart,
   MessageSquare,
   MoreHorizontal,
   Pencil,
   ThumbsDown,
+  Trash,
 } from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {usePostStore} from '@/hooks/stores/use-post-store';
 import {queryClient} from '@/lib/client/query-client';
-import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {usePostActions} from '@/modules/posts/post-hooks';
+import {UserProps} from '@/types/user.types';
 import {toast} from 'sonner';
-import {PostContent} from './post-content';
+import {PostContent} from '../post-content';
 
 interface CommentCardProps {
   comment: CommentFeedProps;
-  onQuote?: () => void;
-  onEdit?: () => void;
-  handleQuoteClick: (quote: string) => void;
+  isFrom: 'replies' | 'mentions' | 'public';
 }
 
-const CommentCard = ({
-  comment,
-  onQuote,
-  onEdit,
-  handleQuoteClick,
-}: CommentCardProps) => {
+const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
   const {theme} = useGlobalStore(state => state);
   const [liked, setLiked] = useState(false);
   const navigate = useRouter();
   const {likeCommentRequest, dislikeCommentRequest} = usePostActions();
   const {currentUser} = useAuthStore(state => state);
-  const {reportComment} = useReportActions();
+  const {setPostComment, setQuotedComment, setPost, resetCommentSection} =
+    usePostStore(state => state);
   const handleLike = () => {
     likeCommentRequest.mutate(comment._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'comment like');
 
-        queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'replies'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'mentions'],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ['public-user-posts', 'replies'],
+        });
       },
       onError(error, variables, context) {
         console.log(error, 'err');
@@ -70,7 +74,16 @@ const CommentCard = ({
       onSuccess(data, variables, context) {
         console.log(data, 'comment like');
 
-        queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'replies'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['user-profile-posts', 'mentions'],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ['public-user-posts', 'replies'],
+        });
       },
       onError(error, variables, context) {
         console.log(error, 'err');
@@ -79,41 +92,51 @@ const CommentCard = ({
     });
   };
 
-  const handleReport = (commentId: string) => {
-    const payload = {
-      reason: 'No reason provided. Requires admin review.',
-      commentId: commentId,
-    };
-
-    reportComment.mutate(payload, {
-      onSuccess(data, variables, context) {
-        console.log(data, 'report data');
-        toast('Comment Reported', {
-          description:
-            'Thank you for reporting this comment. Our team will review it.',
-        });
-      },
-      onError(error, variables, context) {
-        console.log(error, 'comment report err');
-
-        toast.error('Report Failed', {
-          description:
-            'Sorry, we were unable to submit your report. Please try again.',
-        });
-      },
+  const handleReport = () => {
+    toast('Comment Reported', {
+      description:
+        'Thank you for reporting this comment. Our team will review it.',
     });
   };
 
   const handleQuote = () => {
-    if (onQuote) {
-      onQuote();
-    }
+    const payload = {
+      quotedContent: comment.content,
+      quotedUser: comment.commentBy.username,
+      quotedId: comment._id,
+      quotedUserId: comment.commentBy._id,
+      quotedImage:
+        comment.images && comment.images.map((img: any) => img.secure_url),
+      quotedUserImage: comment.commentBy.avatar,
+    };
+
+    setQuotedComment(payload);
+    setPost(comment.post as PostFeedProps);
+
+    navigate.push(`/post/${comment.post._id}/reply`);
   };
 
   const handleEdit = () => {
-    if (onEdit) {
-      onEdit();
+    setPost(comment.post as PostFeedProps);
+    if (comment.quotedComment) {
+      const quotedImg = comment.quotedComment.quotedImage
+        ? comment.quotedComment.quotedImage.map((url: string) => url)
+        : [];
+      const pay = {
+        quotedContent: comment.quotedComment.quotedContent,
+        quotedUser: comment.quotedComment.quotedUser,
+        quotedId: comment.quotedComment.quotedId,
+        quotedUserId: comment.quotedComment.quotedUserId,
+        quotedImage: quotedImg,
+        quotedUserImage: comment.quotedComment.quotedUserImage,
+      };
+
+      setQuotedComment(pay);
+      setPostComment(comment);
+    } else {
+      setPostComment(comment);
     }
+    navigate.push(`/post/${comment.post._id}/reply`);
   };
 
   const renderCommentContent = () => {
@@ -128,11 +151,7 @@ const CommentCard = ({
         const {quotedImage, quotedContent} = comment.quotedComment;
         return (
           <>
-            <div
-              className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background"
-              onClick={() =>
-                handleQuoteClick(comment.quotedComment?.quotedId as string)
-              }>
+            <div className="p-3 rounded-md mb-0 bg-gray-100 border-l-4 border-app dark:bg-background">
               <div className="flex items-center gap-1 mb-1">
                 <Link href={`/user/${quoteName}`}>
                   <Avatar className="w-5 h-5">
@@ -213,7 +232,29 @@ const CommentCard = ({
     }
   };
 
+  function isRelevantComment(
+    comment: CommentFeedProps,
+    currentUser: UserProps | null,
+    isFrom: 'replies' | 'mentions' | 'public',
+  ) {
+    if (isFrom === 'mentions' || isFrom === 'public') return false;
+
+    const quotedUserId = comment.quotedComment?.quotedUserId;
+    const isQuotedUser = quotedUserId === currentUser?._id;
+    const isCommentedUser =
+      !quotedUserId && comment.commentBy?._id === currentUser?._id;
+
+    const isQuotedUserAndCommentedUser =
+      quotedUserId && comment.commentBy?._id === currentUser?._id;
+
+    return isQuotedUser || isCommentedUser || isQuotedUserAndCommentedUser;
+  }
+
+  const checkUser = isRelevantComment(comment, currentUser, isFrom);
+
   const isLiked = comment.likedBy.includes(currentUser?._id as string);
+
+  console.log(checkUser, 'theUserr');
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
@@ -237,30 +278,38 @@ const CommentCard = ({
                 · replied {formatTimeAgo2(comment.createdAt as string)}
               </span>
             </div>
+            {checkUser && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8">
+                    <MoreHorizontal size={16} className="hidden md:block" />
+                    <EllipsisVertical size={16} className="md:hidden" />
+                    <span className="sr-only">Comment menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={handleEdit}
+                    className="cursor-pointer">
+                    <Pencil size={16} className="mr-2" />
+                    Edit
+                  </DropdownMenuItem>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8">
-                  <MoreHorizontal size={16} className="hidden md:block" />
-                  <EllipsisVertical size={16} className="md:hidden" />
-                  <span className="sr-only">Comment menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => handleReport(comment._id)}
-                  className="cursor-pointer">
-                  <Flag size={16} className="mr-2" />
-                  Report comment
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleEdit}
-                  className="cursor-pointer">
-                  <Pencil size={16} className="mr-2" />
-                  Edit
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem
+                    onClick={handleReport}
+                    className="cursor-pointer">
+                    <Trash size={16} className="mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+          <div className="flex flex-row gap-2">
+            <p>Replying to</p>
+            <Link href={`/post/${comment.post._id}`} className="text-blue-500">
+              {comment.post.title}
+            </Link>
           </div>
 
           <div className="mt-1">
@@ -346,4 +395,4 @@ const CommentCard = ({
   );
 };
 
-export default React.memo(CommentCard);
+export default React.memo(UserCommentCard);

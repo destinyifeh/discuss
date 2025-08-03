@@ -16,6 +16,7 @@ import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
 import {Eye, EyeOff} from 'lucide-react';
+import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import {toast} from 'sonner';
@@ -149,14 +150,15 @@ export const ResetPasswordPage = () => {
                   />
                 </g>
               </svg> */}
-
-            <AppLogo
-              color="text-white"
-              mdSize="md:text-4xl"
-              center="text-left"
-              title="Discussday Forum"
-              mb="mb-4"
-            />
+            <Link href="/">
+              <AppLogo
+                color="text-white"
+                mdSize="md:text-4xl"
+                center="text-left"
+                title="Discussday Forum"
+                mb="mb-4"
+              />
+            </Link>
             <h1 className="text-3xl font-bold mb-4">Create new password</h1>
             <p className="text-lg mb-6">
               Almost there! Enter your new password to secure your account.
@@ -193,7 +195,9 @@ export const ResetPasswordPage = () => {
                     />
                   </g>
                 </svg> */}
-                <AppLogo color="text-app" mdSize="md:text-4xl" mb="mb-0" />
+                <Link href="/">
+                  <AppLogo color="text-app" mdSize="md:text-4xl" mb="mb-0" />
+                </Link>
               </div>
               <CardTitle className="text-2xl text-center">
                 Create new password

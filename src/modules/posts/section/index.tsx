@@ -10,17 +10,15 @@ import {useParams} from 'next/navigation';
 import {useEffect, useState} from 'react';
 
 export const SectionPage = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const {section: theSection} = useParams<{section: string}>();
-
+  const [mounted, setMounted] = useState(false);
   const section = Sections.find(cat => cat.name.toLowerCase() === theSection);
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 800);
-  }, [section]);
+    setMounted(true);
+  }, []);
 
-  if (isLoading) {
+  if (!mounted) {
     return <CategorySkeleton />;
   }
 
@@ -32,7 +30,11 @@ export const SectionPage = () => {
     <div>
       <SectionHeader title={section.name} description={section.description} />
 
-      <SectionPostList adSection="home" bannerAd={section.name.toLowerCase()} />
+      <SectionPostList
+        section={section.name}
+        adSection="home"
+        bannerAd={section.name.toLowerCase()}
+      />
     </div>
   );
 };

@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {useQuery} from '@tanstack/react-query';
+import {adminPostService} from '../../actions/post-service/post';
 import {adminService} from '../../actions/user';
 import {COLORS} from '../../data';
 
@@ -67,6 +68,32 @@ export const OverViewTab: FC<OverviewProps> = ({
 
   console.log(usersData, 'should query dataa');
 
+  const {
+    isLoading: loadingSectionStats,
+    error: sectionErr,
+    data: sectionData,
+  } = useQuery({
+    queryKey: ['section-post-comment-stats'],
+    queryFn: () => adminPostService.getSectionPostCommentStats(),
+    retry: true,
+  });
+  console.log('section data', sectionErr);
+
+  console.log(sectionData, 'section dataa');
+
+  const {
+    isLoading: loadingPostStats,
+    error: postStatsErr,
+    data: postStatsData,
+  } = useQuery({
+    queryKey: ['post-stats'],
+    queryFn: () => adminPostService.getPostStats(),
+    retry: true,
+  });
+  console.log('poststats err', postStatsErr);
+
+  console.log(postStatsData, 'postStat dataa');
+
   const pendingAds = [
     {
       id: '1',
@@ -98,7 +125,7 @@ export const OverViewTab: FC<OverviewProps> = ({
     {name: 'Inactive', value: 30},
   ];
 
-  const sectionData = Sections.map(cat => ({
+  const sectionData2 = Sections.map(cat => ({
     name: cat.ch,
     posts: Posts.filter(post => post.sectionId === cat.id).length,
     comments: Posts.filter(post => post.sectionId === cat.id).reduce(
@@ -174,9 +201,11 @@ export const OverViewTab: FC<OverviewProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{Posts.length}</div>
+              <div className="text-2xl font-bold">
+                {postStatsData?.totalPosts}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +12% from last month
+                {postStatsData?.growth}% from last month
               </p>
             </CardContent>
           </Card>
@@ -199,12 +228,12 @@ export const OverViewTab: FC<OverviewProps> = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>section Activity</CardTitle>
+            <CardTitle>Section Activity</CardTitle>
           </CardHeader>
           <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={sectionData}
+                data={sectionData?.data}
                 margin={{top: 20, right: 30, left: 20, bottom: 5}}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />

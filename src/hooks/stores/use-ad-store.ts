@@ -1,37 +1,32 @@
-import {AdCTA, AdProps} from '@/types/ad-types';
+import {CreateAdDto} from '@/modules/dashboard/advertise/dto/create-ad.dto';
+import {AdCTA} from '@/types/ad-types';
 import {create} from 'zustand';
 
 type States = {
   currentBannerIndex: Record<string, number>;
-  previewAdData: AdProps;
+  previewAdData: CreateAdDto;
 };
 
 type Actions = {
   setCurrentBannerIndex: (section: string, index: number) => void;
-  setPreviewAdData: (data: AdProps) => void;
+  setPreviewAdData: (data: CreateAdDto) => void;
   startBannerRotation: (section: string, adsLength: number) => void;
 };
 
 const initialState: States = {
   currentBannerIndex: {},
   previewAdData: {
-    author: {
-      name: 'Janet',
-      username: 'fitnesspro',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Janet',
-      id: 'user_001',
-    },
-    type: 'Sponsored',
     title: '',
     content: '',
-    imageUrl: '',
-    plan: 'professional',
-    section: '',
-    price: '',
-    status: 'pending',
     targetUrl: '',
-    callToAction: AdCTA.LearnMore,
-    duration: '',
+    type: 'sponsored',
+    section: '',
+    callToAction: 'Learn More' as AdCTA,
+    duration: '7',
+    plan: 'basic',
+    price: '',
+    imageUrl: '',
+    image: null,
   },
 };
 
@@ -40,7 +35,7 @@ const startedCategories: Record<string, boolean> = {};
 export const useAdStore = create<States & Actions>(set => ({
   ...initialState,
 
-  setPreviewAdData(data) {
+  setPreviewAdData(data: CreateAdDto) {
     set({previewAdData: data});
   },
   setCurrentBannerIndex: (section, index) => {

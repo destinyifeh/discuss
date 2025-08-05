@@ -1,12 +1,14 @@
 import api from '@/lib/auth/api';
 
-export async function getNotificationsRequestAction() {
-  try {
-    const res = await api.get(`/notifications`);
-    return res.data?.notifications;
-  } catch (err: any) {
-    throw err?.response?.data ?? err;
-  }
+export async function getNotificationsRequestAction(
+  page = 1,
+  limit = 10,
+  requestedNote: string,
+) {
+  const params: any = {page, limit, requestedNote};
+
+  const res = await api.get(`/notifications`, {params});
+  return res.data?.data;
 }
 
 export async function markAllAsReadRequestAction() {

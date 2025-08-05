@@ -11,7 +11,7 @@ export const mockAds: AdProps[] = [
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Janet',
       id: 'user_001',
     },
-    type: 'Sponsored',
+    type: 'sponsored',
     title: 'Discover the Future of AI',
     content: `Don't miss out on our massive summer sale! Enjoy up to 50% off on selected items including electronics, fashion, and home essentials. Hurry, offers valid while stock lasts.`,
     imageUrl:
@@ -33,7 +33,7 @@ export const mockAds: AdProps[] = [
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Janet',
       id: 'user_006',
     },
-    type: 'Banner',
+    type: 'banner',
     title: 'Discover the Future of AI',
     content: `Don't miss out on our massive summer sale! Enjoy up to 50% off on selected items including electronics, fashion, and home essentials. Hurry, offers valid while stock lasts.`,
     imageUrl:
@@ -55,7 +55,7 @@ export const mockAds: AdProps[] = [
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Janet',
       id: 'user_0016',
     },
-    type: 'Banner',
+    type: 'banner',
     title: 'Discover the Future of AI',
     content: `Don't miss out on our massive summer sale! Enjoy up to 50% off on selected items including electronics, fashion, and home essentials. Hurry, offers valid while stock lasts.`,
     imageUrl:
@@ -77,7 +77,7 @@ export const mockAds: AdProps[] = [
       id: 'user_002',
     },
     title: 'New Product Launch',
-    type: 'Banner',
+    type: 'banner',
     imageUrl:
       'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
     plan: 'enterprise',
@@ -96,7 +96,7 @@ export const mockAds: AdProps[] = [
       id: 'user_003',
     },
 
-    type: 'Sponsored',
+    type: 'sponsored',
     title: ' Leveraging AI to improve customer experience - MTN ',
     content: `Escape the stress and unwind with our exclusive holiday packages! Get discounts on flights, hotels, and guided tours to breathtaking destinations across the globe.`,
     plan: 'basic',
@@ -117,7 +117,7 @@ export const mockAds: AdProps[] = [
       id: 'user_004',
     },
 
-    type: 'Banner',
+    type: 'banner',
     title: 'firnessing',
     imageUrl:
       'https://media.istockphoto.com/id/1316524516/photo/modern-large-luxury-dark-gray-kitchen-closeup.jpg?s=612x612&w=0&k=20&c=FtLMlE9VzOx5o8Vq0H_5xMZ8dDj5MsG0q5NVWSPlVzU=',
@@ -139,7 +139,7 @@ export const mockAds: AdProps[] = [
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Musa',
       id: 'user_005',
     },
-    type: 'Sponsored',
+    type: 'sponsored',
     title: ' Leveraging AI to improve customer experience - MTN ',
     content: `Join our free live webinar on "The Role of AI in Modern Education". Learn how artificial intelligence is shaping classrooms of the future, improving outcomes, and redefining learning experiences.`,
     imageUrl:

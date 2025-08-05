@@ -91,13 +91,13 @@ export const ctaBtn = [
 
 export const enterPriseAdTypes = [
   {
-    id: 'Banner',
+    id: 'banner',
     name: 'Banner Ad',
     description: 'Static or animated banner displayed on various pages',
     price: `From ${ENTERPRISE_AD_PRICE_FOR_7_DAYS}/week`,
   },
   {
-    id: 'Sponsored',
+    id: 'sponsored',
     name: 'Sponsored Post',
     description: 'Native-looking sponsored posts in feeds',
     price: `From ${ENTERPRISE_AD_PRICE_FOR_7_DAYS}/week`,
@@ -106,13 +106,13 @@ export const enterPriseAdTypes = [
 
 export const professionalAdTypes = [
   {
-    id: 'Banner',
+    id: 'banner',
     name: 'Banner Ad',
     description: 'Static or animated banner displayed on various pages',
     price: `From ${PROFESSIONAL_AD_PRICE_FOR_7_DAYS}/week`,
   },
   {
-    id: 'Sponsored',
+    id: 'sponsored',
     name: 'Sponsored Post',
     description: 'Native-looking sponsored posts in feeds',
     price: `From ${PROFESSIONAL_AD_PRICE_FOR_7_DAYS}/week`,
@@ -120,13 +120,13 @@ export const professionalAdTypes = [
 ];
 export const basicAdTypes = [
   {
-    id: 'Banner',
+    id: 'banner',
     name: 'Banner Ad',
     description: 'Static or animated banner displayed on various pages',
     price: `From ${BASIC_AD_PRICE_FOR_7_DAYS}/week`,
   },
   {
-    id: 'Sponsored',
+    id: 'sponsored',
     name: 'Sponsored Post',
     description: 'Native-looking sponsored posts in feeds',
     price: `From ${BASIC_AD_PRICE_FOR_7_DAYS}/week`,

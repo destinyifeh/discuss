@@ -17,7 +17,7 @@ import {useInfiniteQuery} from '@tanstack/react-query';
 import {ArrowUp, Calendar, Link as LinkIcon, Settings} from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
-import {useParams, useRouter} from 'next/navigation';
+import {useParams, useRouter, useSearchParams} from 'next/navigation';
 import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {userService} from '../actions/user.actions';
@@ -96,7 +96,16 @@ export const ProfilePage = () => {
   const lastScrollTop = useRef(0);
   const {resetCommentSection} = usePostStore(state => state);
 
+  const searchParams = useSearchParams();
+  const ref = searchParams.get('ref');
+
   useEffect(() => {
+    if (ref === 'mentions') {
+      setActiveTab('mentions');
+    }
+    if (ref === 'likes') {
+      setActiveTab('likes');
+    }
     setMounted(true);
     resetCommentSection();
   }, []);

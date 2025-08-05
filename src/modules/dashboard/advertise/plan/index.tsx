@@ -28,6 +28,8 @@ import {AdCTA, AdPlan, AdProps, AdType, DurationValue} from '@/types/ad-types';
 import {ArrowRight, CheckCircle, Upload} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {ChangeEvent, Fragment, useRef, useState} from 'react';
+import {toast} from 'sonner';
+import {CreateAdDto} from '../dto/create-ad.dto';
 import {AdPreviewPage} from '../preview';
 
 export const AdPlanPage = () => {
@@ -38,12 +40,25 @@ export const AdPlanPage = () => {
   const navigate = useRouter();
   const [isPreviewPage, setIsPreviewPage] = useState(false);
   const {setPreviewAdData} = useAdStore(state => state);
-  const [previewData, setPreviewData] = useState<AdProps>({
+  const [previewData, setPreviewData] = useState<CreateAdDto>({
+    title: '',
+    content: '',
+    targetUrl: '',
+    type: 'sponsored' as AdType,
+    section: '',
+    callToAction: AdCTA.LearnMore,
+    duration: '7' as DurationValue,
+    plan: plan,
+    price: '',
+    imageUrl: '',
+    image: null,
+  });
+  const [previewData2, setPreviewData2] = useState<AdProps>({
     title: '',
     content: 'This could be your advertisement reaching our entire community!',
     targetUrl: '',
     sponsor: 'Your Brand',
-    type: 'Sponsored',
+    type: 'sponsored',
     imageUrl: '',
     section: '',
     callToAction: AdCTA.LearnMore,
@@ -66,10 +81,21 @@ export const AdPlanPage = () => {
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewData(prev => ({
           ...prev,
+          image: file,
           imageUrl: reader.result as string,
           useTextOnly: false,
         }));
@@ -106,11 +132,11 @@ export const AdPlanPage = () => {
     const isCommonInvalid =
       !title || !targetUrl || !duration || (requiresSection && !section);
 
-    if (type === 'Sponsored') {
+    if (type === 'sponsored') {
       if (!content || !callToAction || isCommonInvalid) {
         return true; // disable button
       }
-    } else if (type === 'Banner') {
+    } else if (type === 'banner') {
       if (!imageUrl || isCommonInvalid) {
         return true; // disable button
       }
@@ -200,7 +226,10 @@ export const AdPlanPage = () => {
                   <Select
                     value={previewData.duration}
                     onValueChange={value => {
-                      setPreviewData(prev => ({...prev, duration: value}));
+                      setPreviewData(prev => ({
+                        ...prev,
+                        duration: value as DurationValue,
+                      }));
                     }}>
                     <SelectTrigger className="w-full md:w-[300px] mb-2">
                       <SelectValue placeholder="Select duration" />
@@ -267,7 +296,7 @@ export const AdPlanPage = () => {
                 </SelectContent>
               </Select>
             </div> */}
-                {previewData.type === 'Sponsored' && (
+                {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:w-[300px] md:mb-0">
                     <h2 className="text-lg font-bold mb-4">
                       Call to Action Button
@@ -295,7 +324,7 @@ export const AdPlanPage = () => {
                 )}
                 <div className="mb-5 w-full md:w-[300px] md:mb-0">
                   <h2 className="text-lg font-bold mb-4">
-                    {previewData.type === 'Sponsored'
+                    {previewData.type === 'sponsored'
                       ? 'Ad Image (Optional)'
                       : 'Ad Image'}
                   </h2>
@@ -322,7 +351,11 @@ export const AdPlanPage = () => {
                         variant="destructive"
                         size="sm"
                         onClick={() =>
-                          setPreviewData(prev => ({...prev, imageUrl: ''}))
+                          setPreviewData(prev => ({
+                            ...prev,
+                            imageUrl: '',
+                            image: null,
+                          }))
                         }>
                         Remove
                       </Button>
@@ -360,7 +393,7 @@ export const AdPlanPage = () => {
                   </p>
                 </div>
 
-                {previewData.type === 'Sponsored' && (
+                {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:mb-0">
                     <h2 className="text-lg font-bold mb-4">Ad Description</h2>
                     <textarea
@@ -430,7 +463,10 @@ export const AdPlanPage = () => {
                   <Select
                     value={previewData.duration}
                     onValueChange={value => {
-                      setPreviewData(prev => ({...prev, duration: value}));
+                      setPreviewData(prev => ({
+                        ...prev,
+                        duration: value as DurationValue,
+                      }));
                     }}>
                     <SelectTrigger className="w-full md:w-[300px] mb-2">
                       <SelectValue placeholder="Select duration" />
@@ -476,7 +512,7 @@ export const AdPlanPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                {previewData.type === 'Sponsored' && (
+                {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:w-[300px] md:mb-0">
                     <h2 className="text-lg font-bold mb-4">
                       Call to Action Button
@@ -525,7 +561,7 @@ export const AdPlanPage = () => {
 
                 <div className="mb-5 w-full md:w-[300px] md:mb-0">
                   <h2 className="text-lg font-bold mb-4">
-                    {previewData.type === 'Sponsored'
+                    {previewData.type === 'sponsored'
                       ? 'Ad Image (Optional)'
                       : 'Ad Image'}
                   </h2>
@@ -590,7 +626,7 @@ export const AdPlanPage = () => {
                   </p>
                 </div>
 
-                {previewData.type === 'Sponsored' && (
+                {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:mb-0">
                     <h2 className="text-lg font-bold mb-4">Ad Description</h2>
                     <textarea
@@ -659,7 +695,10 @@ export const AdPlanPage = () => {
                   <Select
                     value={previewData.duration}
                     onValueChange={value => {
-                      setPreviewData(prev => ({...prev, duration: value}));
+                      setPreviewData(prev => ({
+                        ...prev,
+                        duration: value as DurationValue,
+                      }));
                     }}>
                     <SelectTrigger className="w-full md:w-[300px] mb-2">
                       <SelectValue placeholder="Select duration" />
@@ -686,7 +725,7 @@ export const AdPlanPage = () => {
                   </Select>
                 </div>
 
-                {previewData.type === 'Sponsored' && (
+                {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:w-[300px] md:mb-0">
                     <h2 className="text-lg font-bold mb-4">
                       Call to Action Button
@@ -755,7 +794,7 @@ export const AdPlanPage = () => {
 
                 <div className="mb-5 w-full md:w-[300px] md:mb-0">
                   <h2 className="text-lg font-bold mb-4">
-                    {previewData.type === 'Sponsored'
+                    {previewData.type === 'sponsored'
                       ? 'Ad Image (Optional)'
                       : 'Ad Image'}
                   </h2>
@@ -819,7 +858,7 @@ export const AdPlanPage = () => {
                   </p>
                 </div>
 
-                {previewData.type === 'Sponsored' && (
+                {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:mb-0">
                     <h2 className="text-lg font-bold mb-4">Ad Description</h2>
                     <textarea

@@ -1,5 +1,6 @@
 'use client';
 
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {NotificationItemProps} from '@/types/user.types';
 import {BellIcon} from 'lucide-react';
@@ -12,6 +13,7 @@ export const NotificationCard = ({
 }: {
   notification: NotificationItemProps;
 }) => {
+  const {currentUser} = useAuthStore(state => state);
   return (
     <div
       key={notification._id}
@@ -33,7 +35,28 @@ export const NotificationCard = ({
                 {notification.senderName}
               </span>
             </Link>
-            <span className="text-app-gray">{notification.content}</span>
+            <span className="text-app-gray">{notification.content}.</span>
+            {(notification.type === 'mentioned' ||
+              notification.type === 'liked') && (
+              <div>
+                <span className="text-black-500">
+                  You can view the details on your
+                  <Link
+                    className="ml-1 text-blue-500"
+                    href={{
+                      pathname: `/profile/${currentUser?.username}`,
+                      query: {
+                        ref:
+                          notification.type === 'mentioned'
+                            ? 'mentions'
+                            : 'likes',
+                      },
+                    }}>
+                    profile{' '}
+                  </Link>
+                </span>
+              </div>
+            )}
           </div>
           <p className="text-xs text-app-gray mt-1">
             {moment(notification.createdAt).fromNow()}

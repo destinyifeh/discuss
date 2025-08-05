@@ -20,6 +20,7 @@ import {ArrowRight} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {toast} from 'sonner';
+import {useAdActions} from '../../actions/action-hooks/ad.action-hooks';
 
 const AdSubmitMessage = () => {
   return (
@@ -55,12 +56,35 @@ export const AdPreviewPage = ({
 }) => {
   const navigate = useRouter();
   const {previewAdData} = useAdStore(state => state);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAdSubmitted, setIsAdSubmitted] = useState(false);
 
+  const {createAd} = useAdActions();
+
   const handleSubmitForApproval = () => {
-    toast.success('Your advertisement has been submitted for approval!');
-    setIsAdSubmitted(true);
+    setIsSubmitting(true);
+    const payload = {
+      ...previewAdData,
+      price: adPriceFormatter(
+        previewAdData.duration as DurationValue,
+        previewAdData.plan,
+      ),
+    };
+    console.log(payload, 'previewDataa');
+    createAd.mutate(payload, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'dataaaaAd');
+        toast.success('Your advertisement has been submitted for approval!');
+        setIsAdSubmitted(true);
+      },
+      onError(error, variables, context) {
+        toast.success('Oops! Something went wrong, please try again.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsSubmitting(false);
+      },
+    });
+
     //navigate.push('/advertise/ad-preview');
   };
 
@@ -105,11 +129,11 @@ export const AdPreviewPage = ({
                 <div className="border rounded-lg p-4">
                   <h3 className="font-bold mb-4">Ad Preview</h3>
 
-                  {previewAdData.type === 'Banner' && (
+                  {previewAdData.type === 'banner' && (
                     <BannerAd ad={previewAdData} />
                   )}
 
-                  {previewAdData.type === 'Sponsored' && (
+                  {previewAdData.type === 'sponsored' && (
                     <AdCard ad={previewAdData} />
                   )}
                 </div>
@@ -127,7 +151,7 @@ export const AdPreviewPage = ({
                 </div>
                 <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">Ad Type</span>
-                  <p className="font-medium">
+                  <p className="font-medium capitalize">
                     {previewAdData.type || 'None selected'}
                   </p>
                 </div>
@@ -158,13 +182,18 @@ export const AdPreviewPage = ({
             </div>
 
             <div className="flex justify-between mt-8">
-              <Button variant="outline" onClick={handleBack}>
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting}>
                 Back
               </Button>
               <Button
                 onClick={handleSubmitForApproval}
+                disabled={isSubmitting}
                 className="bg-app hover:bg-app/90 text-white">
-                Submit for Approval <ArrowRight className="ml-2" />
+                {isSubmitting ? 'Submitting...' : 'Submit for Approval'}{' '}
+                <ArrowRight className="ml-2" />
               </Button>
             </div>
           </div>

@@ -10,11 +10,10 @@ import NotificationSkeleton from '@/components/skeleton/notification-skeleton';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {queryClient} from '@/lib/client/query-client';
-import {NotificationItemProps} from '@/types/user.types';
-import {useMutation, useQuery} from '@tanstack/react-query';
+import {useInfiniteQuery, useMutation} from '@tanstack/react-query';
 import {ArrowUp} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {Fragment, useEffect, useRef, useState} from 'react';
+import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {
   getNotificationsRequestAction,
@@ -37,23 +36,41 @@ export const NotificationsPage = () => {
   } = useMutation({
     mutationFn: markAllAsReadRequestAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['notifications']});
+      queryClient.invalidateQueries({queryKey: ['notifications', activeTab]});
       queryClient.invalidateQueries({queryKey: ['unreadCount']});
     },
   });
 
   const {
-    isLoading,
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
     error,
-    data: notificationsData,
-  } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => getNotificationsRequestAction(),
-    retry: false,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ['notifications', activeTab],
+    queryFn: ({pageParam = 1}) =>
+      getNotificationsRequestAction(pageParam, 10, activeTab),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    retry: 1,
   });
-  console.log('query err', error);
+  console.log('note err', error);
 
-  console.log(notificationsData, 'query dataa');
+  const notificationsData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.notifications) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  console.log(notificationsData, 'note dataa', totalCount);
 
   useEffect(() => {
     if (notificationsData?.some((n: any) => !n.read)) {
@@ -76,20 +93,7 @@ export const NotificationsPage = () => {
     );
   }
 
-  let data: NotificationItemProps[] | [];
-
-  switch (activeTab) {
-    case 'all':
-      data = notificationsData;
-      break;
-    case 'mentions':
-      data = [];
-      break;
-    default:
-      data = [];
-  }
-
-  const hasUnread = data.some(notification => !notification.read);
+  const hasUnread = notificationsData.some(notification => !notification.read);
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
@@ -102,7 +106,8 @@ export const NotificationsPage = () => {
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        data={data}
+        data={notificationsData}
+        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
@@ -141,11 +146,34 @@ export const NotificationsPage = () => {
             </Fragment>
           ),
           EmptyPlaceholder: () => <NotificationPlaceholder tab={activeTab} />,
+
+          Footer: () =>
+            isFetchingNextPage ? (
+              <div className="py-4 text-center text-sm text-gray-500">
+                Loading more...
+              </div>
+            ) : null,
         }}
-        //endReached={fetchMore}
-        itemContent={(index, notification) => (
-          <NotificationCard notification={notification} />
-        )}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        itemContent={(index, notification) => {
+          console.log(notification, 'nifht');
+          if (status === 'pending') {
+            return <NotificationSkeleton />;
+          }
+          if (!notification) {
+            return <NotificationPlaceholder tab={activeTab} />;
+          }
+          return (
+            <NotificationCard
+              notification={notification}
+              key={notification._id}
+            />
+          );
+        }}
       />
       {showGoUp && (
         <button

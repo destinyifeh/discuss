@@ -121,6 +121,9 @@ export const PostDetailPage = () => {
         queryClient.invalidateQueries({
           queryKey: ['comment-feed-posts', postId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ['unreadCount'],
+        });
         // Clear input and close comment section if open on mobile
         setComment('');
         setQuoteContent('');

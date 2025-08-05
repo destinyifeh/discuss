@@ -1,4 +1,4 @@
-export type AdType = 'Sponsored' | 'Banner';
+export type AdType = 'sponsored' | 'banner';
 export type AdStatus =
   | 'pending'
   | 'approved'
@@ -63,7 +63,7 @@ export interface AdProps {
   type: AdType;
   plan: AdPlan;
   price?: number | string;
-  status: AdStatus;
+  status?: AdStatus;
   submittedDate?: string;
   approvedDate?: string;
   rejectedDate?: string;

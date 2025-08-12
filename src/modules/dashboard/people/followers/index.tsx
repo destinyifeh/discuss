@@ -5,6 +5,7 @@ import {FallbackMessage} from '@/components/fallbacks';
 import FollowersSkeleton from '@/components/skeleton/followers-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {UserProps} from '@/types/user.types';
@@ -14,7 +15,6 @@ import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
-import {toast} from 'sonner';
 import {userService} from '../../actions/user.actions';
 
 export const UserFollowersPage = () => {

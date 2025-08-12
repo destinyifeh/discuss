@@ -4,6 +4,7 @@ import CommunityGuidelines from '@/components/post/community-guidelines';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {CommentFeedProps} from '@/types/post-item.type';
 import clsx from 'clsx';
@@ -11,7 +12,6 @@ import {ImagePlus, MessageSquare, Reply, Trash2} from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import {VirtuosoHandle} from 'react-virtuoso';
-import {toast} from 'sonner';
 
 type SectionProps = {
   showWebComment: boolean;

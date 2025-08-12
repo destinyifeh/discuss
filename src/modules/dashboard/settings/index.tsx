@@ -26,6 +26,7 @@ import {Input} from '@/components/ui/input';
 import {Separator} from '@/components/ui/separator';
 import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
+import {toast} from '@/components/ui/toast';
 import {ChangePasswordErrorMessages} from '@/constants/messages';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {changePasswordRequestAction} from '@/modules/auth/actions';
@@ -37,7 +38,6 @@ import {useTheme} from 'next-themes';
 import {useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
-import {toast} from 'sonner';
 import {z} from 'zod';
 
 const formSchema = z
@@ -171,8 +171,9 @@ export const SettingsPage = () => {
       });
       return;
     }
-
-    toast.error(message || 'Failed to change password. Please try again.');
+    const theMessage =
+      message || 'Failed to change password. Please try again.';
+    toast.error(theMessage as string);
   };
   const handleReportAbuse = () => {
     toast.success('Report submitted. Our team will review it shortly.');

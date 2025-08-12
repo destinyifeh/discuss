@@ -3,8 +3,8 @@
 import {usePathname, useRouter} from 'next/navigation';
 import {useEffect} from 'react';
 
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {toast} from 'sonner';
 import {isPublicPath} from './is-public-path';
 
 export const useAuthGuard = () => {

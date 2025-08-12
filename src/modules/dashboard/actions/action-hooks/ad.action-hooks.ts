@@ -8,7 +8,22 @@ export const useAdActions = () => {
     mutationFn: adService.createdAdRequest,
   });
 
+  const updateAdClicksRequest = useMutation({
+    mutationFn: adService.updateAdCliks,
+  });
+
+  const verifyAdPaymentRequest = useMutation({
+    mutationFn: adService.verifyAdPayment,
+  });
+
+  const initializeAdPaymentRequest = useMutation({
+    mutationFn: adService.initializeAdPayment,
+  });
+
   return {
     createAd,
+    updateAdClicksRequest,
+    initializeAdPaymentRequest,
+    verifyAdPaymentRequest,
   };
 };

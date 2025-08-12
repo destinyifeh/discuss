@@ -25,12 +25,12 @@ import {
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {usePostStore} from '@/hooks/stores/use-post-store';
 import {queryClient} from '@/lib/client/query-client';
 import {usePostActions} from '@/modules/posts/post-hooks';
 import {UserProps} from '@/types/user.types';
-import {toast} from 'sonner';
 import {PostContent} from '../post-content';
 
 interface CommentCardProps {
@@ -93,7 +93,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
   };
 
   const handleReport = () => {
-    toast('Comment Reported', {
+    toast.success('Comment Reported', {
       description:
         'Thank you for reporting this comment. Our team will review it.',
     });

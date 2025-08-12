@@ -49,8 +49,15 @@ const processQueue = (err: unknown) => {
 api.interceptors.response.use(
   res => res,
   async (error: AxiosError) => {
-    console.log(error, 'destoo');
+    console.log('Interceptor caught error:', error);
     const orig = error.config as AxiosRequestConfig;
+
+    if (axios.isAxiosError(error)) {
+      console.log('Status:', error.response?.status);
+      console.log('Response datas:', error.response?.data);
+    } else {
+      console.log('Unexpected error object:', error);
+    }
 
     if (error.response?.status === 401 && !orig._retry) {
       orig._retry = true;
@@ -80,8 +87,17 @@ api.interceptors.response.use(
 
         processQueue(null);
         return api(orig); // retry original
-      } catch (err) {
-        processQueue(err);
+      } catch (refreshErr: any) {
+        if (axios.isAxiosError(refreshErr)) {
+          console.error(
+            'Refresh token failed with status:',
+            refreshErr.response?.status,
+          );
+          console.error('Refresh token response:', refreshErr.response?.data);
+        } else {
+          console.error('Unexpected refresh token error:', refreshErr);
+        }
+        processQueue(refreshErr);
         //logout
         redirect('/login?reason=sessionExpired');
 

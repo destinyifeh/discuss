@@ -13,10 +13,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {Label} from '@/components/ui/label';
-import {TabsContent} from '@/components/ui/tabs';
 
+import {toast} from '@/components/ui/toast';
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
-import {toast} from 'sonner';
 
 import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -53,10 +52,9 @@ type ReportsProps = {
   searchTerm: string;
   filterSection: string;
   filterStatus: string;
-  tabValue: string;
 };
 
-export const ReportsTab: FC<ReportsProps> = ({searchTerm, tabValue}) => {
+export const ReportsTab: FC<ReportsProps> = ({searchTerm}) => {
   const navigate = useRouter();
 
   const [reportAction, setReportAction] = useState<
@@ -242,7 +240,7 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm, tabValue}) => {
 
   return (
     <Fragment>
-      <TabsContent value={tabValue} className="space-y-4">
+      <div className="space-y-4">
         <Virtuoso
           className="custom-scrollbar min-h-screen"
           totalCount={totalCount}
@@ -392,7 +390,7 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm, tabValue}) => {
             <ArrowUp size={20} />
           </button>
         )}
-      </TabsContent>
+      </div>
 
       {/* Report Action Dialog */}
       <Dialog open={reportActionDialog} onOpenChange={setReportActionDialog}>

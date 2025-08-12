@@ -1,3 +1,4 @@
+import {toast} from '@/components/ui/toast';
 import api from '@/lib/auth/api';
 import {
   removeCookieAccessToken,
@@ -5,7 +6,6 @@ import {
 } from '@/lib/server/cookies';
 import {AxiosResponse} from 'axios';
 import {redirect} from 'next/navigation';
-import {toast} from 'sonner';
 import {
   LoginRequestProps,
   RegisterRequestProps,

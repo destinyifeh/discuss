@@ -2,13 +2,8 @@
 
 import {AdPerformanceData, AdStatus} from '@/types/ad-types';
 import clsx from 'clsx';
-import {
-  Activity,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-} from 'lucide-react';
+import {Activity, AlertCircle, CheckCircle, Clock} from 'lucide-react';
+import moment from 'moment';
 import {useRouter} from 'next/navigation';
 import {AppProgressBar} from '../custom-progress';
 import {Badge} from '../ui/badge';
@@ -49,15 +44,22 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
   const navigate = useRouter();
 
   const handleMakePayment = (adId: string) => {
-    navigate.push(`/payment/${adId}`);
+    navigate.push(`/payment/ad/${adId}`);
   };
+
+  const getCtr = (ad: any) => {
+    if (!ad.impressions || ad.impressions === 0) return 0; // avoid division by zero
+    const adCtr = (ad.clicks / ad.impressions) * 100;
+    return Number(adCtr.toFixed(2)); // round to 2 decimal places
+  };
+
   return (
-    <Card key={ad.id} className="verflow-hidden">
+    <Card key={ad._id} className="verflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg">{ad.title}</CardTitle>
-            <p className="text-sm text-app-gray mb-1">{ad.description}</p>
+            <p className="text-sm text-app-gray mb-1">{ad.content}</p>
           </div>
           <Badge
             className={clsx(
@@ -74,12 +76,12 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
           <div className="text-center p-2 rounded-lg bg-gray-50">
             <p className="text-xs text-app-gray">Type</p>
             <p className="font-medium text-black">
-              {ad.adType.charAt(0).toUpperCase() + ad.adType.slice(1)}
+              {ad.type.charAt(0).toUpperCase() + ad.type.slice(1)}
             </p>
           </div>
           <div className="text-center p-2 rounded-lg bg-gray-50">
             <p className="text-xs text-app-gray">Plan</p>
-            <p className="font-medium text-black">{ad.plan}</p>
+            <p className="font-medium text-black capitalize">{ad.plan}</p>
           </div>
           <div className="text-center p-2 rounded-lg bg-gray-50">
             <p className="text-xs text-app-gray">Section</p>
@@ -87,10 +89,10 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
           </div>
         </div>
 
-        {ad.image && (
+        {ad.imageUrl && (
           <div className="mb-3 rounded-lg overflow-hidden h-32 bg-gray-100 flex items-center justify-center">
             <img
-              src={ad.image}
+              src={ad.imageUrl}
               alt={ad.title}
               className="w-full h-full object-cover"
             />
@@ -103,7 +105,7 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
               <div className="flex justify-between text-sm mb-1">
                 <span>Impressions</span>
                 <span className="font-medium">
-                  {ad.impressions.toLocaleString()}
+                  {ad?.impressions?.toLocaleString()}
                 </span>
               </div>
               {/* <Progress
@@ -115,13 +117,13 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
                           className="h-2"
                         /> */}
 
-              <AppProgressBar item={ad.impressions} max={2000} />
+              <AppProgressBar item={ad?.impressions || 0} max={2000} />
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span>Clicks</span>
                 <span className="font-medium">
-                  {ad.clicks.toLocaleString()}
+                  {ad?.clicks?.toLocaleString()}
                 </span>
               </div>
               {/* <Progress
@@ -134,11 +136,12 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
                       
                         /> */}
 
-              <AppProgressBar item={ad.clicks} max={200} />
+              <AppProgressBar item={ad?.clicks || 0} max={200} />
             </div>
             <div className="flex justify-between text-sm">
               <span>CTR</span>
-              <span className="font-medium">{ad.ctr}%</span>
+              {/* <span className="font-medium">{ad.ctr}%</span> */}
+              <span className="font-medium">{getCtr(ad)}%</span>
             </div>
           </div>
         )}
@@ -154,20 +157,23 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">Cost</p>
-            <p className="text-xl font-bold">${ad.cost.toFixed(2)}</p>
+            {/* <p className="text-xl font-bold">${ad.price.toFixed(2)}</p> */}
+            <p className="text-xl font-bold">{ad.price}</p>
           </div>
 
           {ad.status === 'approved' ? (
             <Button
-              onClick={() => handleMakePayment(ad.id)}
+              onClick={() => handleMakePayment(ad._id)}
               className="bg-app hover:bg-app/90">
-              <DollarSign className="mr-1" size={18} /> Make Payment
+              {/* <DollarSign className="mr-1" size={18} /> */}₦ Make Payment
             </Button>
           ) : (
             ad.status === 'active' && (
               <div className="text-right">
                 <p className="text-sm text-app-gray">Active until</p>
-                <p className="font-medium">{ad.endDate}</p>
+                <p className="font-medium">
+                  {moment(ad.expirationDate).format('DD/MM/YYYY') || null}
+                </p>
               </div>
             )
           )}

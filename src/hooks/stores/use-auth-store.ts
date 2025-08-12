@@ -1,7 +1,7 @@
 // stores/useAuthStore.ts
+import {toast} from '@/components/ui/toast';
 import {logoutRequest} from '@/modules/auth/actions';
 import {UserProps} from '@/types/user.types';
-import {toast} from 'sonner';
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
 

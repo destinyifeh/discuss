@@ -29,7 +29,7 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
 import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {usePostActions} from '@/modules/posts/post-hooks';
-import {toast} from 'sonner';
+import {toast} from '../ui/toast';
 import {PostContent} from './post-content';
 
 interface CommentCardProps {
@@ -88,7 +88,8 @@ const CommentCard = ({
     reportComment.mutate(payload, {
       onSuccess(data, variables, context) {
         console.log(data, 'report data');
-        toast('Comment Reported', {
+
+        toast.success('Comment Reported', {
           description:
             'Thank you for reporting this comment. Our team will review it.',
         });

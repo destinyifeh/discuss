@@ -107,7 +107,7 @@ class PostService {
     search?: string,
     pattern: string = '',
     adPlan: AdPlan = 'enterprise',
-    mode: string = 'random',
+    mode: string = 'pattern',
   ) {
     const params: any = {page, limit, mode};
     if (search) params.search = search;

@@ -9,12 +9,7 @@ import {
   PROFESSIONAL_AD_PRICE_FOR__14_DAYS,
   PROFESSIONAL_AD_PRICE_FOR__30_DAYS,
 } from '@/constants/config';
-import {
-  AdPerformanceData,
-  AdPlan,
-  DurationOption,
-  DurationValue,
-} from '@/types/ad-types';
+import {AdPlan, DurationOption, DurationValue} from '@/types/ad-types';
 
 export const pricingTiers = [
   {
@@ -178,67 +173,6 @@ export const adPriceFormatter = (duration: string, plan: string) => {
 
   return PRICE_MAP[plan as AdPlan]?.[duration as DurationValue] ?? 0;
 };
-
-export const mockAdPerformancew: AdPerformanceData[] = [
-  {
-    id: '1',
-    title: 'Summer Sale',
-    description: 'Get 50% off on all summer products!',
-    plan: 'Professional',
-    adType: 'banner',
-    section: 'Shopping',
-    status: 'approved',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 89.99,
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=Banner',
-  },
-  {
-    id: '2',
-    title: 'New Product Launch',
-    description: 'Check out our brand new product line!',
-    plan: 'Basic',
-    adType: 'post',
-    section: 'Technology',
-    status: 'active',
-    impressions: 1240,
-    clicks: 86,
-    ctr: 6.9,
-    startDate: '2025-04-25',
-    endDate: '2025-05-02',
-    cost: 49.99,
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=Product',
-  },
-  {
-    id: '3',
-    title: 'Premium Membership',
-    description: 'Join our premium membership program today!',
-    plan: 'Enterprise',
-    adType: 'feed',
-    section: 'Services',
-    status: 'pending',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 149.99,
-  },
-  {
-    id: '4',
-    title: 'Limited Time Offer',
-    description: 'Special discount for our loyal customers!',
-    plan: 'Basic',
-    adType: 'banner',
-    section: 'Shopping',
-    status: 'rejected',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 49.99,
-    rejectionReason:
-      'Ad content violates community guidelines regarding promotional claims.',
-  },
-];
 
 export const BASIC_PLAN_DESCRIPTION =
   'Reach your ideal audience with the Basic plan—promote your ad in a single section, perfect for focused exposure as a banner or sponsored post.';

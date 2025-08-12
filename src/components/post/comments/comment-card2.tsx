@@ -1,9 +1,9 @@
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {CommentFeedProps} from '@/types/post-item.type';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
-import {toast} from 'sonner';
 import CommentActions from './comment-actions';
 import CommentContent from './comment-content';
 import CommentEditForm from './comment-edit-form';
@@ -34,7 +34,7 @@ const CommentCard2 = ({
   };
 
   const handleReport = () => {
-    toast(
+    toast.success(
       // "Comment Reported",
       'Thank you for reporting this comment. Our team will review it.',
     );
@@ -58,12 +58,12 @@ const CommentCard2 = ({
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      toast('Image too large. Please select an image less than 5MB');
+      toast.info('Image too large. Please select an image less than 5MB');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      toast('Please select an image file');
+      toast.info('Please select an image file');
       return;
     }
 
@@ -82,7 +82,7 @@ const CommentCard2 = ({
 
   const handleSaveEdit = () => {
     if (!editContent.trim() && !editImagePreview) {
-      toast('Comment cannot be empty');
+      toast.info('Comment cannot be empty');
       return;
     }
 
@@ -93,7 +93,7 @@ const CommentCard2 = ({
     // });
 
     setIsEditing(false);
-    toast(
+    toast.success(
       // "Comment Updated",
       'Your comment has been updated successfully',
     );

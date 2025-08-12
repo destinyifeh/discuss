@@ -12,13 +12,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {Label} from '@/components/ui/label';
-import {TabsContent} from '@/components/ui/tabs';
 import {ArrowUp, Edit} from 'lucide-react';
 
+import {toast} from '@/components/ui/toast';
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
-import {toast} from 'sonner';
 
-import {FallbackMessage} from '@/components/fallbacks';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Textarea} from '@/components/ui/textarea';
@@ -34,7 +32,6 @@ type ContentProps = {
   searchTerm: string;
   filterSection: string;
   filterStatus: string;
-  tabValue: string;
 };
 
 export const ContentTab: FC<ContentProps> = ({
@@ -42,7 +39,6 @@ export const ContentTab: FC<ContentProps> = ({
 
   filterSection,
   filterStatus,
-  tabValue,
 }) => {
   const navigate = useRouter();
   const lastScrollTop = useRef(0);
@@ -173,19 +169,9 @@ export const ContentTab: FC<ContentProps> = ({
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
   return (
     <Fragment>
-      <TabsContent value={tabValue} className="space-y-4">
+      <div className="space-y-4">
         <Virtuoso
           className="custom-scrollbar min-h-screen"
           totalCount={totalCount}
@@ -288,7 +274,7 @@ export const ContentTab: FC<ContentProps> = ({
         )}
 
         {showBottomTab && <MobileBottomTab />}
-      </TabsContent>
+      </div>
 
       {/* Content Action Dialog */}
       <Dialog open={contentActionDialog} onOpenChange={setContentActionDialog}>

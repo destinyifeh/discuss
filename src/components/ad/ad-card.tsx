@@ -2,7 +2,10 @@
 import {mockAds} from '@/constants/data';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
+import {useAdActions} from '@/modules/dashboard/actions/action-hooks/ad.action-hooks';
+import {adService} from '@/modules/dashboard/actions/ad.actions';
 import {AdProps} from '@/types/ad-types';
+import {useQuery} from '@tanstack/react-query';
 import copy from 'copy-to-clipboard';
 import {
   BarChart3,
@@ -20,7 +23,6 @@ import moment from 'moment';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {Fragment, useState} from 'react';
-import {toast} from 'sonner';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
 import {
@@ -31,9 +33,10 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover';
+import {toast} from '../ui/toast';
 
 interface AdCardProps {
-  ad?: AdProps;
+  ad: AdProps;
   showActions?: boolean;
   isInDetailView?: boolean;
 }
@@ -47,12 +50,27 @@ export const AdCard = ({
   const [user] = useState({id: '2', following: ['2']});
   const [expanded, setExpanded] = useState(false);
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
-
+  const {updateAdClicksRequest} = useAdActions();
   const navigate = useRouter();
-  const handleLike = () => {
-    // if (!user) return;
-    // setLiked(!liked);
-    // likePost(post.id, user.id);
+
+  const shouldQuery = !!ad._id;
+  const {error, data: impressionData} = useQuery({
+    queryKey: ['ad-impressions-count', ad._id],
+    queryFn: () => adService.updateAdImpressions(ad._id),
+    retry: 1,
+    enabled: shouldQuery,
+  });
+  console.log(impressionData, 'ad impressionData');
+
+  const onCallToAction = () => {
+    let url = ad.targetUrl;
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    const clickUrl = `http://localhost:3000/api/ad/${ad._id}/clicks`;
+    navigator.sendBeacon(clickUrl);
+    window.location.href = url;
   };
   const liked = true;
 
@@ -106,16 +124,16 @@ export const AdCard = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const postUrl = `${window.location.origin}/post/${ad?.id}`;
+    const postUrl = `${window.location.origin}/post/${ad?._id}`;
     try {
       copy(postUrl);
-      toast('Link Copied', {
+      toast.success('Link Copied', {
         description: 'Post link has been copied to clipboard.',
       });
       setTimeout(() => setSharePopoverOpen(false), 500);
     } catch (err) {
       console.error('Failed to copy link: ', err);
-      toast('Copy Failed', {
+      toast.error('Copy Failed', {
         description: 'Failed to copy link, please try again.',
       });
     }
@@ -134,8 +152,10 @@ export const AdCard = ({
         <Avatar
           className="w-10 h-10 cursor-pointer"
           onClick={navigateToUserProfile}>
-          <AvatarImage src={ad?.author?.avatar} />
-          <AvatarFallback>D</AvatarFallback>
+          <AvatarImage src={ad?.owner?.avatar} />
+          <AvatarFallback className="capitalize text-app text-3xl">
+            {ad.owner?.username?.charAt(0)}
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex-1 min-w-0">
@@ -143,8 +163,10 @@ export const AdCard = ({
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-1 overflow-hidden">
                 <div className="font-bold hover:underline truncate cursor-pointer">
-                  <Link href={`/user/dee`} className="">
-                    {ad?.author?.name}
+                  <Link
+                    href={`/user/${ad?.owner?.username}`}
+                    className="capitalize">
+                    {ad?.owner?.username}
                   </Link>
                 </div>
 
@@ -273,7 +295,7 @@ export const AdCard = ({
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleLike();
+                    //handleLike();
                   }}>
                   <div className="flex items-center gap-1">
                     <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
@@ -351,6 +373,7 @@ export const AdCard = ({
                 onClick={e => {
                   e.preventDefault();
                   e.stopPropagation();
+                  onCallToAction();
                 }}>
                 {ad?.callToAction}
               </Button>
@@ -364,13 +387,13 @@ export const AdCard = ({
 
 export function AppSponsoredAd({section}: {section: string}) {
   const sponsoredAds = mockAds.filter(
-    ad => ad.type === 'Sponsored' && ad.section === section,
+    ad => ad.type === 'sponsored' && ad.section === section,
   );
   if (sponsoredAds.length === 0) return null;
   return (
     <Fragment>
       {sponsoredAds.map(ad => (
-        <div key={ad.id}>
+        <div key={ad._id}>
           <AdCard ad={ad} />
         </div>
       ))}

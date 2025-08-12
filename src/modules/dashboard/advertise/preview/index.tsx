@@ -2,6 +2,7 @@
 import {AdCard} from '@/components/ad/ad-card';
 import {BannerAd} from '@/components/ad/banner';
 import {Button} from '@/components/ui/button';
+import {toast} from '@/components/ui/toast';
 import {
   BASIC_AD_PRICE_FOR_7_DAYS,
   BASIC_AD_PRICE_FOR__14_DAYS,
@@ -15,11 +16,12 @@ import {
 } from '@/constants/config';
 import {adPriceFormatter} from '@/fixtures/ad';
 import {useAdStore} from '@/hooks/stores/use-ad-store';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {DurationValue} from '@/types/ad-types';
 import {ArrowRight} from 'lucide-react';
+import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
-import {toast} from 'sonner';
 import {useAdActions} from '../../actions/action-hooks/ad.action-hooks';
 
 const AdSubmitMessage = () => {
@@ -45,6 +47,14 @@ const AdSubmitMessage = () => {
         Your ad has been submitted for review. We'll notify you once it's
         approved and ready to run.
       </p>
+      <div>
+        <Button asChild className="bg-app hover:bg-app/90 text-white">
+          <Link href="/advertise/ad-performance">
+            View Status
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 };
@@ -58,7 +68,7 @@ export const AdPreviewPage = ({
   const {previewAdData} = useAdStore(state => state);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAdSubmitted, setIsAdSubmitted] = useState(false);
-
+  const {currentUser} = useAuthStore(state => state);
   const {createAd} = useAdActions();
 
   const handleSubmitForApproval = () => {
@@ -69,6 +79,10 @@ export const AdPreviewPage = ({
         previewAdData.duration as DurationValue,
         previewAdData.plan,
       ),
+      section:
+        previewAdData.plan === 'enterprise'
+          ? 'enterprise'
+          : previewAdData.section.toLowerCase(),
     };
     console.log(payload, 'previewDataa');
     createAd.mutate(payload, {
@@ -116,6 +130,13 @@ export const AdPreviewPage = ({
     setIsPreviewPage(false);
     // navigate.back();
   };
+  const previewData = {
+    ...previewAdData,
+    owner: {
+      avatar: currentUser?.avatar ?? '',
+      username: currentUser?.username ?? '',
+    },
+  };
 
   return (
     <div className="pb-20">
@@ -134,7 +155,7 @@ export const AdPreviewPage = ({
                   )}
 
                   {previewAdData.type === 'sponsored' && (
-                    <AdCard ad={previewAdData} />
+                    <AdCard ad={previewData} />
                   )}
                 </div>
               </div>

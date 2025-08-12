@@ -7,13 +7,13 @@ import EmailMessageSkeleton from '@/components/skeleton/email-message-skeleton';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
+import {toast} from '@/components/ui/toast';
 import {InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useQuery} from '@tanstack/react-query';
 import {AlertTriangle, Send} from 'lucide-react';
 import {useParams, useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
-import {toast} from 'sonner';
 import {z} from 'zod';
 import {userService} from '../actions/user.actions';
 

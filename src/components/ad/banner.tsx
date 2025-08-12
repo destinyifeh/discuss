@@ -6,7 +6,9 @@ import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {useAdManger} from '@/hooks/use-ad-manager';
 import {shuffleArray} from '@/lib/helpers';
 import {cn} from '@/lib/utils';
+import {adService} from '@/modules/dashboard/actions/ad.actions';
 import {AdProps} from '@/types/ad-types';
+import {useQuery} from '@tanstack/react-query';
 import {ExternalLink} from 'lucide-react';
 import Image from 'next/image';
 import {useEffect, useState} from 'react';
@@ -16,47 +18,18 @@ export interface BannerAdProps {
   size?: 'small' | 'medium' | 'large';
   position?: 'top' | 'middle' | 'bottom';
   className?: string;
+  animation?: any;
 }
-
-// Mock data for demonstration purposes
-const mockBannerAds = [
-  {
-    id: 'banner1',
-    imageUrl:
-      'https://media.istockphoto.com/id/1316524516/photo/modern-large-luxury-dark-gray-kitchen-closeup.jpg?s=612x612&w=0&k=20&c=FtLMlE9VzOx5o8Vq0H_5xMZ8dDj5MsG0q5NVWSPlVzU=',
-    targetUrl: 'https://example.com/luxury-kitchens',
-    altText: 'Luxury Kitchen Designs - 30% Off',
-  },
-  {
-    id: 'banner2',
-    imageUrl:
-      'https://images.ctfassets.net/hrltx12pl8hq/4kzWG72Pi925q9Gtc6hBQh/6bdbb560251e188bab5d3ea1ad195d6b/1.jpg',
-    targetUrl: 'https://example.com/gadgets',
-    altText: 'New Tech Gadgets',
-  },
-  {
-    id: 'banner3',
-    imageUrl:
-      'https://images.ctfassets.net/hrltx12pl8hq/4kzWG72Pi925q9Gtc6hBQh/6bdbb560251e188bab5d3ea1ad195d6b/1.jpg',
-    targetUrl: 'https://example.com/travel',
-    altText: 'Travel Deals',
-  },
-  {
-    id: 'banner4',
-    imageUrl:
-      'https://images.ctfassets.net/hrltx12pl8hq/4kzWG72Pi925q9Gtc6hBQh/6bdbb560251e188bab5d3ea1ad195d6b/1.jpg',
-    targetUrl: 'https://example.com/courses',
-    altText: 'Online Courses - Learn New Skills',
-  },
-];
 
 export function BannerAd({
   ad,
   size = 'medium',
   position,
   className,
+  animation,
 }: BannerAdProps) {
   const {theme} = useGlobalStore(state => state);
+  const [imgSrc, setImgSrc] = useState(ad.imageUrl || '/public/vercel.svg');
   const sizeClasses = {
     small: 'h-[90px]',
     medium: 'h-[120px]',
@@ -78,13 +51,20 @@ export function BannerAd({
         target="_blank"
         rel="noopener noreferrer"
         className="group block h-full w-full">
-        <div className="relative h-full w-full">
+        <div
+          className="relative h-full w-full"
+          style={{
+            opacity: animation ? 1 : 0,
+            transition: 'opacity 0.5s ease-in-out',
+          }}>
           <Image
-            src={ad.imageUrl || '/placeholder.svg'}
+            src={imgSrc}
             alt={ad.title}
+            priority
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 800px"
+            onError={() => setImgSrc('/placeholder.svg')}
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-opacity group-hover:bg-black/10 group-hover:opacity-100">
             <ExternalLink className="h-6 w-6 text-white drop-shadow-lg" />
@@ -97,7 +77,7 @@ export function BannerAd({
 
 export function AppBannerAd3({section}: {section: string}) {
   const bannerAds = shuffleArray(
-    mockAds.filter(ad => ad.type === 'Banner' && ad.section === section),
+    mockAds.filter(ad => ad.type === 'banner' && ad.section === section),
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -122,7 +102,7 @@ export function AppBannerAd3({section}: {section: string}) {
 
 export function AppBannerAd({section}: {section: string}) {
   const bannerAds = mockAds.filter(
-    ad => ad.type === 'Banner' && ad.section === section,
+    ad => ad.type === 'banner' && ad.section === section,
   );
 
   const currentIndex = useAdStore(
@@ -150,7 +130,7 @@ export function AppBannerAd({section}: {section: string}) {
 export function AppBannerAd4({section}: {section: string}) {
   const ad = useAdManger(
     mockAds,
-    ad => ad.type === 'Banner' && ad.section === section,
+    ad => ad.type === 'banner' && ad.section === section,
     10000, // 10s interval
   );
 
@@ -159,6 +139,50 @@ export function AppBannerAd4({section}: {section: string}) {
   return (
     <div className="p-4 border-b border-app-border">
       <BannerAd ad={ad} />
+    </div>
+  );
+}
+
+export function BannerAds({section}: {section: string}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  console.log(section, 'settt');
+  const shouldQuery = Boolean(section);
+
+  const {data, isLoading} = useQuery({
+    queryKey: ['bannerAds', section],
+    queryFn: () => adService.getBannerAds(section),
+    refetchInterval: 60000,
+    enabled: shouldQuery,
+  });
+
+  console.log(data, 'banner ads');
+
+  // Local rotation every 15s
+  useEffect(() => {
+    if (!data?.ads?.length) return;
+
+    const interval = setInterval(() => {
+      setFade(false); // start fade-out
+      setTimeout(() => {
+        setCurrentIndex(prev => (prev + 1) % data.ads.length);
+        setFade(true); // fade-in new ad
+      }, 500); // fade out time
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [data?.ads]);
+
+  if (isLoading) return null;
+  if (!data?.ads.length) return null;
+
+  const currentAd = data.ads[currentIndex];
+
+  console.log(currentAd, 'currentAdd');
+  return (
+    <div className="p-4 border-b border-app-border">
+      <BannerAd ad={currentAd} key={currentAd._id} animation={fade} />
     </div>
   );
 }

@@ -29,7 +29,6 @@ import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.
 import {postService} from '@/modules/posts/actions';
 import {usePostActions} from '@/modules/posts/post-hooks';
 import {useQuery} from '@tanstack/react-query';
-import {toast} from 'sonner';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
 import {
@@ -40,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover';
+import {toast} from '../ui/toast';
 import {PostContent} from './post-content';
 
 interface PostCardProps {
@@ -242,13 +242,13 @@ const PostCard = ({
     const postUrl = `${window.location.origin}/post/${post._id}`;
     try {
       copy(postUrl);
-      toast('Link Copied', {
+      toast.success('Link Copied', {
         description: 'Post link has been copied to clipboard.',
       });
       setTimeout(() => setSharePopoverOpen(false), 500);
     } catch (err) {
       console.error('Failed to copy link: ', err);
-      toast('Copy Failed', {
+      toast.error('Copy Failed', {
         description: 'Failed to copy link, please try again.',
       });
     }

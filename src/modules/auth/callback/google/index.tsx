@@ -1,11 +1,11 @@
 'use client';
 
 import {HomeDashboardSkeleton} from '@/components/skeleton/home-dashboard-skeleton';
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useQuery} from '@tanstack/react-query';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect} from 'react';
-import {toast} from 'sonner';
 import {getGoogleUserRequestAction} from '../../actions';
 
 export const GoogleCallbackPage = () => {

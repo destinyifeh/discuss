@@ -1,14 +1,12 @@
 'use client';
 
 import {Card, CardContent} from '@/components/ui/card';
-import {TabsContent} from '@/components/ui/tabs';
 import {ArrowUp} from 'lucide-react';
 import {useDebounce} from 'use-debounce';
 
+import {toast} from '@/components/ui/toast';
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
-import {toast} from 'sonner';
 
-import {FallbackMessage} from '@/components/fallbacks';
 import {UsersSkeleton} from '@/components/skeleton/users.skeleton';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -26,14 +24,12 @@ type UsersProps = {
   searchTerm: string;
   filterSection: string;
   filterStatus: string;
-  tabValue: string;
 };
 
 export const UsersTab: FC<UsersProps> = ({
   searchTerm,
   filterSection,
   filterStatus,
-  tabValue,
 }) => {
   const navigate = useRouter();
   const [showGoUp, setShowGoUp] = useState(false);
@@ -96,16 +92,6 @@ export const UsersTab: FC<UsersProps> = ({
 
   if (status === 'pending') {
     return <UsersSkeleton />;
-  }
-
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
   }
 
   const handleUserAction = () => {
@@ -224,7 +210,7 @@ export const UsersTab: FC<UsersProps> = ({
 
   return (
     <Fragment>
-      <TabsContent value={tabValue} className="space-y-4">
+      <div className="space-y-4">
         <h2 className="text-lg font-bold">All Users</h2>
         {isFetching && !isFetchingNextPage && (
           <div className="my-4">Searching...</div>
@@ -294,7 +280,7 @@ export const UsersTab: FC<UsersProps> = ({
             <ArrowUp size={20} />
           </button>
         )}
-      </TabsContent>
+      </div>
 
       {/* User Action Dialog */}
 

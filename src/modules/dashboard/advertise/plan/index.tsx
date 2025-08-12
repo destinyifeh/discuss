@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {toast} from '@/components/ui/toast';
 import {Sections} from '@/constants/data';
 import {
   BASIC_PLAN_DESCRIPTION,
@@ -24,11 +25,10 @@ import {
   professionalDurations,
 } from '@/fixtures/ad';
 import {useAdStore} from '@/hooks/stores/use-ad-store';
-import {AdCTA, AdPlan, AdProps, AdType, DurationValue} from '@/types/ad-types';
+import {AdCTA, AdPlan, AdType, DurationValue} from '@/types/ad-types';
 import {ArrowRight, CheckCircle, Upload} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {ChangeEvent, Fragment, useRef, useState} from 'react';
-import {toast} from 'sonner';
 import {CreateAdDto} from '../dto/create-ad.dto';
 import {AdPreviewPage} from '../preview';
 
@@ -52,26 +52,6 @@ export const AdPlanPage = () => {
     price: '',
     imageUrl: '',
     image: null,
-  });
-  const [previewData2, setPreviewData2] = useState<AdProps>({
-    title: '',
-    content: 'This could be your advertisement reaching our entire community!',
-    targetUrl: '',
-    sponsor: 'Your Brand',
-    type: 'sponsored',
-    imageUrl: '',
-    section: '',
-    callToAction: AdCTA.LearnMore,
-    duration: '7' as DurationValue,
-    plan: plan,
-    status: 'pending',
-    price: '',
-    author: {
-      name: 'Janet',
-      username: 'fitnesspro',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Janet',
-      id: 'user_001',
-    },
   });
 
   console.log(plan, 'planno');
@@ -102,10 +82,6 @@ export const AdPlanPage = () => {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleTabChange = (value: string) => {
-    //setSelectedTab(value);
   };
 
   const handleSubmitForApproval = () => {

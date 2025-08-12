@@ -17,6 +17,7 @@ import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -32,7 +33,6 @@ import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
-import {toast} from 'sonner';
 import {postService} from '../actions';
 import {CommentDto, UpdateCommentDto} from '../dto/post-dto';
 import {usePostActions} from '../post-hooks';
@@ -307,7 +307,7 @@ export const PostDetailPage = () => {
     if (!files) return;
 
     if (imageUrls.length + files.length > 2) {
-      toast.error('You can only upload a maximum of 2 images');
+      toast.info('You can only upload a maximum of 2 images');
       return;
     }
 

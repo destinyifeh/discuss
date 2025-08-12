@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {toast} from '@/components/ui/toast';
 import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
@@ -20,7 +21,6 @@ import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
-import {toast} from 'sonner';
 import {z} from 'zod';
 import {loginRequestAction} from '../actions';
 const formSchema = z.object({

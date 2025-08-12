@@ -7,6 +7,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {PageHeader} from '@/components/app-headers';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import PostCard from '@/components/post/post-card';
+import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {usePostStore} from '@/hooks/stores/use-post-store';
 import {useIsMobile} from '@/hooks/use-mobile';
@@ -19,7 +20,6 @@ import {ImagePlus, Reply, Send, Trash2} from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import React, {useEffect, useRef, useState} from 'react';
-import {toast} from 'sonner';
 import {CommentDto, UpdateCommentDto} from '../dto/post-dto';
 import {usePostActions} from '../post-hooks';
 
@@ -239,7 +239,7 @@ export const CreateCommentPage = () => {
     if (!files) return;
 
     if (imageUrls.length + files.length > 2) {
-      toast.error('You can only upload a maximum of 2 images');
+      toast.info('You can only upload a maximum of 2 images');
       return;
     }
 

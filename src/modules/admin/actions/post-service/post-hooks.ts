@@ -15,12 +15,5 @@ export const useAdminPostActions = () => {
   return {
     closePostCommentRequest: closeComment,
     deletePostRequest: deletePost,
-    //     getPostsRequest: get,
-    //     createComment: createComment,
-    //     updateCommentRequest: updateComment,
-    //     likePostRequest: likePost,
-    //     bookmarkPostRequest: bookmarkPost,
-    //     likeCommentRequest: likeComment,
-    //     dislikeCommentRequest: dislikeComment,
   };
 };

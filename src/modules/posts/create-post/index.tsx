@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {toast} from '@/components/ui/toast';
 import {Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -22,7 +23,6 @@ import {useQuery} from '@tanstack/react-query';
 import {FileImage, Trash2, X} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
-import {toast} from 'sonner';
 import {postService} from '../actions';
 import {PostDto, UpdatePostDto} from '../dto/post-dto';
 import {usePostActions} from '../post-hooks';
@@ -143,7 +143,7 @@ export const CreatePostPage = () => {
     if (!files) return;
 
     if (imageUrls.length + files.length > 4) {
-      toast.error('You can only upload a maximum of 4 images');
+      toast.info('You can only upload a maximum of 4 images');
       return;
     }
 

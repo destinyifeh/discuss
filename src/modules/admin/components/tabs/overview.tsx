@@ -2,9 +2,7 @@
 
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {TabsContent} from '@/components/ui/tabs';
 import {Tooltip} from '@/components/ui/tooltip';
-import {Comments, Posts, Sections} from '@/constants/data';
 import {BellRing} from 'lucide-react';
 import {FC, Fragment, useState} from 'react';
 import {
@@ -29,6 +27,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {useQuery} from '@tanstack/react-query';
+import {adminAdService} from '../../actions/ad-service/ad';
 import {adminPostService} from '../../actions/post-service/post';
 import {adminService} from '../../actions/user';
 import {COLORS} from '../../data';
@@ -37,7 +36,6 @@ type OverviewProps = {
   searchTerm: string;
   filterSection: string;
   filterStatus: string;
-  tabValue: string;
   setCurrentTab: (current: string) => void;
 };
 
@@ -46,7 +44,6 @@ export const OverViewTab: FC<OverviewProps> = ({
   setCurrentTab,
   filterSection,
   filterStatus,
-  tabValue,
 }) => {
   const [searchTerms, setSearchTerms] = useState('');
   const [viewContentDialog, setViewContentDialog] = useState(false);
@@ -90,66 +87,25 @@ export const OverViewTab: FC<OverviewProps> = ({
     queryFn: () => adminPostService.getPostStats(),
     retry: true,
   });
-  console.log('poststats err', postStatsErr);
 
-  console.log(postStatsData, 'postStat dataa');
+  const {
+    isLoading: loadingAd,
+    error: adStatsErr,
+    data: pendingAdData,
+  } = useQuery({
+    queryKey: ['pending-ads'],
+    queryFn: () => adminAdService.getCountAdByStatus('pending'),
+    retry: true,
+  });
+  console.log('ad err', adStatsErr);
 
-  const pendingAds = [
-    {
-      id: '1',
-      title: 'New Fitness Program',
-      description: 'Transform your body in 30 days with our proven program',
-      sponsor: 'FitLife Inc',
-      type: 'banner',
-      section: '5',
-      duration: '30',
-      submitted: new Date(2023, 4, 1),
-      status: 'pending',
-    },
-    {
-      id: '2',
-      title: 'Summer Tech Sale',
-      description: 'Huge discounts on all electronic devices this summer',
-      sponsor: 'TechWorld',
-      type: 'post',
-      section: '1',
-      duration: '14',
-      submitted: new Date(2023, 4, 2),
-      status: 'pending',
-    },
-  ];
+  console.log(pendingAdData, 'pending ad dataa');
 
   const userActivityData = [
     {name: 'New Users', value: 45},
     {name: 'Active Users', value: 125},
     {name: 'Inactive', value: 30},
   ];
-
-  const sectionData2 = Sections.map(cat => ({
-    name: cat.ch,
-    posts: Posts.filter(post => post.sectionId === cat.id).length,
-    comments: Posts.filter(post => post.sectionId === cat.id).reduce(
-      (acc, post) => {
-        const postComments = Comments.filter(c => c.postId === post.id).length;
-        return acc + postComments;
-      },
-      0,
-    ),
-  }));
-
-  const filteredAds = pendingAds.filter(ad => {
-    const matchesSearch =
-      searchTerm === '' ||
-      ad.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ad.sponsor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ad.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesSection =
-      filterSection === 'all' || ad.section === filterSection;
-    const matchesStatus = filterStatus === 'all' || ad.status === filterStatus;
-
-    return matchesSearch && matchesSection && matchesStatus;
-  });
 
   const {distribution, growth, totalUsers} = usersData ?? {};
 
@@ -181,7 +137,7 @@ export const OverViewTab: FC<OverviewProps> = ({
 
   return (
     <Fragment>
-      <TabsContent value={tabValue} className="space-y-4">
+      <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -214,7 +170,7 @@ export const OverViewTab: FC<OverviewProps> = ({
               <CardTitle className="text-sm font-medium">Pending Ads</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{filteredAds.length}</div>
+              <div className="text-2xl font-bold">{pendingAdData?.ad}</div>
               <Button
                 variant="outline"
                 size="sm"
@@ -326,7 +282,7 @@ export const OverViewTab: FC<OverviewProps> = ({
             </div>
           </CardContent>
         </Card>
-      </TabsContent>
+      </div>
 
       {/* View Reported Content Dialog */}
       <Dialog open={viewContentDialog} onOpenChange={setViewContentDialog}>

@@ -17,6 +17,7 @@ import {
 import {Input} from '@/components/ui/input';
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {Textarea} from '@/components/ui/textarea';
+import {toast} from '@/components/ui/toast';
 import {FILE_SIZE_LIMIT} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {UserProps} from '@/types/user.types';
@@ -25,7 +26,6 @@ import {useMutation} from '@tanstack/react-query';
 import {Camera, X} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
-import {toast} from 'sonner';
 import * as z from 'zod';
 import {userService} from '../../actions/user.actions';
 

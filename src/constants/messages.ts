@@ -4,3 +4,6 @@ export const ChangePasswordErrorMessages = [
   'New password must include uppercase, lowercase letters, and at least one special character',
   'New password must be at least 4 characters long',
 ];
+
+export const UNEXPECTED_ERROR =
+  'An unexpected error occurred. Please try again.';

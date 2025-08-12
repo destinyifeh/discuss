@@ -4,14 +4,14 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {feedService} from '@/modules/dashboard/actions/feed.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
-import {ArrowUp, BookmarkIcon, Search} from 'lucide-react';
+import {ArrowUp, BookmarkIcon, PenSquare, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
 import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
 import {AdCard} from '../ad/ad-card';
-import {AppBannerAd, AppBannerAd4} from '../ad/banner';
+import {AppBannerAd, BannerAds} from '../ad/banner';
 import {PageHeader} from '../app-headers';
 import {FallbackMessage} from '../fallbacks';
 import SearchBarList from '../forms/list-search-bar';
@@ -101,7 +101,7 @@ export const SectionPostList = ({
         components={{
           Header: () => (
             <div>
-              <AppBannerAd4 section={bannerAd} />
+              <BannerAds section={bannerAd} />
             </div>
           ),
           EmptyPlaceholder: () => <SectionPlaceholder />,
@@ -141,6 +141,17 @@ export const SectionPostList = ({
           <ArrowUp size={20} />
         </button>
       )}
+      {!showGoUp && (
+        <div>
+          <Button
+            className="fixed bottom-6 h-14 w-14 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition"
+            // className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
+            size="icon"
+            onClick={() => {}}>
+            <PenSquare size={24} />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -177,6 +188,10 @@ export const HomePostList = () => {
       return page < pages ? page + 1 : undefined;
     },
     placeholderData: previousData => previousData,
+    // refetchOnWindowFocus: true,
+    // refetchIntervalInBackground: true,
+    // refetchOnReconnect: true,
+    // refetchInterval: 10000,
   });
   useEffect(() => {
     setMounted(true);

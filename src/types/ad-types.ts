@@ -4,7 +4,8 @@ export type AdStatus =
   | 'approved'
   | 'rejected'
   | 'active'
-  | 'expired';
+  | 'expired'
+  | 'paused';
 
 export type AdPlan = 'basic' | 'professional' | 'enterprise';
 // export type AdCTA =
@@ -51,31 +52,30 @@ export enum AdCTA {
 }
 
 type AdAuthor = {
-  name: string;
-  username: string;
-  avatar: string;
-  id: string;
+  username?: string;
+  avatar?: string;
+  _id?: string;
 };
 
 export interface AdProps {
-  id?: string;
-  author?: AdAuthor;
+  _id?: string;
+  owner?: AdAuthor;
   type: AdType;
   plan: AdPlan;
   price?: number | string;
   status?: AdStatus;
-  submittedDate?: string;
+  createdAt?: string;
   approvedDate?: string;
   rejectedDate?: string;
+  pausedDate?: string;
   rejectionReason?: string;
   content?: string; // for sponsored ads
   targetUrl: string; // for banner ads
   imageUrl?: string; // for banner ads
-  callToAction?: AdCTA;
+  callToAction: AdCTA;
   title: string;
   section: string;
   duration?: string;
-  sponsor?: string;
 }
 
 export type DurationValue = '7' | '14' | '30';
@@ -88,19 +88,21 @@ export interface DurationOption {
 }
 
 export interface AdPerformanceData {
-  id: string;
+  _id: string;
   title: string;
-  description: string;
+  content: string;
   plan: string;
-  adType: string;
+  type: string;
   section: string;
   status: AdStatus;
-  impressions: number;
-  clicks: number;
-  ctr: number;
+  impressions?: number;
+  clicks?: number;
+  ctr?: number;
   startDate?: string;
   endDate?: string;
-  cost: number;
+  price: string;
   rejectionReason?: string;
-  image?: string;
+  imageUrl?: string;
+  duration: string;
+  expirationDate?: any;
 }

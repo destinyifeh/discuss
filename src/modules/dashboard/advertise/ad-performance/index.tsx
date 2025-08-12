@@ -6,113 +6,39 @@ import {
 } from '@/components/ad/ad-performace-card';
 import {PageHeader} from '@/components/app-headers';
 
-import AdPerformanceSkeleton from '@/components/skeleton/adPerformance-skeleton';
+import {FallbackMessage} from '@/components/fallbacks';
+import AdPerformanceCardSkeleton from '@/components/skeleton/adPerformance-card-skeleton';
 import {Button} from '@/components/ui/button';
-import {AdPerformanceData} from '@/types/ad-types';
+import {useInfiniteQuery} from '@tanstack/react-query';
 import {
   Activity,
   AlertCircle,
   ArrowRight,
+  ArrowUp,
   CheckCircle,
   Clock,
 } from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {CSSProperties, forwardRef, ReactNode, useEffect, useState} from 'react';
-import {VirtuosoGrid} from 'react-virtuoso';
+import {
+  CSSProperties,
+  forwardRef,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {VirtuosoGrid, VirtuosoHandle} from 'react-virtuoso';
+import {adService} from '../../actions/ad.actions';
 import {AdPerformanceNav} from './components/ad-performance-nav';
 
-type AdStatus = 'pending' | 'approved' | 'rejected' | 'active' | 'expired';
-
-const mockAds: AdPerformanceData[] = [
-  {
-    id: '1',
-    title: 'Summer Sale',
-    description: 'Get 50% off on all summer products!',
-    plan: 'Professional',
-    adType: 'banner',
-    section: 'Shopping',
-    status: 'active',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 89.99,
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=Banner',
-  },
-  {
-    id: '2',
-    title: 'New Product Launch',
-    description: 'Check out our brand new product line!',
-    plan: 'Basic',
-    adType: 'post',
-    section: 'Technology',
-    status: 'active',
-    impressions: 1240,
-    clicks: 86,
-    ctr: 6.9,
-    startDate: '2025-04-25',
-    endDate: '2025-05-02',
-    cost: 49.99,
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=Product',
-  },
-  {
-    id: '3',
-    title: 'Premium Membership',
-    description: 'Join our premium membership program today!',
-    plan: 'Enterprise',
-    adType: 'feed',
-    section: 'Services',
-    status: 'pending',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 149.99,
-  },
-  {
-    id: '4',
-    title: 'Limited Time Offer',
-    description: 'Special discount for our loyal customers!',
-    plan: 'Basic',
-    adType: 'banner',
-    section: 'Shopping',
-    status: 'rejected',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 49.99,
-    rejectionReason:
-      'Ad content violates community guidelines regarding promotional claims.',
-  },
-  {
-    id: '6',
-    title: 'Limited Time Offer',
-    description: 'Special discount for our loyal customers!',
-    plan: 'Basic',
-    adType: 'banner',
-    section: 'Shopping',
-    status: 'rejected',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 49.99,
-    rejectionReason:
-      'Ad content violates community guidelines regarding promotional claims.',
-  },
-  {
-    id: '7',
-    title: 'Limited Time Offer',
-    description: 'Special discount for our loyal customers!',
-    plan: 'Basic',
-    adType: 'banner',
-    section: 'Shopping',
-    status: 'rejected',
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cost: 49.99,
-    rejectionReason:
-      'Ad content violates community guidelines regarding promotional claims.',
-  },
-];
+type AdStatus =
+  | 'pending'
+  | 'approved'
+  | 'paused'
+  | 'rejected'
+  | 'active'
+  | 'expired';
 
 const getStatusColor = (status: AdStatus) => {
   switch (status) {
@@ -133,7 +59,7 @@ const getStatusIcon = (status: AdStatus) => {
   switch (status) {
     case 'pending':
       return <Clock size={16} />;
-    case 'approved':
+    case 'paused':
       return <CheckCircle size={16} />;
     case 'rejected':
       return <AlertCircle size={16} />;
@@ -174,27 +100,74 @@ export const AdPerformancePage = () => {
   const navigate = useRouter();
 
   const [filteredStatus, setFilteredStatus] = useState<AdStatus | 'all'>('all');
-  const [ads, setAds] = useState<AdPerformanceData[]>(mockAds);
+
   const [isLoading, setIsLoading] = useState(true);
+
+  const [showGoUp, setShowGoUp] = useState(false);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+
+  const [mounted, setMounted] = useState(false);
+  const lastScrollTop = useRef(0);
+
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['user-adPerformance-data', filteredStatus],
+    queryFn: ({pageParam = 1}) =>
+      adService.getUserAdByStatus(pageParam, 10, filteredStatus),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    retry: 1,
+  });
+
+  const adData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.ads) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  console.log('user ad dataa', adData);
 
   useEffect(() => {
     // Simulate loading
-    setTimeout(() => setIsLoading(false), 800);
+    //setTimeout(() => setIsLoading(false), 800);
   }, []);
-
-  const filteredAds =
-    filteredStatus === 'all'
-      ? ads
-      : ads.filter(ad => ad.status === filteredStatus);
 
   const handleMakePayment = (adId: string) => {
     navigate.push(`/payment/${adId}`);
   };
 
-  const show = false;
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
 
-  if (isLoading) {
-    return <AdPerformanceSkeleton />;
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  // if (isLoading) {
+  //   return <AdPerformanceSkeleton />;
+  // }
+
+  if (status === 'error') {
+    return (
+      <FallbackMessage
+        message="Oops! Something went wrong"
+        buttonText="Back to Home"
+        page="/home"
+      />
+    );
   }
 
   return (
@@ -210,18 +183,29 @@ export const AdPerformancePage = () => {
       />
 
       <div className="flex-1 overflow-hidden">
-        {filteredAds.length === 0 ? (
+        {adData.length === 0 ? (
           <AdPerformancePlaceholder />
         ) : (
           <VirtuosoGrid
             className="custom-scrollbar hide-scrollbar overflow-y-auto"
             style={{height: '100%'}}
-            // ref={virtuosoRef}
-            // onScroll={handleScroll}
-
-            data={filteredAds}
+            ref={virtuosoRef}
+            onScroll={handleScroll}
+            totalCount={totalCount}
+            data={adData}
+            endReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
+            }}
             itemContent={(index, item) => {
-              return <AdPerformanceCard ad={item} key={item.id} />;
+              if (status === 'pending') {
+                return <AdPerformanceCardSkeleton />;
+              }
+              if (!item) {
+                return <AdPerformancePlaceholder />;
+              }
+              return <AdPerformanceCard ad={item} key={item._id} />;
             }}
             components={{
               ...gridComponents,
@@ -232,13 +216,24 @@ export const AdPerformancePage = () => {
         )}
       </div>
 
-      <div className="mt-10 mb-20 md:mb-5 text-center">
-        <Button
-          onClick={() => navigate.push('/advertise')}
-          className="bg-app hover:bg-app/90 dark:bg-app-/90 dark:hover:bg-app text-white">
-          Create New Advertisement <ArrowRight className="ml-2" />
-        </Button>
-      </div>
+      {showGoUp && (
+        <button
+          onClick={() => {
+            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+          }}
+          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          <ArrowUp size={20} />
+        </button>
+      )}
+      {adData?.length && (
+        <div className="mt-10 mb-20 md:mb-5 text-center">
+          <Button
+            onClick={() => navigate.push('/advertise')}
+            className="bg-app hover:bg-app/90 dark:bg-app-/90 dark:hover:bg-app text-white">
+            Create New Advertisement <ArrowRight className="ml-2" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

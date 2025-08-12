@@ -8,12 +8,12 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Textarea} from '@/components/ui/textarea';
+import {toast} from '@/components/ui/toast';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {AlertTriangle, CheckCircle} from 'lucide-react';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import {useState} from 'react';
-import {toast} from 'sonner';
 import {useReportActions} from '../actions/action-hooks/report.action-hooks';
 
 export default function ReportAbusePage() {

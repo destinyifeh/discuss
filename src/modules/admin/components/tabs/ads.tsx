@@ -1,7 +1,8 @@
 'use client';
 
-import {FC, Fragment, useState} from 'react';
+import {FC, Fragment, useMemo, useRef, useState} from 'react';
 
+import AdSkeleton from '@/components/skeleton/ad-skeleton';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent} from '@/components/ui/card';
@@ -14,65 +15,79 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {Label} from '@/components/ui/label';
-import {TabsContent} from '@/components/ui/tabs';
 import {Textarea} from '@/components/ui/textarea';
-import {CheckCircle, XCircle} from 'lucide-react';
-import {toast} from 'sonner';
+import {toast} from '@/components/ui/toast';
+import {queryClient} from '@/lib/client/query-client';
+import {useInfiniteQuery} from '@tanstack/react-query';
+import {ArrowUp, CheckCircle, XCircle} from 'lucide-react';
+import moment from 'moment';
+import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
+import {useDebounce} from 'use-debounce';
+import {adminAdService} from '../../actions/ad-service/ad';
+import {useAdminAdActions} from '../../actions/ad-service/ad-hooks';
 
 type AdProps = {
   searchTerm: string;
   filterSection: string;
   filterStatus: string;
-  tabValue: string;
 };
 
 export const AdTab: FC<AdProps> = ({
   searchTerm,
   filterSection,
   filterStatus,
-  tabValue,
 }) => {
   const [rejectAdDialog, setRejectAdDialog] = useState(false);
+  const [pauseAdDialog, setPauseAdDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [selectedAd, setSelectedAd] = useState<string>('');
-  const pendingAds = [
-    {
-      id: '1',
-      title: 'New Fitness Program',
-      description: 'Transform your body in 30 days with our proven program',
-      sponsor: 'FitLife Inc',
-      type: 'banner',
-      section: '5',
-      duration: '30',
-      submitted: new Date(2023, 4, 1),
-      status: 'pending',
+  const [selectedOwner, setSelectedOwner] = useState<string>('');
+  const lastScrollTop = useRef(0);
+  const [submittingApproval, setSubmittingApproval] = useState(false);
+  const [submittingActivation, setSubmittingActivation] = useState(false);
+  const [submittingRejection, setSubmittingRejection] = useState(false);
+  const [submittingPause, setSubmittingPause] = useState(false);
+  const [submittingResume, setSubmittingResume] = useState(false);
+  const [showGoUp, setShowGoUp] = useState(false);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+
+  const [debouncedSearch] = useDebounce(searchTerm, 500);
+  const {
+    approveAdRequest,
+    rejectAdRequest,
+    pauseAdRequest,
+    activateAdRequest,
+    resumeAdRequest,
+  } = useAdminAdActions();
+  const {
+    data, // This 'data' contains { pages: [], pageParams: [] }
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['admin-ads', debouncedSearch],
+    queryFn: ({pageParam = 1}) =>
+      adminAdService.getAds(pageParam, 10, debouncedSearch),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
     },
-    {
-      id: '2',
-      title: 'Summer Tech Sale',
-      description: 'Huge discounts on all electronic devices this summer',
-      sponsor: 'TechWorld',
-      type: 'post',
-      section: '1',
-      duration: '14',
-      submitted: new Date(2023, 4, 2),
-      status: 'pending',
-    },
-  ];
-
-  const filteredAds = pendingAds.filter(ad => {
-    const matchesSearch =
-      searchTerm === '' ||
-      ad.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ad.sponsor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ad.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesSection =
-      filterSection === 'all' || ad.section === filterSection;
-    const matchesStatus = filterStatus === 'all' || ad.status === filterStatus;
-
-    return matchesSearch && matchesSection && matchesStatus;
+    placeholderData: previousData => previousData,
   });
+
+  const adData = useMemo(() => {
+    return data?.pages?.flatMap(page => page.ads) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  console.log('report err', error);
+
+  console.log(adData, 'admin ad dataa', totalCount);
 
   const handleRejectAd = () => {
     if (!rejectReason) {
@@ -80,103 +95,397 @@ export const AdTab: FC<AdProps> = ({
       return;
     }
 
-    toast.success(
-      `Advertisement #${selectedAd} has been rejected: ${rejectReason}`,
-    );
-    setRejectAdDialog(false);
+    setSubmittingRejection(true);
+    const data = {
+      adId: selectedAd,
+      ownerId: selectedOwner,
+      reason: rejectReason,
+    };
+
+    rejectAdRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'ad rejection');
+        toast.success(`Advertisement #${selectedAd} has been rejected`);
+        queryClient.invalidateQueries({
+          queryKey: ['admin-ads', debouncedSearch],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['unreadCount'],
+        });
+      },
+      onError(error, variables, context) {
+        console.log(error, 'ad rejection err');
+        toast.error('Oops! Couldn’t Reject Ad', {
+          description:
+            'There was an issue rejecting this ad. Please try again in a few moments.',
+        });
+      },
+      onSettled(data, error, variables, context) {
+        setSubmittingRejection(false);
+        setRejectAdDialog(false);
+      },
+    });
   };
 
-  const handleOpenRejectAdDialog = (adId: string) => {
+  const handleOpenRejectAdDialog = (adId: string, ownerId: string) => {
     setSelectedAd(adId);
+    setSelectedOwner(ownerId);
     setRejectReason('');
     setRejectAdDialog(true);
   };
 
-  const handleApproveAd = (adId: string) => {
-    toast.success(`Advertisement #${adId} has been approved`);
+  const handlePauseAd = () => {
+    if (!rejectReason) {
+      toast.error('Please provide a reason for pausing');
+      return;
+    }
+
+    setSubmittingPause(true);
+    const data = {
+      adId: selectedAd,
+      ownerId: selectedOwner,
+      reason: rejectReason,
+    };
+
+    pauseAdRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'ad pause');
+        toast.success(`Advertisement #${selectedAd} has been paused`);
+        queryClient.invalidateQueries({
+          queryKey: ['admin-ads', debouncedSearch],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['unreadCount'],
+        });
+      },
+      onError(error, variables, context) {
+        console.log(error, 'ad pause err');
+        toast.error('Oops! Couldn’t Pause Ad', {
+          description:
+            'There was an issue pausing this ad. Please try again in a few moments.',
+        });
+      },
+      onSettled(data, error, variables, context) {
+        setSubmittingPause(false);
+        setPauseAdDialog(false);
+      },
+    });
+  };
+
+  const handleOpenPauseAdDialog = (adId: string, ownerId: string) => {
+    setSelectedAd(adId);
+    setSelectedOwner(ownerId);
+    setRejectReason('');
+    setPauseAdDialog(true);
+  };
+
+  const handleApproveAd = (adId: string, ownerId: string) => {
+    setSubmittingApproval(true);
+    const data = {
+      ownerId,
+      adId,
+    };
+    approveAdRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'ad approval');
+        toast.success(`Advertisement #${adId} has been approved`);
+        queryClient.invalidateQueries({
+          queryKey: ['admin-ads', debouncedSearch],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['unreadCount'],
+        });
+      },
+      onError(error, variables, context) {
+        console.log(error, 'ad approval err');
+        toast.error('Oops! Couldn’t Approve Ad', {
+          description:
+            'There was an issue approving this ad. Please try again in a few moments.',
+        });
+      },
+      onSettled(data, error, variables, context) {
+        setSubmittingApproval(false);
+        setSubmittingPause(false);
+      },
+    });
+  };
+
+  const handleResumeAd = (adId: string, ownerId: string) => {
+    setSubmittingResume(true);
+    const data = {
+      ownerId,
+      adId,
+    };
+    resumeAdRequest.mutate(adId, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'ad resume');
+        toast.success(`Advertisement #${adId} has been resumed`);
+        queryClient.invalidateQueries({
+          queryKey: ['admin-ads', debouncedSearch],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['unreadCount'],
+        });
+      },
+      onError(error, variables, context) {
+        console.log(error, 'ad resume err');
+        toast.error('Oops! Couldn’t Resume Ad', {
+          description:
+            'There was an issue resuming this ad. Please try again in a few moments.',
+        });
+      },
+      onSettled(data, error, variables, context) {
+        setSubmittingResume(false);
+        setSubmittingPause(false);
+      },
+    });
+  };
+
+  const handleActivateAd = (adId: string, ownerId: string) => {
+    setSubmittingActivation(true);
+    const data = {
+      ownerId,
+      adId,
+    };
+    activateAdRequest.mutate(data, {
+      onSuccess(data, variables, context) {
+        console.log(data, 'ad activated');
+        toast.success(`Advertisement #${adId} has been activated`);
+        queryClient.invalidateQueries({
+          queryKey: ['admin-ads', debouncedSearch],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['unreadCount'],
+        });
+      },
+      onError(error, variables, context) {
+        console.log(error, 'ad activate err');
+        toast.error('Oops! Couldn’t Activate Ad', {
+          description:
+            'There was an issue activating this ad. Please try again in a few moments.',
+        });
+      },
+      onSettled(data, error, variables, context) {
+        setSubmittingActivation(false);
+        setSubmittingPause(false);
+      },
+    });
+  };
+
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const getAdStatusDateLabel = (ad: any) => {
+    switch (ad.status) {
+      case 'paused':
+        return `Paused · ${moment(ad.pausedDate).format('DD/MM/YYYY')}`;
+      case 'rejected':
+        return `Rejected · ${moment(ad.rejectedDate).format('DD/MM/YYYY')}`;
+      case 'active':
+        return `Activated · ${moment(ad.activatedDate).format('DD/MM/YYYY')}`;
+      case 'approved':
+        return `Approved · ${moment(ad.approvedDate).format('DD/MM/YYYY')}`;
+      default:
+        return `Submitted · ${moment(ad.createdAt).format('DD/MM/YYYY')}`;
+    }
   };
 
   return (
     <Fragment>
-      <TabsContent value={tabValue} className="space-y-4">
-        <h2 className="text-lg font-bold">Pending Advertisements</h2>
+      <div className="space-y-4">
+        <Virtuoso
+          className="custom-scrollbar min-h-screen"
+          totalCount={totalCount}
+          data={adData}
+          onScroll={handleScroll}
+          ref={virtuosoRef}
+          components={{
+            Header: () => (
+              <h2 className="text-lg font-bold mb-3">Advertisements</h2>
+            ),
+            EmptyPlaceholder: () => (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-app-gray">No advertisements found</p>
+                </CardContent>
+              </Card>
+            ),
 
-        {filteredAds.length > 0 ? (
-          filteredAds.map(ad => (
-            <Card key={ad.id} className="mb-4">
-              <CardContent className="p-4">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="font-bold">{ad.title}</h3>
-                    <p className="text-sm text-app-gray mb-2">
-                      {ad.description}
-                    </p>
+            Footer: () => (
+              <div className="py-12 text-center text-sm text-gray-500">
+                {isFetchingNextPage ? 'Loading more...' : 'No more ads'}
+              </div>
+            ),
+          }}
+          endReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          itemContent={(index, ad) => {
+            if (status === 'pending') {
+              return <AdSkeleton />;
+            } else {
+              if (!ad) {
+                return (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-app-gray">No advertisement found</p>
+                    </CardContent>
+                  </Card>
+                );
+              }
 
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      <Badge variant="outline">
-                        {ad.type === 'banner'
-                          ? 'Banner Ad'
-                          : ad.type === 'post'
-                          ? 'Sponsored Post'
-                          : 'Feed Ad'}
-                      </Badge>
-                      <Badge variant="outline">
-                        Duration: {ad.duration} days
-                      </Badge>
-                      <Badge variant="secondary">Pending Review</Badge>
+              return (
+                <Card className="mb-4">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-bold">{ad.title}</h3>
+                        <p className="text-sm text-app-gray mb-2">
+                          {ad.content}
+                        </p>
+
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          <Badge variant="outline">
+                            {ad.type === 'banner'
+                              ? 'Banner Ad'
+                              : ad.type === 'sponsored'
+                              ? 'Sponsored Post'
+                              : 'Feed Ad'}
+                          </Badge>
+                          <Badge variant="outline">
+                            Duration: {ad.duration} days
+                          </Badge>
+                          <Badge variant="secondary">{ad.status}</Badge>
+                        </div>
+
+                        <p className="text-xs text-app-gray">
+                          By{' '}
+                          <span className="font-medium capitalize">
+                            {ad.owner.username}
+                          </span>{' '}
+                          {getAdStatusDateLabel(ad)}
+                        </p>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            toast.info(
+                              'Ad preview functionality would be implemented here',
+                            );
+                          }}>
+                          Preview Ad
+                        </Button>
+                      </div>
+
+                      <div className="flex flex-col gap-2 w-full md:w-auto">
+                        {ad.status === 'active' && (
+                          <Button
+                            disabled={submittingPause}
+                            size="sm"
+                            className="bg-yellow-600 hover:bg-yellow-700"
+                            onClick={() =>
+                              handleOpenPauseAdDialog(ad._id, ad.owner._id)
+                            }>
+                            <CheckCircle size={16} className="mr-1" />
+                            {submittingPause ? 'Pausing' : 'Pause'}
+                          </Button>
+                        )}
+
+                        {ad.status === 'approved' && (
+                          <Button
+                            disabled={submittingActivation}
+                            size="sm"
+                            className="bg-yellow-600 hover:bg-yellow-700"
+                            onClick={() =>
+                              handleActivateAd(ad._id, ad.owner._id)
+                            }>
+                            <CheckCircle size={16} className="mr-1" />
+                            {submittingActivation ? 'Activating' : 'Activate'}
+                          </Button>
+                        )}
+
+                        {ad.status === 'paused' && (
+                          <Button
+                            disabled={submittingResume}
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() =>
+                              handleResumeAd(ad._id, ad.owner._id)
+                            }>
+                            <CheckCircle size={16} className="mr-1" />
+                            {submittingResume ? 'Resuming' : 'Resume'}
+                          </Button>
+                        )}
+
+                        {ad.status === 'rejected' && (
+                          <Button
+                            disabled={submittingApproval || submittingRejection}
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() =>
+                              handleApproveAd(ad._id, ad.owner._id)
+                            }>
+                            <CheckCircle size={16} className="mr-1" />
+                            {submittingApproval ? 'Approving' : ' Approve'}
+                          </Button>
+                        )}
+
+                        {ad.status === 'pending' && (
+                          <>
+                            <Button
+                              disabled={
+                                submittingApproval || submittingRejection
+                              }
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() =>
+                                handleApproveAd(ad._id, ad.owner._id)
+                              }>
+                              <CheckCircle size={16} className="mr-1" />
+                              {submittingApproval ? 'Approving' : ' Approve'}
+                            </Button>
+
+                            <Button
+                              disabled={
+                                submittingApproval || submittingRejection
+                              }
+                              size="sm"
+                              variant="destructive"
+                              onClick={() =>
+                                handleOpenRejectAdDialog(ad._id, ad.owner._id)
+                              }>
+                              <XCircle size={16} className="mr-1" />{' '}
+                              {submittingRejection ? 'Rejecting...' : 'Reject'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
-
-                    <p className="text-xs text-app-gray">
-                      By <span className="font-medium">{ad.sponsor}</span> ·
-                      Submitted {ad.submitted.toLocaleDateString()}
-                    </p>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => {
-                        toast.info(
-                          'Ad preview functionality would be implemented here',
-                        );
-                      }}>
-                      Preview Ad
-                    </Button>
-                  </div>
-
-                  <div className="flex flex-col gap-2 w-full md:w-auto">
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                      onClick={() => handleApproveAd(ad.id)}>
-                      <CheckCircle size={16} className="mr-1" /> Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleOpenRejectAdDialog(ad.id)}>
-                      <XCircle size={16} className="mr-1" /> Reject
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-app-gray">No pending advertisements found</p>
-            </CardContent>
-          </Card>
+                  </CardContent>
+                </Card>
+              );
+            }
+          }}
+        />
+        {showGoUp && (
+          <button
+            onClick={() => {
+              virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+            }}
+            className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+            <ArrowUp size={20} />
+          </button>
         )}
-
-        <h2 className="text-lg font-bold mt-8">Active Advertisements</h2>
-        <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-app-gray">No active advertisements found</p>
-          </CardContent>
-        </Card>
-      </TabsContent>
+      </div>
 
       {/* Reject Ad Dialog */}
       <Dialog open={rejectAdDialog} onOpenChange={setRejectAdDialog}>
@@ -191,6 +500,7 @@ export const AdTab: FC<AdProps> = ({
             <div className="space-y-2">
               <Label htmlFor="reason">Reason for rejection</Label>
               <Textarea
+                disabled={submittingRejection}
                 id="reason"
                 placeholder="Enter reason for rejection"
                 value={rejectReason}
@@ -200,11 +510,57 @@ export const AdTab: FC<AdProps> = ({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectAdDialog(false)}>
+            <Button
+              disabled={submittingRejection}
+              variant="outline"
+              onClick={() => setRejectAdDialog(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleRejectAd}>
-              Reject
+            <Button
+              variant="destructive"
+              disabled={submittingRejection}
+              onClick={handleRejectAd}>
+              {submittingRejection ? 'Rejecting...' : 'Reject'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pause Ad Dialog */}
+
+      <Dialog open={pauseAdDialog} onOpenChange={setPauseAdDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pause Advertisement</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for pausing this advertisement.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reason">Reason for Pausing</Label>
+              <Textarea
+                disabled={submittingRejection}
+                id="reason"
+                placeholder="Enter reason for pausing"
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                className="form-input"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              disabled={submittingPause}
+              variant="outline"
+              onClick={() => setPauseAdDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={submittingPause}
+              onClick={handlePauseAd}>
+              {submittingRejection ? 'Pausing...' : 'Pause'}
             </Button>
           </DialogFooter>
         </DialogContent>

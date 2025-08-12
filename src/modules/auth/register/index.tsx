@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
+import {toast} from '@/components/ui/toast';
 import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -21,7 +22,6 @@ import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {useForm} from 'react-hook-form';
-import {toast} from 'sonner';
 import {z} from 'zod';
 import {registerRequestAction} from '../actions';
 

@@ -6,9 +6,9 @@ class FeedService {
     page = 1,
     limit = 10,
     search?: string,
-    pattern: string = '',
+    pattern: string = '4, 9, 15',
     adPlan: AdPlan = 'enterprise',
-    mode: string = 'random',
+    mode: string = 'pattern',
   ) {
     const params: any = {page, limit, mode};
     if (search) params.search = search;

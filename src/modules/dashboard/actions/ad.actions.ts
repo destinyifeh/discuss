@@ -8,7 +8,6 @@ class AdService {
     formData.append('price', data.price);
     formData.append('duration', data.duration);
     formData.append('plan', data.plan);
-    formData.append('section', data.section);
     formData.append('targetUrl', data.targetUrl);
     formData.append('callToAction', data.callToAction);
     formData.append('type', data.type);
@@ -19,12 +18,62 @@ class AdService {
     }
 
     if (data.content) {
-      formData.append('image', data.content);
+      formData.append('content', data.content);
+    }
+    if (data.section) {
+      formData.append('section', data.section);
     }
 
     return await api.post('/ad', formData, {
       headers: {'Content-Type': 'multipart/form-data'},
     });
+  }
+
+  async getUserAdByStatus(
+    page = 1,
+    limit = 10,
+    status: string = 'all',
+    search?: string,
+  ) {
+    const params: any = {page, limit, status, search};
+
+    if (search) params.search = search;
+    const response = await api.get(`/ad/user-ads`, {params});
+    return response.data?.data;
+  }
+
+  async updateAdImpressions(id: any): Promise<AxiosResponse> {
+    return await api.post(`/ad/${id}/impressions`);
+  }
+
+  async updateAdCliks(id: string): Promise<AxiosResponse> {
+    return await api.post(`/ad/${id}/clicks`);
+  }
+  async getAd(id: string) {
+    try {
+      const response = await api.get(`/ad/${id}`);
+      return response.data?.ad;
+    } catch (err: any) {
+      throw err?.response?.data ?? err;
+    }
+  }
+
+  async initializeAdPayment(data: any): Promise<AxiosResponse> {
+    return await api.post(`/ad/initialize`, data);
+  }
+
+  async verifyAdPayment(reference: string) {
+    const response = await api.get(`/ad/verify?reference=${reference}`);
+    return response.data;
+  }
+
+  async getBannerAds(section: string) {
+    try {
+      const response = await api.get(`/ad/banner-ads?section=${section}`);
+      return response.data;
+    } catch (err: any) {
+      throw err?.response?.data ?? err;
+    }
   }
 }
 

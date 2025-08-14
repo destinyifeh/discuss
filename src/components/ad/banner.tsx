@@ -51,25 +51,43 @@ export function BannerAd({
         target="_blank"
         rel="noopener noreferrer"
         className="group block h-full w-full">
-        <div
-          className="relative h-full w-full"
-          style={{
-            opacity: animation ? 1 : 0,
-            transition: 'opacity 0.5s ease-in-out',
-          }}>
-          <Image
-            src={imgSrc}
-            alt={ad.title}
-            priority
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 800px"
-            onError={() => setImgSrc('/placeholder.svg')}
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-opacity group-hover:bg-black/10 group-hover:opacity-100">
-            <ExternalLink className="h-6 w-6 text-white drop-shadow-lg" />
+        {imgSrc.startsWith('data:') ? (
+          <div className="relative h-full w-full">
+            <Image
+              src={imgSrc}
+              alt={ad.title}
+              priority
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 800px"
+              onError={() => setImgSrc('/placeholder.svg')}
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-opacity group-hover:bg-black/10 group-hover:opacity-100">
+              <ExternalLink className="h-6 w-6 text-white drop-shadow-lg" />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div
+            className="relative h-full w-full"
+            style={{
+              opacity: animation ? 1 : 0,
+              transition: 'opacity 0.5s ease-in-out',
+            }}>
+            <Image
+              src={imgSrc}
+              alt={ad.title}
+              priority
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 800px"
+              onError={() => setImgSrc('/placeholder.svg')}
+            />
+
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-opacity group-hover:bg-black/10 group-hover:opacity-100">
+              <ExternalLink className="h-6 w-6 text-white drop-shadow-lg" />
+            </div>
+          </div>
+        )}
       </a>
     </div>
   );
@@ -143,7 +161,7 @@ export function AppBannerAd4({section}: {section: string}) {
   );
 }
 
-export function BannerAds({section}: {section: string}) {
+export function BannerAds2({section}: {section: string}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
@@ -178,6 +196,38 @@ export function BannerAds({section}: {section: string}) {
   if (!data?.ads.length) return null;
 
   const currentAd = data.ads[currentIndex];
+
+  console.log(currentAd, 'currentAdd');
+  return (
+    <div className="p-4 border-b border-app-border">
+      <BannerAd ad={currentAd} key={currentAd._id} animation={fade} />
+    </div>
+  );
+}
+
+export function BannerAds({section}: {section: string}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  console.log(section, 'settt');
+  const shouldQuery = Boolean(section);
+
+  const {data, isLoading} = useQuery({
+    queryKey: ['bannerAds', section],
+    queryFn: () => adService.getBannerAds(section),
+    // refetchInterval: 60000,
+    refetchInterval: 15000,
+    enabled: shouldQuery,
+  });
+
+  console.log(data, 'banner ads');
+
+  // Local rotation every 15s
+
+  if (isLoading) return null;
+  if (!data?.ads.length) return null;
+
+  const currentAd = data.ads[0]; // backend returns one ad at a time
 
   console.log(currentAd, 'currentAdd');
   return (

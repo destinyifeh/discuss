@@ -25,6 +25,7 @@ import {
   professionalDurations,
 } from '@/fixtures/ad';
 import {useAdStore} from '@/hooks/stores/use-ad-store';
+import {urlFormatter} from '@/lib/formatter';
 import {AdCTA, AdPlan, AdType, DurationValue} from '@/types/ad-types';
 import {ArrowRight, CheckCircle, Upload} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
@@ -85,7 +86,11 @@ export const AdPlanPage = () => {
   };
 
   const handleSubmitForApproval = () => {
-    setPreviewAdData(previewData);
+    const data = {
+      ...previewData,
+      targetUrl: urlFormatter(previewData.targetUrl),
+    };
+    setPreviewAdData(data);
     setIsPreviewPage(true);
     // toast.success('Your advertisement has been submitted for approval!');
     //navigate.push(`/create-ad/ad-preview`);
@@ -235,7 +240,7 @@ export const AdPlanPage = () => {
                 <div className="mb-5 w-full md:w-[300px] md:mb-0">
                   <h2 className="text-lg font-bold mb-4">Destination URL</h2>
                   <input
-                    type="text"
+                    type="url"
                     className="w-full p-2 border rounded-md form-input"
                     value={previewData.targetUrl}
                     onChange={e =>

@@ -1,6 +1,8 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import UserCommentCard from '@/components/post/comments/user-comment-card';
 import PostCard from '@/components/post/post-card';
 import PostSkeleton from '@/components/skeleton/post-skeleton';
@@ -103,7 +105,7 @@ export const PeoplePage = () => {
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [open, setOpen] = useState(false);
-
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
@@ -128,6 +130,7 @@ export const PeoplePage = () => {
     isLoading,
     error,
     data: userData,
+    refetch,
   } = useQuery({
     queryKey: ['user', user],
     queryFn: () => userService.getUserByUsername(user),
@@ -178,29 +181,11 @@ export const PeoplePage = () => {
   }
 
   if (error?.message === 'User not found') {
-    return (
-      <div>
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">User not found</h2>
-          <Button variant="outline" onClick={() => navigate.push('/home')}>
-            Back to Home
-          </Button>
-        </div>
-      </div>
-    );
+    return <ErrorFeedback showGoBack message="User not found" />;
   }
 
   if (userData?.code !== '200') {
-    return (
-      <div>
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Oops! Something went wrong</h2>
-          <Button variant="outline" onClick={() => navigate.push('/home')}>
-            Back to Home
-          </Button>
-        </div>
-      </div>
-    );
+    return <ErrorFeedback showGoBack showRetry onRetry={refetch} />;
   }
 
   const handleReportUser = (userId: string) => {
@@ -328,6 +313,15 @@ export const PeoplePage = () => {
       setReportReason('');
       setReportDetails('');
     }, 1000);
+  };
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
   };
   return (
     <div className="">
@@ -479,12 +473,24 @@ export const PeoplePage = () => {
               </Tabs>
             </Fragment>
           ),
-          EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
-        }}
-        endReached={() => {
-          if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-          }
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : <PostPlaceholder tab={activeTab} />,
+          Footer: () =>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
+            ) : null,
         }}
         itemContent={(index, post) => {
           if (status === 'pending') {

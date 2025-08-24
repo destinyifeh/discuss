@@ -35,6 +35,11 @@ type CommentFeedAuthor = {
   _id: string;
 };
 
+export enum PostStatus {
+  PUBLISHED = 'published',
+  PROMOTED = 'promoted',
+}
+
 export type ImageProps = {
   secure_url: string;
   public_id: string;
@@ -53,6 +58,7 @@ export interface PostFeedProps {
   commentBy: string[];
   commentsClosed?: boolean;
   viewCount: number;
+  status: PostStatus;
 }
 
 export interface CommentProps {

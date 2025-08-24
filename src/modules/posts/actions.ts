@@ -1,5 +1,5 @@
 import api from '@/lib/auth/api';
-import {AdPlan} from '@/types/ad-types';
+import {AdPlacementProps} from '@/types/ad-types';
 import {
   CommentDto,
   PostDto,
@@ -105,14 +105,13 @@ class PostService {
     page = 1,
     limit = 10,
     search?: string,
-    pattern: string = '',
-    adPlan: AdPlan = 'enterprise',
+    pattern: string = '4, 9, 15',
     mode: string = 'pattern',
+    placement: AdPlacementProps = 'details_feed',
   ) {
-    const params: any = {page, limit, mode};
+    const params: any = {page, limit, mode, placement};
     if (search) params.search = search;
     if (pattern) params.pattern = pattern;
-    if (adPlan) params.adPlan = adPlan;
 
     const response = await api.get(`/feeds/comments/${postId}`, {params});
     return response.data?.data;

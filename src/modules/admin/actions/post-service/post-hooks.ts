@@ -12,8 +12,18 @@ export const useAdminPostActions = () => {
     mutationFn: adminPostService.deletePost,
   });
 
+  const promotePost = useMutation({
+    mutationFn: adminPostService.promotePost,
+  });
+
+  const demotePost = useMutation({
+    mutationFn: adminPostService.demotePost,
+  });
+
   return {
     closePostCommentRequest: closeComment,
     deletePostRequest: deletePost,
+    promotePost,
+    demotePost,
   };
 };

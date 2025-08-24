@@ -235,8 +235,8 @@ export const SidebarLayoutLeft = () => {
         <div className="mb-10">
           <Button
             className="text-white rounded-full py-6 w-full mt-4 hover:bg-app/90 bg-app darK:hover:bg-app bg-app/90"
-            onClick={() => navigate.push('/create-post')}>
-            Post
+            onClick={() => navigate.push('/discuss')}>
+            Start Discussion
           </Button>
         </div>
 

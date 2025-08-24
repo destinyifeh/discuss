@@ -3,9 +3,10 @@
 import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
-import {AppBannerAd} from '@/components/ad/banner';
+import {BannerAds} from '@/components/ad/banner';
 import {PageHeader} from '@/components/app-headers';
-import {FallbackMessage} from '@/components/fallbacks';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {AddCommentField} from '@/components/post/add-comment-field';
 import CommentCard from '@/components/post/comment-card';
 import CommunityGuidelines from '@/components/post/community-guidelines';
@@ -65,6 +66,7 @@ export const PostDetailPage = () => {
   const [quoteId, setQuoteId] = useState('');
   const [quotedUserId, setQuotedUserId] = useState('');
   const [quotedUserImage, setQuotedUserImage] = useState('');
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const {createComment, updateCommentRequest} = usePostActions();
 
   const shouldQuery = !!postId;
@@ -72,6 +74,7 @@ export const PostDetailPage = () => {
     isLoading,
     error,
     data: post,
+    refetch: refetchPost,
   } = useQuery({
     queryKey: ['post-details', postId],
     queryFn: () => postService.getPostRequestAction(postId),
@@ -90,6 +93,7 @@ export const PostDetailPage = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error: commentErr,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['comment-feed-posts', postId],
     queryFn: ({pageParam = 1}) =>
@@ -390,10 +394,11 @@ export const PostDetailPage = () => {
 
   if (error?.message === 'Post not found' || !postId) {
     return (
-      <FallbackMessage
+      <ErrorFeedback
+        showGoBack
+        showRetry
+        onRetry={refetchPost}
         message="Post not found"
-        buttonText="Back to Home"
-        page="/home"
       />
     );
   }
@@ -401,9 +406,18 @@ export const PostDetailPage = () => {
   if (isLoading) {
     return <PostDetailSkeleton />;
   }
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
   return (
     <Fragment>
-      <PageHeader title="Post" />
+      <PageHeader title="Discuss" />
       <div>
         <Virtuoso
           className="custom-scrollbar"
@@ -413,19 +427,9 @@ export const PostDetailPage = () => {
           // initialTopMostItemIndex={0}
 
           data={commentsData}
-          // itemContent={(index, comment) => (
-          //   <div>
-          //     <CommentCard
-          //       key={comment.id}
-          //       comment={comment}
-          //       onQuote={() => handleQuoteComment(comment.id)}
-          //     />
-          //   </div>
-          // )}
-
           endReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              handleFetchNext();
             }
           }}
           itemContent={(index, comment) => {
@@ -456,15 +460,25 @@ export const PostDetailPage = () => {
           }}
           components={{
             Footer: () =>
-              isFetchingNextPage ? (
-                <div className="py-4 text-center text-sm text-gray-500">
-                  Loading more...
-                </div>
+              status === 'error' ? (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              ) : isFetchingNextPage ? (
+                <LoadingMore />
+              ) : fetchNextError ? (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
               ) : null,
             Header: () => (
               <Fragment>
                 <div>
-                  <AppBannerAd section="home" />
+                  <BannerAds placement="details_feed" />
                 </div>
                 {/* <div className="pb-2 border-b border-app-border"> */}
                 <div className="pb-2">

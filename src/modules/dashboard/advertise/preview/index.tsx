@@ -79,10 +79,10 @@ export const AdPreviewPage = ({
         previewAdData.duration as DurationValue,
         previewAdData.plan,
       ),
-      section:
-        previewAdData.plan === 'enterprise'
-          ? 'enterprise'
-          : previewAdData.section.toLowerCase(),
+      // section:
+      //   previewAdData.plan === 'enterprise'
+      //     ? 'enterprise'
+      //     : previewAdData.section.toLowerCase(),
     };
     console.log(payload, 'previewDataa');
     createAd.mutate(payload, {

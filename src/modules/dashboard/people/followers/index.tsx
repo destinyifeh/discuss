@@ -1,7 +1,8 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
-import {FallbackMessage} from '@/components/fallbacks';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import FollowersSkeleton from '@/components/skeleton/followers-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
@@ -9,11 +10,11 @@ import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {UserProps} from '@/types/user.types';
-import {useMutation, useQuery} from '@tanstack/react-query';
+import {useInfiniteQuery, useMutation} from '@tanstack/react-query';
 import {ArrowUp} from 'lucide-react';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
-import {useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {userService} from '../../actions/user.actions';
 
@@ -24,52 +25,61 @@ export const UserFollowersPage = () => {
   const [isPending, setIsPending] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
-
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const {mutate} = useMutation({
     mutationFn: userService.followUserRequestAction,
   });
 
   const shouldQuery = !!user;
+
   const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching, // Combines isFetching and isFetchingNextPage
+    status,
     isLoading,
     error,
-    data: userData,
-  } = useQuery({
+    refetch,
+  } = useInfiniteQuery({
     queryKey: ['followers', user],
-    queryFn: () => userService.getFollowersRequestAction(user),
-    retry: false,
+    queryFn: ({pageParam = 1}) =>
+      userService.getFollowersRequestAction(user, pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      const {page, pages} = lastPage.pagination;
+      return page < pages ? page + 1 : undefined;
+    },
+    placeholderData: previousData => previousData,
+    retry: 1,
     enabled: shouldQuery,
   });
+
   console.log(shouldQuery, 'should query', error);
 
-  console.log(userData, 'should query dataa');
+  console.log(data, 'should query dataa');
+
+  const followers = useMemo(() => {
+    return data?.pages?.flatMap(page => page.followers) || [];
+  }, [data]);
+
+  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
+
+  const theUserId = data?.pages?.[0]?.pagination.userId;
+
+  console.log(totalCount, 'totalcounnt');
 
   if (error?.message === 'User not found' || !user) {
-    return (
-      <FallbackMessage
-        message="User not found"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
+    return <ErrorFeedback showGoBack message="User not found" />;
   }
 
   if (isLoading) {
     return <FollowersSkeleton />;
   }
 
-  if (userData?.code !== '200') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
   const isOwnProfile = user === currentUser?.username;
-  const userId = userData?.userId;
+  const userId = theUserId;
 
   console.log(isOwnProfile, userId, 'isF-isOwn');
 
@@ -106,6 +116,15 @@ export const UserFollowersPage = () => {
     setShowGoUp(scrollTop > 300);
   };
 
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -116,24 +135,49 @@ export const UserFollowersPage = () => {
       <Virtuoso
         className="custom-scrollbar min-h-screen  divide-y divide-app-border"
         // style={{height: '100vh'}}
-        data={userData.followers}
+        data={followers}
+        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
-          EmptyPlaceholder: () => (
-            <div className="p-8 text-center">
-              <h2 className="text-xl font-bold mb-2">No followers yet</h2>
-              {isOwnProfile && (
-                <p className="text-app-gray">
-                  When people follow you, they'll show up here.
-                </p>
-              )}
-            </div>
-          ),
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : (
+              <div className="p-8 text-center">
+                <h2 className="text-xl font-bold mb-2">No followers yet</h2>
+                {isOwnProfile && (
+                  <p className="text-app-gray">
+                    When people follow you, they'll show up here.
+                  </p>
+                )}
+              </div>
+            ),
+          Footer: () =>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
+            ) : null,
         }}
-        //endReached={fetchMore}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            handleFetchNext();
+          }
+        }}
         itemContent={(index, follower) => {
-          const isCurrentUser = currentUser?.username === follower.username;
+          if (!follower) {
+            return null;
+          }
+          const isCurrentUser = currentUser?.username === follower?.username;
           console.log({
             isCurrentUser,
             user,

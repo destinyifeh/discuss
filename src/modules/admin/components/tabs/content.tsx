@@ -12,11 +12,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {Label} from '@/components/ui/label';
-import {ArrowUp, Edit} from 'lucide-react';
+import {ArrowUp, CheckCircle, Edit, XCircle} from 'lucide-react';
 
 import {toast} from '@/components/ui/toast';
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
 
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Textarea} from '@/components/ui/textarea';
@@ -43,12 +45,15 @@ export const ContentTab: FC<ContentProps> = ({
   const navigate = useRouter();
   const lastScrollTop = useRef(0);
   const [showBottomTab, setShowBottomTab] = useState(true);
+  const [promoting, setPromoting] = useState(false);
+  const [demoting, setDemoting] = useState(false);
   const [showGoUp, setShowGoUp] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [contentActionDialog, setContentActionDialog] = useState(false);
   const [selectedContent, setSelectedContent] = useState<string>('');
   const [commentStatus, setCommentStatus] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const [contentAction, setContentAction] = useState<
     'delete' | 'edit' | 'close'
   >('close');
@@ -57,7 +62,8 @@ export const ContentTab: FC<ContentProps> = ({
   const [viewContentDialog, setViewContentDialog] = useState(false);
 
   const [debouncedSearch] = useDebounce(searchTerm, 500);
-  const {closePostCommentRequest, deletePostRequest} = useAdminPostActions();
+  const {closePostCommentRequest, deletePostRequest, promotePost, demotePost} =
+    useAdminPostActions();
   const {
     data, // This 'data' contains { pages: [], pageParams: [] }
     fetchNextPage,
@@ -66,6 +72,7 @@ export const ContentTab: FC<ContentProps> = ({
     isFetching,
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['admin-posts-content-with-comment-count', debouncedSearch],
     queryFn: ({pageParam = 1}) =>
@@ -161,12 +168,57 @@ export const ContentTab: FC<ContentProps> = ({
     }
   };
 
+  const handlePromotePost = (id: string) => {
+    setPromoting(true);
+    promotePost.mutate(id, {
+      onSuccess(data, variables, context) {
+        toast.success('Post successfully promoted to the frontpage');
+        queryClient.invalidateQueries({
+          queryKey: ['admin-posts-content-with-comment-count', debouncedSearch],
+        });
+      },
+      onError(error, variables, context) {
+        toast.error('Something went wrong. Please try again later.');
+      },
+      onSettled(data, error, variables, context) {
+        setPromoting(false);
+      },
+    });
+  };
+
+  const handleDemotePost = (id: string) => {
+    setDemoting(true);
+    demotePost.mutate(id, {
+      onSuccess(data, variables, context) {
+        toast.success('Post has been removed from the frontpage');
+        queryClient.invalidateQueries({
+          queryKey: ['admin-posts-content-with-comment-count', debouncedSearch],
+        });
+      },
+      onError(error, variables, context) {
+        toast.error('Something went wrong. Please try again later.');
+      },
+      onSettled(data, error, variables, context) {
+        setDemoting(false);
+      },
+    });
+  };
+
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
   };
 
   return (
@@ -180,26 +232,37 @@ export const ContentTab: FC<ContentProps> = ({
           ref={virtuosoRef}
           components={{
             Header: () => <h2 className="text-lg font-bold">All Content</h2>,
-            EmptyPlaceholder: () => (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-app-gray">
-                    No posts found matching your search
-                  </p>
-                </CardContent>
-              </Card>
-            ),
+            EmptyPlaceholder: () =>
+              status === 'error' ? null : (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <p className="text-app-gray">
+                      No posts found matching your search
+                    </p>
+                  </CardContent>
+                </Card>
+              ),
 
             Footer: () =>
-              isFetchingNextPage ? (
-                <div className="py-4 text-center text-sm text-gray-500">
-                  Loading more...
-                </div>
+              status === 'error' ? (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              ) : isFetchingNextPage ? (
+                <LoadingMore />
+              ) : fetchNextError ? (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
               ) : null,
           }}
           endReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              handleFetchNext();
             }
           }}
           itemContent={(index, post) => {
@@ -216,12 +279,28 @@ export const ContentTab: FC<ContentProps> = ({
                   className="grid grid-cols-1 md:grid-cols-4 gap-2 p-4">
                   <div className="font-medium truncate">{post.title}</div>
                   <div>By {post?.user.username}</div>
-                  <div>{post.commentCount || 0} comments</div>
+                  <div>
+                    <div>{post.commentCount || 0} comments</div>
+
+                    <span
+                      className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
+                        (post.status || 'published') === 'promoted'
+                          ? 'bg-green-100 text-green-800'
+                          : (post.status || 'published') === 'published'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                      {post.status || 'published'}
+                    </span>
+                  </div>
+
                   <div className="flex flex-wrap gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate.push(`/post/${post._id}`)}>
+                      onClick={() =>
+                        navigate.push(`/discuss/${post.section}/${post._id}`)
+                      }>
                       View
                     </Button>
                     <Button
@@ -257,6 +336,28 @@ export const ContentTab: FC<ContentProps> = ({
                       }>
                       Delete
                     </Button>
+                    {post.status === 'published' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={promoting}
+                        className="text-green-600 hover:bg-green-50"
+                        onClick={() => handlePromotePost(post._id)}>
+                        <CheckCircle size={14} className="mr-1" />{' '}
+                        {promoting ? 'Promoting' : 'Promote'}
+                      </Button>
+                    )}
+                    {post.status === 'promoted' && (
+                      <Button
+                        disabled={demoting}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50"
+                        onClick={() => handleDemotePost(post._id)}>
+                        <XCircle size={14} className="mr-1" />
+                        {demoting ? 'Demoting' : 'Demote'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

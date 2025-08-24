@@ -34,6 +34,14 @@ class AdminPostService {
     const response = await api.get(`/admin/post-stats`);
     return response.data;
   }
+  async promotePost(id: string) {
+    const response = await api.post(`/posts/${id}/promote`);
+    return response.data;
+  }
+  async demotePost(id: string) {
+    const response = await api.post(`/posts/${id}/demote`);
+    return response.data;
+  }
 }
 
 export const adminPostService = new AdminPostService();

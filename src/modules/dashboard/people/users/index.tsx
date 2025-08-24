@@ -1,7 +1,8 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
-import {FallbackMessage} from '@/components/fallbacks';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {UsersSkeleton} from '@/components/skeleton/users.skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
@@ -22,6 +23,8 @@ export const Users = () => {
   const {currentUser, setUser} = useAuthStore(state => state);
   const [showGoUp, setShowGoUp] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
+
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +43,7 @@ export const Users = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['get-all-users', debouncedSearch],
     queryFn: ({pageParam = 1}) =>
@@ -68,16 +72,6 @@ export const Users = () => {
         header
         headerTitle="Connect"
         headerDesc="Discover people to follow"
-      />
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
       />
     );
   }
@@ -115,6 +109,14 @@ export const Users = () => {
     setShowGoUp(scrollTop > 300);
   };
 
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
   return (
     <div>
       <PageHeader title="Connect" description="Discover people to follow" />
@@ -136,25 +138,36 @@ export const Users = () => {
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
-          EmptyPlaceholder: () => (
-            <div className="p-8 text-center">
-              <h2 className="text-xl font-bold mb-2">No users found</h2>
-              <p className="text-app-gray">
-                Check back later for more users to follow.
-              </p>
-            </div>
-          ),
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : (
+              <div className="p-8 text-center">
+                <h2 className="text-xl font-bold mb-2">No users found</h2>
+                <p className="text-app-gray">
+                  Check back later for more users to follow.
+                </p>
+              </div>
+            ),
 
           Footer: () =>
-            isFetchingNextPage ? (
-              <div className="py-4 text-center text-sm text-gray-500">
-                Loading more...
-              </div>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
             ) : null,
         }}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+            handleFetchNext();
           }
         }}
         itemContent={(index, user) => {

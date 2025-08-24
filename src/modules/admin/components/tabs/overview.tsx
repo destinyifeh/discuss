@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {getTimeAgo} from '@/lib/formatter';
 import {useQuery} from '@tanstack/react-query';
 import {adminAdService} from '../../actions/ad-service/ad';
 import {adminPostService} from '../../actions/post-service/post';
@@ -101,6 +102,17 @@ export const OverViewTab: FC<OverviewProps> = ({
 
   console.log(pendingAdData, 'pending ad dataa');
 
+  const {
+    isLoading: loadingSystemNotifications,
+    error: systemErr,
+    data: systemNotificationsData,
+  } = useQuery({
+    queryKey: ['system-notifications'],
+    queryFn: () => adminService.getSystemNotifications(),
+    retry: true,
+  });
+
+  console.log(systemNotificationsData, 'systemNotificationsData');
   const userActivityData = [
     {name: 'New Users', value: 45},
     {name: 'Active Users', value: 125},
@@ -241,44 +253,41 @@ export const OverViewTab: FC<OverviewProps> = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center gap-4 border-b pb-4">
-                <BellRing className="text-app" />
-                <div>
-                  <p className="text-sm font-medium">New user registration</p>
-                  <p className="text-xs text-muted-foreground">
-                    Sarah Johnson joined the platform
-                  </p>
-                </div>
-                <div className="ml-auto text-xs text-muted-foreground">
-                  5m ago
-                </div>
-              </div>
-              <div className="flex items-center gap-4 border-b pb-4">
-                <BellRing className="text-app" />
-                <div>
-                  <p className="text-sm font-medium">
-                    New advertisement submitted
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    TechWorld submitted a new ad
-                  </p>
-                </div>
-                <div className="ml-auto text-xs text-muted-foreground">
-                  20m ago
-                </div>
-              </div>
-              <div className="flex items-center gap-4 border-b pb-4">
-                <BellRing className="text-red-500" />
-                <div>
-                  <p className="text-sm font-medium">New content report</p>
-                  <p className="text-xs text-muted-foreground">
-                    A post was reported for inappropriate content
-                  </p>
-                </div>
-                <div className="ml-auto text-xs text-muted-foreground">
-                  1h ago
-                </div>
-              </div>
+              {systemNotificationsData?.systemNotifications.map((item: any) => {
+                console.log(item, 'itemmNote');
+                return (
+                  <div
+                    className="flex items-center gap-4 border-b pb-4"
+                    key={item._id}>
+                    {[
+                      'Content reported',
+                      'User reported',
+                      'Ad reported',
+                      'Abuse reported',
+                      'Comment reported',
+                    ].includes(item.message) ? (
+                      <BellRing className="text-red-500" />
+                    ) : (
+                      <BellRing className="text-app" />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium">{item.message}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.content}
+                      </p>
+                    </div>
+                    <div className="ml-auto text-xs text-muted-foreground">
+                      {/* {moment(item.createdAt).fromNow()} */}
+                      {getTimeAgo(item.createdAt)}
+                    </div>
+                  </div>
+                );
+              })}
+              {!systemNotificationsData?.systemNotifications?.length && (
+                <p className="text-xs text-muted-foreground">
+                  No recent activity yet
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

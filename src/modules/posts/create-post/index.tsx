@@ -1,5 +1,5 @@
 'use client';
-import {FallbackMessage} from '@/components/fallbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import {AddPostField} from '@/components/post/add-post-field';
 import CommunityGuidelines from '@/components/post/community-guidelines';
@@ -20,7 +20,7 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
 import {SectionName} from '@/types/section';
 import {useQuery} from '@tanstack/react-query';
-import {FileImage, Trash2, X} from 'lucide-react';
+import {ChevronLeft, FileImage, Trash2, X} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {postService} from '../actions';
@@ -49,12 +49,14 @@ export const CreatePostPage = () => {
 
   const {createPostRequest, updatePostRequest} = usePostActions();
   const postId = location.get('postId');
-
+  const theSection = location.get('section');
+  console.log(theSection, 'section001');
   const shouldQuery = !!postId;
   const {
     isLoading,
     error,
     data: post,
+    refetch: refetchPost,
   } = useQuery({
     queryKey: ['edit-post', postId],
     queryFn: () => postService.getPostRequestAction(postId as string),
@@ -65,6 +67,12 @@ export const CreatePostPage = () => {
 
   console.log(post, 'should query dataa');
   console.log(currentUser, 'currentooo');
+
+  useEffect(() => {
+    if (theSection) {
+      setSelectedSection(theSection as SectionName);
+    }
+  }, [theSection]);
 
   useEffect(() => {
     if (post) {
@@ -80,10 +88,11 @@ export const CreatePostPage = () => {
 
   if (isEditing && (error?.message === 'Post not found' || !postId)) {
     return (
-      <FallbackMessage
+      <ErrorFeedback
+        showGoBack
+        showRetry
+        onRetry={refetchPost}
         message="Post not found"
-        buttonText="Back to Home"
-        page="/home"
       />
     );
   }
@@ -93,13 +102,7 @@ export const CreatePostPage = () => {
   }
 
   if (error) {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
+    return <ErrorFeedback showGoBack showRetry onRetry={refetchPost} />;
   }
 
   if (
@@ -110,23 +113,22 @@ export const CreatePostPage = () => {
     currentUser?.role !== 'admin' // AND the user is NOT an admin
   ) {
     return (
-      <FallbackMessage
+      <ErrorFeedback
+        showGoBack
         message="Access Denied: You are not authorized to edit this post."
-        buttonText="Back to Home"
-        page="/home"
       />
     );
   }
 
-  const updatePost = (data: UpdatePostDto) => {
-    console.log(data, 'dataa');
+  const updatePost = (dataToUpdate: UpdatePostDto) => {
+    console.log(dataToUpdate, 'dataa');
     setIsSubmitting(true);
-    updatePostRequest.mutate(data, {
+    updatePostRequest.mutate(dataToUpdate, {
       onSuccess(data, variables, context) {
         console.log(data, 'post data');
         queryClient.invalidateQueries({queryKey: ['edit-post', postId]});
         toast.success('Your post has been updated successfully.');
-        navigate.push('/home');
+        navigate.push(`/discuss/${dataToUpdate.section}`);
       },
       onError(error, variables, context) {
         console.log(error, 'update post err');
@@ -176,14 +178,14 @@ export const CreatePostPage = () => {
     setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
-  const addPost = (data: PostDto) => {
-    console.log(data, 'dataa');
+  const addPost = (dataToPost: PostDto) => {
+    console.log(dataToPost, 'dataa');
     setIsSubmitting(true);
-    createPostRequest.mutate(data, {
+    createPostRequest.mutate(dataToPost, {
       onSuccess(data, variables, context) {
         console.log(data, 'post data');
         toast.success('Your post has been published successfully.');
-        navigate.push('/home');
+        navigate.push(`/discuss/${dataToPost.section}`);
       },
       onError(error, variables, context) {
         console.log(error, 'post err');
@@ -210,9 +212,9 @@ export const CreatePostPage = () => {
       // Update existing post
       updatePost({
         content: content,
-        title: content.split(' ').slice(0, 5).join(' ') + '...',
+        title: content.split(' ').slice(0, 10).join(' ') + '...',
         images: images,
-        section: selectedSection,
+        section: selectedSection.toLowerCase() as SectionName,
         postId: postId as string,
         removedImageIds: removedImageIds,
       });
@@ -220,8 +222,8 @@ export const CreatePostPage = () => {
       // Create new post
       addPost({
         content: content,
-        title: content.split(' ').slice(0, 5).join(' ') + '...', // Generate title from content
-        section: selectedSection,
+        title: content.split(' ').slice(0, 10).join(' ') + '...', // Generate title from content
+        section: selectedSection.toLowerCase() as SectionName,
         images: images,
       });
     }
@@ -237,10 +239,14 @@ export const CreatePostPage = () => {
     <div className="pb-25">
       <div className="sticky top-0 backdrop-blur-sm border-b z-10 bg-white/80 border-app-border dark:bg-background">
         <div className="px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold">
-            {isEditing ? 'Edit Post' : 'Create Post'}
-          </h1>
-
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
+              <ChevronLeft />
+            </Button>
+            <h1 className="text-xl font-bold">
+              {isEditing ? 'Edit Post' : 'Discuss'}
+            </h1>
+          </div>
           <Button
             className="rounded-full bg-app hover:bg-app/90 md:hidden text-white"
             onClick={handleSubmitPost}
@@ -335,7 +341,7 @@ export const CreatePostPage = () => {
                   onValueChange={(value: SectionName) =>
                     setSelectedSection(value)
                   }>
-                  <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm">
+                  <SelectTrigger className="w-[140px] sm:w-[180px] text-xs sm:text-sm form-input">
                     <SelectValue placeholder="Select section" className="" />
                   </SelectTrigger>
                   <SelectContent>
@@ -360,12 +366,13 @@ export const CreatePostPage = () => {
 
             {showGuidelines && (
               <Card className="mt-4">
-                <X
-                  className="self-end mr-5 pointer-cursor hidden md:block"
-                  onClick={() => setShowGuidelines(false)}
-                />
-
-                <CardContent className="p-4">
+                <CardContent className="px-4">
+                  <div className="flex justify-end mb-1">
+                    <X
+                      className="cursor-pointer"
+                      onClick={() => setShowGuidelines(false)}
+                    />
+                  </div>
                   <CommunityGuidelines />
                 </CardContent>
               </Card>

@@ -56,3 +56,12 @@ export interface UserProps {
   googleId: string | null;
   createdAt: string; // ISO date
 }
+
+export interface MailUserDto {
+  username: string;
+  email: string;
+  senderName: string;
+  senderEmail: string;
+  message: string;
+  subject: string;
+}

@@ -64,6 +64,11 @@ class AdminUserService {
       throw err?.response?.data ?? err;
     }
   }
+
+  async getSystemNotifications() {
+    const response = await api.get(`/notifications/system-notifications`);
+    return response.data;
+  }
 }
 
 export const adminService = new AdminUserService();

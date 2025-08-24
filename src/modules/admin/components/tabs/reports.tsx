@@ -17,6 +17,8 @@ import {Label} from '@/components/ui/label';
 import {toast} from '@/components/ui/toast';
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
 
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {
@@ -71,6 +73,7 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm}) => {
   const [targetUser, setTargetUser] = useState('');
   const lastScrollTop = useRef(0);
   const [submitting, setSubmitting] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const [showGoUp, setShowGoUp] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
@@ -84,6 +87,7 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm}) => {
     isFetching,
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['admin-reports-content', debouncedSearch],
     queryFn: ({pageParam = 1}) =>
@@ -238,6 +242,14 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm}) => {
     navigate.push(`/${selectedReportType}/${selectedReportContent._id}`);
   };
 
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
   return (
     <Fragment>
       <div className="space-y-4">
@@ -251,26 +263,37 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm}) => {
             Header: () => (
               <h2 className="text-lg font-bold mb-3">Reported Content</h2>
             ),
-            EmptyPlaceholder: () => (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-app-gray">
-                    No reports found matching your search
-                  </p>
-                </CardContent>
-              </Card>
-            ),
+            EmptyPlaceholder: () =>
+              status === 'error' ? null : (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <p className="text-app-gray">
+                      No reports found matching your search
+                    </p>
+                  </CardContent>
+                </Card>
+              ),
 
             Footer: () =>
-              isFetchingNextPage ? (
-                <div className="py-4 text-center text-sm text-gray-500">
-                  Loading more...
-                </div>
+              status === 'error' ? (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              ) : isFetchingNextPage ? (
+                <LoadingMore />
+              ) : fetchNextError ? (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
               ) : null,
           }}
           endReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              handleFetchNext();
             }
           }}
           itemContent={(index, report) => {

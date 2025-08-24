@@ -11,9 +11,10 @@ import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
 import {AdCard} from '../ad/ad-card';
-import {AppBannerAd, BannerAds} from '../ad/banner';
+import {BannerAds} from '../ad/banner';
 import {PageHeader} from '../app-headers';
-import {FallbackMessage} from '../fallbacks';
+import {LoadingMore, LoadMoreError} from '../feedbacks';
+import ErrorFeedback from '../feedbacks/error-feedback';
 import SearchBarList from '../forms/list-search-bar';
 import {MobileBottomTab} from '../layouts/dashboard/mobile-bottom-tab';
 import MobileNavigation from '../layouts/dashboard/mobile-navigation';
@@ -38,6 +39,7 @@ export const SectionPostList = ({
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const navigate = useRouter();
   const shouldQuery = !!section;
   const {
@@ -48,6 +50,7 @@ export const SectionPostList = ({
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['section-feed-posts', section],
     queryFn: ({pageParam = 1}) =>
@@ -70,22 +73,21 @@ export const SectionPostList = ({
 
   console.log(data, 'section dataa');
 
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
   };
 
   return (
@@ -101,14 +103,34 @@ export const SectionPostList = ({
         components={{
           Header: () => (
             <div>
-              <BannerAds section={bannerAd} />
+              <BannerAds section={bannerAd} placement="section_feed" />
             </div>
           ),
-          EmptyPlaceholder: () => <SectionPlaceholder />,
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : (
+              <SectionPlaceholder section={section} />
+            ),
+
+          Footer: () =>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
+            ) : null,
         }}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+            handleFetchNext();
           }
         }}
         itemContent={(index, post) => {
@@ -147,7 +169,9 @@ export const SectionPostList = ({
             className="fixed bottom-6 h-14 w-14 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition"
             // className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
             size="icon"
-            onClick={() => {}}>
+            onClick={() => {
+              navigate.push(`/discuss?section=${section}`);
+            }}>
             <PenSquare size={24} />
           </Button>
         </div>
@@ -170,6 +194,7 @@ export const HomePostList = () => {
   const {currentUser} = useAuthStore(state => state);
   console.log(currentUser, 'currentooo');
   const [mounted, setMounted] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
 
   const {
     data, // This 'data' contains { pages: [], pageParams: [] }
@@ -179,6 +204,7 @@ export const HomePostList = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['home-feed-posts'],
     queryFn: ({pageParam = 1}) => feedService.getHomePostFeeds(pageParam, 10),
@@ -209,25 +235,6 @@ export const HomePostList = () => {
 
   if (!mounted) return <HomeDashboardSkeleton />;
 
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
-  const sortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
-
-  const sortedPosts2 = [...Posts].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
-  const data2 = activeTab === 'for-you' ? sortedPosts : sortedPosts2;
-
   const homeData = status === 'pending' ? Array(5).fill(null) : postsData;
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -256,6 +263,15 @@ export const HomePostList = () => {
 
   const onSectionOptionsNavigate = (section: string) => {
     navigate.push(`/${section}`);
+  };
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
   };
 
   const allowTab = false;
@@ -341,22 +357,33 @@ export const HomePostList = () => {
                 </div>
               )}
               <div>
-                <AppBannerAd section="home" />
+                <BannerAds placement="homepage_feed" />
               </div>
             </Fragment>
           ),
-          EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : <PostPlaceholder tab={activeTab} />,
 
           Footer: () =>
-            isFetchingNextPage ? (
-              <div className="py-4 text-center text-sm text-gray-500">
-                Loading more...
-              </div>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
             ) : null,
         }}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+            handleFetchNext();
           }
         }}
         itemContent={(index, post) => {
@@ -407,6 +434,7 @@ export const ExplorePostList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [mounted, setMounted] = useState(false);
   const [debouncedSearch] = useDebounce(searchTerm, 500);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const {
     data, // This 'data' contains { pages: [], pageParams: [] }
@@ -416,6 +444,7 @@ export const ExplorePostList = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['explore-feed-posts', debouncedSearch],
     queryFn: ({pageParam = 1}) =>
@@ -450,16 +479,6 @@ export const ExplorePostList = () => {
 
   if (!mounted) return <HomeDashboardSkeleton />;
 
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
   const exploreData = status === 'pending' ? Array(5).fill(null) : postsData;
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -484,6 +503,16 @@ export const ExplorePostList = () => {
     }
     navigate.push(`/discuss/${section.toLowerCase()}`);
   };
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
+
   return (
     <div className="lg:pb-0">
       <PageHeader title="Search" />
@@ -520,25 +549,36 @@ export const ExplorePostList = () => {
               </div>
 
               <div>
-                <AppBannerAd section="home" />
+                <BannerAds placement="homepage_feed" />
               </div>
               <div className="border-b-2 border-b-app p-3 w-30 mb-3 font-bold text-lg">
                 <h1> Trending</h1>
               </div>
             </Fragment>
           ),
-          EmptyPlaceholder: () => <Placeholder holder={'explore'} />,
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : <Placeholder holder={'explore'} />,
 
           Footer: () =>
-            isFetchingNextPage ? (
-              <div className="py-4 text-center text-sm text-gray-500">
-                Loading more...
-              </div>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
             ) : null,
         }}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+            handleFetchNext();
           }
         }}
         itemContent={(index, post) => {
@@ -584,6 +624,7 @@ export const BookmarkPostList = () => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const navigate = useRouter();
 
   const {
@@ -594,6 +635,7 @@ export const BookmarkPostList = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['bookmarked-feed-posts'],
     queryFn: ({pageParam = 1}) =>
@@ -615,16 +657,6 @@ export const BookmarkPostList = () => {
 
   console.log(data, 'bookmarked dataa');
 
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
     // Compare current scrollTop to previous value to determine direction
@@ -640,6 +672,15 @@ export const BookmarkPostList = () => {
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
+
   return (
     <div className="lg:pb-0">
       <Virtuoso
@@ -651,11 +692,28 @@ export const BookmarkPostList = () => {
         data={bookmarkedData}
         components={{
           Header: () => <PageHeader title="Bookmarks" />,
-          EmptyPlaceholder: () => <Placeholder holder={'bookmark'} />,
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : <Placeholder holder={'bookmark'} />,
+          Footer: () =>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
+            ) : null,
         }}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+            handleFetchNext();
           }
         }}
         itemContent={(index, post) => {
@@ -753,7 +811,7 @@ export const Placeholder = ({
   );
 };
 
-export const SectionPlaceholder = () => {
+export const SectionPlaceholder = (props: {section: string}) => {
   const navigate = useRouter();
   return (
     <div className="p-8 text-center">
@@ -761,7 +819,7 @@ export const SectionPlaceholder = () => {
       <p className="text-app-gray">Be the first to post in this section!</p>
       <Button
         className="mt-4 bg-app hover:bg-app/90"
-        onClick={() => navigate.push('/create')}>
+        onClick={() => navigate.push(`/create-post?section=${props.section}`)}>
         Create Post
       </Button>
     </div>

@@ -188,12 +188,7 @@ export const Sections: Section[] = [
     description: 'Debates and news on politics and government affairs',
     ch: 'pol',
   },
-  {
-    id: '6',
-    name: 'Education',
-    description: 'Topics related to schools, learning, and academia',
-    ch: 'edu',
-  },
+
   {
     id: '7',
     name: 'Religion',
@@ -201,17 +196,25 @@ export const Sections: Section[] = [
     ch: 'rel',
   },
   {
-    id: '8',
-    name: 'Romance',
-    description: 'Love stories, dating advice, and relationship discussions',
-    ch: 'rom',
-  },
-  {
     id: '9',
     name: 'Jobs',
     description: 'Career advice, job opportunities, and work-life tips',
     ch: 'jobs',
   },
+
+  {
+    id: '6',
+    name: 'Education',
+    description: 'Topics related to schools, learning, and academia',
+    ch: 'edu',
+  },
+  {
+    id: '8',
+    name: 'Romance',
+    description: 'Love stories, dating advice, and relationship discussions',
+    ch: 'rom',
+  },
+
   {
     id: '10',
     name: 'News',

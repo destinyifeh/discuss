@@ -29,6 +29,11 @@ export type AdPlan = 'basic' | 'professional' | 'enterprise';
 //   | 'Request Access'
 //   | 'Start Now';
 
+export type AdPlacementProps =
+  | 'homepage_feed'
+  | 'details_feed'
+  | 'section_feed';
+
 export enum AdCTA {
   LearnMore = 'Learn More',
   SignUp = 'Sign Up',

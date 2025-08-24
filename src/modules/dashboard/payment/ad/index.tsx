@@ -3,8 +3,8 @@
 import type React from 'react';
 
 import {PageHeader} from '@/components/app-headers';
-import ErrorFeedback from '@/components/fallbacks/error-feedback';
-import {LoadingFeedback} from '@/components/fallbacks/loading-feedback';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
+import {LoadingFeedback} from '@/components/feedbacks/loading-feedback';
 import {Button} from '@/components/ui/button';
 import {
   Card,

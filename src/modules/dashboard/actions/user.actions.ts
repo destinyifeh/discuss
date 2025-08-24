@@ -1,22 +1,25 @@
 import api from '@/lib/auth/api';
 import {UserUpdateRequestProps} from '@/modules/auth/types';
+import {MailUserDto} from '@/types/user.types';
 import {AxiosResponse} from 'axios';
 import {UsersResponse} from './type.actions';
 
 class UserService {
-  async getFollowingRequestAction(username: string) {
+  async getFollowingRequestAction(username: string, page = 1, limit = 10) {
+    const params: any = {page, limit};
     try {
-      const res = await api.get(`/user/${username}/following`);
-      return res.data;
+      const res = await api.get(`/user/${username}/following`, {params});
+      return res.data?.data;
     } catch (err: any) {
       throw err?.response?.data ?? err;
     }
   }
 
-  async getFollowersRequestAction(username: string) {
+  async getFollowersRequestAction(username: string, page = 1, limit = 10) {
+    const params: any = {page, limit};
     try {
-      const res = await api.get(`/user/${username}/followers`);
-      return res.data;
+      const res = await api.get(`/user/${username}/followers`, {params});
+      return res.data?.data;
     } catch (err: any) {
       throw err?.response?.data ?? err;
     }
@@ -118,6 +121,9 @@ class UserService {
     if (search) params.search = search;
     const response = await api.get(`/posts/replies`, {params});
     return response.data?.data;
+  }
+  async mailUser(payload: MailUserDto) {
+    return await api.post(`/user/mail`, payload);
   }
 }
 

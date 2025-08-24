@@ -1,7 +1,8 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
-import {FallbackMessage} from '@/components/fallbacks';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {
   NotificationCard,
   NotificationPlaceholder,
@@ -23,7 +24,7 @@ import {
 export const NotificationsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const navigate = useRouter();
-
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const [showGoUp, setShowGoUp] = useState(false);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -50,6 +51,7 @@ export const NotificationsPage = () => {
     status,
     error,
     isLoading,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['notifications', activeTab],
     queryFn: ({pageParam = 1}) =>
@@ -83,16 +85,6 @@ export const NotificationsPage = () => {
     return <NotificationSkeleton />;
   }
 
-  if (error) {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
   const hasUnread = notificationsData.some(notification => !notification.read);
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -100,6 +92,14 @@ export const NotificationsPage = () => {
 
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
+  };
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
   };
   return (
     <div>
@@ -145,13 +145,26 @@ export const NotificationsPage = () => {
               </Tabs>
             </Fragment>
           ),
-          EmptyPlaceholder: () => <NotificationPlaceholder tab={activeTab} />,
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : (
+              <NotificationPlaceholder tab={activeTab} />
+            ),
 
           Footer: () =>
-            isFetchingNextPage ? (
-              <div className="py-4 text-center text-sm text-gray-500">
-                Loading more...
-              </div>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
             ) : null,
         }}
         endReached={() => {
@@ -165,7 +178,7 @@ export const NotificationsPage = () => {
             return <NotificationSkeleton />;
           }
           if (!notification) {
-            return <NotificationPlaceholder tab={activeTab} />;
+            return null;
           }
           return (
             <NotificationCard

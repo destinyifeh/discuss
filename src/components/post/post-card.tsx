@@ -1,14 +1,13 @@
 'use client';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
-import {PostFeedProps} from '@/types/post-item.type';
+import {PostFeedProps, PostStatus} from '@/types/post-item.type';
 import copy from 'copy-to-clipboard';
 import {formatDistanceToNow} from 'date-fns';
 import {
   BarChart3,
   Bookmark,
   EllipsisVertical,
-  Flag,
   Heart,
   LinkIcon,
   MessageSquare,
@@ -91,6 +90,16 @@ const PostCard = ({
         console.log(data, 'post like');
         // setLikesCount(data.likesCount);
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
+        queryClient.invalidateQueries({queryKey: ['bookmarked-feed-posts']});
+        queryClient.invalidateQueries({
+          queryKey: ['section-feed-posts'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['explore-feed-posts'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['post-details'],
+        });
         queryClient.invalidateQueries({
           queryKey: ['user-profile-posts', 'posts'],
         });
@@ -117,6 +126,16 @@ const PostCard = ({
         console.log(data, 'post like');
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
         queryClient.invalidateQueries({queryKey: ['bookmarked-feed-posts']});
+        queryClient.invalidateQueries({
+          queryKey: ['section-feed-posts'],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['explore-feed-posts'],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ['post-details'],
+        });
         queryClient.invalidateQueries({
           queryKey: ['user-profile-posts', 'posts'],
         });
@@ -239,7 +258,7 @@ const PostCard = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const postUrl = `${window.location.origin}/post/${post._id}`;
+    const postUrl = `${window.location.origin}/discuss/${post.section}/${post._id}`;
     try {
       copy(postUrl);
       toast.success('Link Copied', {
@@ -309,17 +328,18 @@ const PostCard = ({
                   <DropdownMenuContent
                     align="end"
                     className="border-app-border">
-                    {post.user._id === currentUser?._id && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={handleEditPost}
-                          className="cursor-pointer">
-                          <Pencil size={16} className="mr-2 font-bold" />
-                          Edit post
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                      </>
-                    )}
+                    {post.user._id === currentUser?._id &&
+                      post.status !== (PostStatus.PROMOTED as string) && (
+                        <>
+                          <DropdownMenuItem
+                            onClick={handleEditPost}
+                            className="cursor-pointer">
+                            <Pencil size={16} className="mr-2 font-bold" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
+                      )}
 
                     {post.user._id !== currentUser?._id && (
                       <>
@@ -343,9 +363,8 @@ const PostCard = ({
                     )}
                     <DropdownMenuItem
                       onClick={() => handleReport(post._id)}
-                      className="cursor-pointer">
-                      <Flag size={16} className="mr-2 font-bold" />
-                      Report post
+                      className="cursor-pointer justify-center">
+                      Report
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -359,7 +378,9 @@ const PostCard = ({
             </div>
           </div>
 
-          <Link href={`/post/${post._id}`} className="block">
+          <Link
+            href={`/discuss/${post.section.toLowerCase()}/${post._id}`}
+            className="block">
             <div className="mt-1">
               {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}
               <PostContent content={displayContent} />

@@ -1,5 +1,5 @@
 import api from '@/lib/auth/api';
-import {AdPlan} from '@/types/ad-types';
+import {AdPlacementProps, AdPlan} from '@/types/ad-types';
 
 class FeedService {
   async getHomePostFeeds(
@@ -9,8 +9,9 @@ class FeedService {
     pattern: string = '4, 9, 15',
     adPlan: AdPlan = 'enterprise',
     mode: string = 'pattern',
+    placement: AdPlacementProps = 'homepage_feed',
   ) {
-    const params: any = {page, limit, mode};
+    const params: any = {page, limit, mode, placement};
     if (search) params.search = search;
     if (pattern) params.pattern = pattern;
     if (adPlan) params.adPlan = adPlan;
@@ -26,8 +27,9 @@ class FeedService {
     pattern: string = '',
     adPlan: AdPlan = 'enterprise',
     mode: string = 'random',
+    placement: AdPlacementProps = 'section_feed',
   ) {
-    const params: any = {page, limit, section, mode};
+    const params: any = {page, limit, section, mode, placement};
 
     if (pattern) params.pattern = pattern;
     if (adPlan) params.adPlan = adPlan;
@@ -41,13 +43,12 @@ class FeedService {
     limit = 10,
     onlyBookmarked: boolean = true,
     pattern: string = '',
-    adPlan: AdPlan = 'enterprise',
     mode: string = 'random',
+    placement: AdPlacementProps = 'homepage_feed',
   ) {
-    const params: any = {page, limit, onlyBookmarked, mode};
+    const params: any = {page, limit, onlyBookmarked, mode, placement};
 
     if (pattern) params.pattern = pattern;
-    if (adPlan) params.adPlan = adPlan;
 
     const response = await api.get(`/feeds`, {params});
     return response.data?.data;

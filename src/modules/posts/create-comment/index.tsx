@@ -283,7 +283,7 @@ export const CreateCommentPage = () => {
     if (postComment?.content) {
       return isSubmitting ? 'Updating...' : 'Update';
     }
-    return isSubmitting ? 'Posting...' : 'Post';
+    return isSubmitting ? 'Replying...' : 'Reply';
   };
 
   return (
@@ -291,7 +291,7 @@ export const CreateCommentPage = () => {
       <div className="flex flex-col h-full">
         {/* Header */}
 
-        <PageHeader title="Add comment" />
+        <PageHeader title="Reply" />
 
         {/* Original post */}
         <PostCard post={thePost as PostFeedProps} showActions={false} />
@@ -313,7 +313,7 @@ export const CreateCommentPage = () => {
               {formatReplyTextarea()}
 
               <Textarea
-                placeholder="Add a comment..."
+                placeholder="Reply..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="max-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"

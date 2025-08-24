@@ -7,7 +7,7 @@ import {useAdManger} from '@/hooks/use-ad-manager';
 import {shuffleArray} from '@/lib/helpers';
 import {cn} from '@/lib/utils';
 import {adService} from '@/modules/dashboard/actions/ad.actions';
-import {AdProps} from '@/types/ad-types';
+import {AdPlacementProps, AdProps} from '@/types/ad-types';
 import {useQuery} from '@tanstack/react-query';
 import {ExternalLink} from 'lucide-react';
 import Image from 'next/image';
@@ -161,16 +161,22 @@ export function AppBannerAd4({section}: {section: string}) {
   );
 }
 
-export function BannerAds2({section}: {section: string}) {
+export function BannerAds2({
+  section,
+  placement,
+}: {
+  section?: string;
+  placement: AdPlacementProps;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
-  console.log(section, 'settt');
-  const shouldQuery = Boolean(section);
+  console.log(placement, 'settt');
+  const shouldQuery = Boolean(placement);
 
   const {data, isLoading} = useQuery({
-    queryKey: ['bannerAds', section],
-    queryFn: () => adService.getBannerAds(section),
+    queryKey: ['bannerAds', placement],
+    queryFn: () => adService.getBannerAds(placement, section),
     refetchInterval: 60000,
     enabled: shouldQuery,
   });
@@ -205,16 +211,22 @@ export function BannerAds2({section}: {section: string}) {
   );
 }
 
-export function BannerAds({section}: {section: string}) {
+export function BannerAds({
+  section,
+  placement,
+}: {
+  section?: string;
+  placement: AdPlacementProps;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
   console.log(section, 'settt');
-  const shouldQuery = Boolean(section);
+  const shouldQuery = Boolean(placement);
 
   const {data, isLoading} = useQuery({
-    queryKey: ['bannerAds', section],
-    queryFn: () => adService.getBannerAds(section),
+    queryKey: ['bannerAds', placement],
+    queryFn: () => adService.getBannerAds(placement, section),
     // refetchInterval: 60000,
     refetchInterval: 15000,
     enabled: shouldQuery,

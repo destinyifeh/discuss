@@ -1,7 +1,8 @@
 'use client';
 
 import {PageHeader} from '@/components/app-headers';
-import {FallbackMessage} from '@/components/fallbacks';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
 import UserCommentCard from '@/components/post/comments/user-comment-card';
 import PostCard from '@/components/post/post-card';
@@ -93,6 +94,7 @@ export const ProfilePage = () => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [showBottomTab, setShowBottomTab] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const lastScrollTop = useRef(0);
   const {resetCommentSection} = usePostStore(state => state);
 
@@ -118,6 +120,7 @@ export const ProfilePage = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['user-profile-posts', activeTab],
     queryFn: ({pageParam = 1}) =>
@@ -146,23 +149,7 @@ export const ProfilePage = () => {
   }
 
   if (mounted && isNotCurrentUser) {
-    return (
-      <FallbackMessage
-        message="Unauthorized access."
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
+    return <ErrorFeedback showGoBack message="Unauthorized access." />;
   }
 
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -178,6 +165,15 @@ export const ProfilePage = () => {
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
   };
 
   return (
@@ -331,11 +327,28 @@ export const ProfilePage = () => {
                 </Tabs>
               </Fragment>
             ),
-            EmptyPlaceholder: () => <PostPlaceholder tab={activeTab} />,
+            EmptyPlaceholder: () =>
+              status === 'error' ? null : <PostPlaceholder tab={activeTab} />,
+            Footer: () =>
+              status === 'error' ? (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              ) : isFetchingNextPage ? (
+                <LoadingMore />
+              ) : fetchNextError ? (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
+              ) : null,
           }}
           endReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              handleFetchNext();
             }
           }}
           itemContent={(index, post) => {

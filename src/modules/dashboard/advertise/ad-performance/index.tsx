@@ -6,7 +6,8 @@ import {
 } from '@/components/ad/ad-performace-card';
 import {PageHeader} from '@/components/app-headers';
 
-import {FallbackMessage} from '@/components/fallbacks';
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import AdPerformanceCardSkeleton from '@/components/skeleton/adPerformance-card-skeleton';
 import {Button} from '@/components/ui/button';
 import {useInfiniteQuery} from '@tanstack/react-query';
@@ -19,16 +20,8 @@ import {
   Clock,
 } from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {
-  CSSProperties,
-  forwardRef,
-  ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import {VirtuosoGrid, VirtuosoHandle} from 'react-virtuoso';
+import {CSSProperties, ReactNode, useMemo, useRef, useState} from 'react';
+import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {adService} from '../../actions/ad.actions';
 import {AdPerformanceNav} from './components/ad-performance-nav';
 
@@ -82,20 +75,6 @@ type ItemProps = {
   style?: CSSProperties;
 };
 
-const gridComponents = {
-  List: forwardRef<HTMLDivElement, ListProps>(
-    ({style, children, className, ...props}, ref) => (
-      <div
-        ref={ref}
-        {...props}
-        className={` grid gap-4 md:grid-cols-2 px-3 ${className ?? ''}`}
-        style={style}>
-        {children}
-      </div>
-    ),
-  ),
-};
-
 export const AdPerformancePage = () => {
   const navigate = useRouter();
 
@@ -106,6 +85,7 @@ export const AdPerformancePage = () => {
   const [showGoUp, setShowGoUp] = useState(false);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
 
   const [mounted, setMounted] = useState(false);
   const lastScrollTop = useRef(0);
@@ -118,6 +98,7 @@ export const AdPerformancePage = () => {
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['user-adPerformance-data', filteredStatus],
     queryFn: ({pageParam = 1}) =>
@@ -139,11 +120,6 @@ export const AdPerformancePage = () => {
 
   console.log('user ad dataa', adData);
 
-  useEffect(() => {
-    // Simulate loading
-    //setTimeout(() => setIsLoading(false), 800);
-  }, []);
-
   const handleMakePayment = (adId: string) => {
     navigate.push(`/payment/${adId}`);
   };
@@ -156,22 +132,17 @@ export const AdPerformancePage = () => {
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
-  // if (isLoading) {
-  //   return <AdPerformanceSkeleton />;
-  // }
-
-  if (status === 'error') {
-    return (
-      <FallbackMessage
-        message="Oops! Something went wrong"
-        buttonText="Back to Home"
-        page="/home"
-      />
-    );
-  }
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="">
       <PageHeader
         title="Ad Performance"
         description="Manage and track your advertisements"
@@ -182,46 +153,67 @@ export const AdPerformancePage = () => {
         setFilteredStatus={setFilteredStatus}
       />
 
-      <div className="flex-1 overflow-hidden">
-        {adData.length === 0 ? (
-          <AdPerformancePlaceholder />
-        ) : (
-          <VirtuosoGrid
-            className="custom-scrollbar hide-scrollbar overflow-y-auto"
-            style={{height: '100%'}}
-            ref={virtuosoRef}
-            onScroll={handleScroll}
-            totalCount={totalCount}
-            data={adData}
-            endReached={() => {
-              if (hasNextPage && !isFetchingNextPage) {
-                fetchNextPage();
-              }
-            }}
-            itemContent={(index, item) => {
-              if (status === 'pending') {
-                return <AdPerformanceCardSkeleton />;
-              }
-              if (!item) {
-                return <AdPerformancePlaceholder />;
-              }
-              return <AdPerformanceCard ad={item} key={item._id} />;
-            }}
-            components={{
-              ...gridComponents,
+      <Virtuoso
+        className="custom-scrollbar hide-scrollbar min-h-screen"
+        ref={virtuosoRef}
+        onScroll={handleScroll}
+        totalCount={Math.ceil(adData.length / 2)} // each row has 2 cards
+        components={{
+          EmptyPlaceholder: () =>
+            status === 'error' ? null : <AdPerformancePlaceholder />,
 
-              // EmptyPlaceholder: () => <AdPerformancePlaceholder />,
-            }}
-          />
-        )}
-      </div>
+          Footer: () =>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
+            ) : null,
+        }}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            handleFetchNext();
+          }
+        }}
+        itemContent={rowIndex => {
+          const leftItem = adData[rowIndex * 2];
+          const rightItem = adData[rowIndex * 2 + 1];
+
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-3 py-2">
+              {/* LEFT CARD */}
+              {status === 'pending' ? (
+                <AdPerformanceCardSkeleton />
+              ) : leftItem ? (
+                <AdPerformanceCard ad={leftItem} key={leftItem._id} />
+              ) : null}
+
+              {/* RIGHT CARD */}
+              {status === 'pending' ? (
+                <AdPerformanceCardSkeleton />
+              ) : rightItem ? (
+                <AdPerformanceCard ad={rightItem} key={rightItem._id} />
+              ) : null}
+            </div>
+          );
+        }}
+      />
 
       {showGoUp && (
         <button
           onClick={() => {
             virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
           }}
-          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
+          className="fixedBottomBtn z-1 fixed bottom-5 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
           <ArrowUp size={20} />
         </button>
       )}

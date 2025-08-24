@@ -113,7 +113,11 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
     setQuotedComment(payload);
     setPost(comment.post as PostFeedProps);
 
-    navigate.push(`/post/${comment.post._id}/reply`);
+    navigate.push(
+      `/discuss/${comment.post.section.toLowerCase()}/${
+        comment.post._id
+      }/reply`,
+    );
   };
 
   const handleEdit = () => {
@@ -307,7 +311,11 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
           </div>
           <div className="flex flex-row gap-2">
             <p>Replying to</p>
-            <Link href={`/post/${comment.post._id}`} className="text-blue-500">
+            <Link
+              href={`/discuss/${comment.post.section.toLowerCase()}/${
+                comment.post._id
+              }`}
+              className="text-blue-500">
               {comment.post.title}
             </Link>
           </div>

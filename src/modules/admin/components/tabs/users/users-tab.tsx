@@ -7,6 +7,8 @@ import {useDebounce} from 'use-debounce';
 import {toast} from '@/components/ui/toast';
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
 
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {UsersSkeleton} from '@/components/skeleton/users.skeleton';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -47,6 +49,7 @@ export const UsersTab: FC<UsersProps> = ({
   const [userActionDialog, setUserActionDialog] = useState(false);
   const [suspensionPeriod, setSuspensionPeriod] = useState('7');
   const [selectedUser, setSelectedUser] = useState<string>('');
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const [userActionType, setUserActionType] = useState<UserActionType>(
     UserActionType.VIEW,
   );
@@ -67,6 +70,7 @@ export const UsersTab: FC<UsersProps> = ({
     isFetching, // Combines isFetching and isFetchingNextPage
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['admin-users-with-post-count', debouncedSearch], // Query key includes debouncedSearch
     queryFn: ({pageParam = 1}) =>
@@ -207,6 +211,14 @@ export const UsersTab: FC<UsersProps> = ({
     setCurrentRole(user.role);
     setRoleManagementDialog(true);
   };
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
 
   return (
     <Fragment>
@@ -235,17 +247,18 @@ export const UsersTab: FC<UsersProps> = ({
           }}
           endReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              handleFetchNext();
             }
           }}
           components={{
-            EmptyPlaceholder: () => (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-app-gray">No users found</p>
-                </CardContent>
-              </Card>
-            ),
+            EmptyPlaceholder: () =>
+              status === 'error' ? null : (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <p className="text-app-gray">No users found</p>
+                  </CardContent>
+                </Card>
+              ),
 
             Header: () => (
               <div className="rounded-md border border-app-border">
@@ -263,10 +276,20 @@ export const UsersTab: FC<UsersProps> = ({
             ),
 
             Footer: () =>
-              isFetchingNextPage ? (
-                <div className="py-4 text-center text-sm text-gray-500">
-                  Loading more...
-                </div>
+              status === 'error' ? (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              ) : isFetchingNextPage ? (
+                <LoadingMore />
+              ) : fetchNextError ? (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
               ) : null,
           }}
         />

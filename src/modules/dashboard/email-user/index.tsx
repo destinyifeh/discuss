@@ -3,18 +3,22 @@
 import {useState} from 'react';
 
 import {PageHeader} from '@/components/app-headers';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import EmailMessageSkeleton from '@/components/skeleton/email-message-skeleton';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
+import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {InputMessage} from '@/modules/components/form-info';
+import {MailUserDto} from '@/types/user.types';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useQuery} from '@tanstack/react-query';
 import {AlertTriangle, Send} from 'lucide-react';
 import {useParams, useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
+import {useUserActions} from '../actions/action-hooks/user.action-hooks';
 import {userService} from '../actions/user.actions';
 
 const formSchema = z.object({
@@ -33,9 +37,9 @@ type emailFormData = z.infer<typeof formSchema>;
 
 export const EmailMessage = () => {
   const {user} = useParams<{user: string}>();
-
+  const {currentUser} = useAuthStore(state => state);
   const navigate = useRouter();
-
+  const {sendMail} = useUserActions();
   const [isSending, setIsSending] = useState(false);
   console.log(user, 'my userr');
 
@@ -44,6 +48,7 @@ export const EmailMessage = () => {
     isLoading,
     error,
     data: userData,
+    refetch,
   } = useQuery({
     queryKey: ['user', user],
     queryFn: () => userService.getUserByUsername(user),
@@ -76,27 +81,11 @@ export const EmailMessage = () => {
   }
 
   if (error?.message === 'User not found') {
-    return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold mb-2">User not found</h2>
-        <Button variant="outline" onClick={() => navigate.push('/home')}>
-          Back to Home
-        </Button>
-      </div>
-    );
+    return <ErrorFeedback showGoBack message="User not found" />;
   }
 
   if (userData?.code !== '200') {
-    return (
-      <div>
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Oops! Something went wrong</h2>
-          <Button variant="outline" onClick={() => navigate.push('/home')}>
-            Back to Home
-          </Button>
-        </div>
-      </div>
-    );
+    return <ErrorFeedback showGoBack showRetry onRetry={refetch} />;
   }
 
   const {username, email} = userData.user;
@@ -111,23 +100,38 @@ export const EmailMessage = () => {
     console.log(data, 'email data');
     setIsSending(true);
     resetFormError();
-    const payload = {
+    const payload: MailUserDto = {
       ...data,
       username: username,
       email: email,
+      senderName: currentUser?.username ?? '',
+      senderEmail: currentUser?.email ?? '',
     };
 
     console.log(payload, 'email payload');
-
-    // Simulate sending email
-    setTimeout(() => {
-      toast.success(
-        `Email sent to ${username.charAt(0).toUpperCase() + username.slice(1)}`,
-      );
-      reset();
-      setIsSending(false);
-      navigate.back();
-    }, 1500);
+    sendMail.mutate(payload, {
+      onSuccess(data, variables, context) {
+        reset();
+        toast.success(
+          `Your email was successfully sent to ${
+            username.charAt(0).toUpperCase() + username.slice(1)
+          } 🎉`,
+        );
+        setTimeout(() => {
+          navigate.back();
+        }, 500);
+      },
+      onError(error, variables, context) {
+        toast.error(
+          `Oops! We couldn’t send your email to ${
+            username.charAt(0).toUpperCase() + username.slice(1)
+          }. Please try again.`,
+        );
+      },
+      onSettled(data, error, variables, context) {
+        setIsSending(false);
+      },
+    });
   };
 
   return (

@@ -2,6 +2,8 @@
 
 import {FC, Fragment, useMemo, useRef, useState} from 'react';
 
+import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
+import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import AdSkeleton from '@/components/skeleton/ad-skeleton';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -49,6 +51,7 @@ export const AdTab: FC<AdProps> = ({
   const [submittingPause, setSubmittingPause] = useState(false);
   const [submittingResume, setSubmittingResume] = useState(false);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const [debouncedSearch] = useDebounce(searchTerm, 500);
@@ -67,6 +70,7 @@ export const AdTab: FC<AdProps> = ({
     isFetching,
     status,
     error,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ['admin-ads', debouncedSearch],
     queryFn: ({pageParam = 1}) =>
@@ -295,6 +299,15 @@ export const AdTab: FC<AdProps> = ({
     }
   };
 
+  const handleFetchNext = async () => {
+    try {
+      setFetchNextError(null);
+      await fetchNextPage();
+    } catch (err) {
+      setFetchNextError('Failed to load more content.');
+    }
+  };
+
   return (
     <Fragment>
       <div className="space-y-4">
@@ -308,23 +321,35 @@ export const AdTab: FC<AdProps> = ({
             Header: () => (
               <h2 className="text-lg font-bold mb-3">Advertisements</h2>
             ),
-            EmptyPlaceholder: () => (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-app-gray">No advertisements found</p>
-                </CardContent>
-              </Card>
-            ),
+            EmptyPlaceholder: () =>
+              status === 'error' ? null : (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <p className="text-app-gray">No advertisements found</p>
+                  </CardContent>
+                </Card>
+              ),
 
-            Footer: () => (
-              <div className="py-12 text-center text-sm text-gray-500">
-                {isFetchingNextPage ? 'Loading more...' : 'No more ads'}
-              </div>
-            ),
+            Footer: () =>
+              status === 'error' ? (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              ) : isFetchingNextPage ? (
+                <LoadingMore />
+              ) : fetchNextError ? (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
+              ) : null,
           }}
           endReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              handleFetchNext();
             }
           }}
           itemContent={(index, ad) => {
@@ -332,13 +357,7 @@ export const AdTab: FC<AdProps> = ({
               return <AdSkeleton />;
             } else {
               if (!ad) {
-                return (
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <p className="text-app-gray">No advertisement found</p>
-                    </CardContent>
-                  </Card>
-                );
+                return null;
               }
 
               return (

@@ -1,4 +1,5 @@
 import api from '@/lib/auth/api';
+import {AdPlacementProps} from '@/types/ad-types';
 import {AxiosResponse} from 'axios';
 import {CreateAdDto} from '../advertise/dto/create-ad.dto';
 
@@ -67,9 +68,12 @@ class AdService {
     return response.data;
   }
 
-  async getBannerAds(section: string) {
+  async getBannerAds(placement: AdPlacementProps, section?: string) {
+    const params: any = {placement};
+
+    if (section) params.section = section;
     try {
-      const response = await api.get(`/ad/banner-ads?section=${section}`);
+      const response = await api.get(`/ad/banner-ads`, {params});
       return response.data;
     } catch (err: any) {
       throw err?.response?.data ?? err;

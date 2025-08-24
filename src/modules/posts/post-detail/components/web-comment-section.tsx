@@ -96,7 +96,7 @@ export const WebCommentSection = ({
         )}>
         <div className="p-4">
           <div className="flex justify-between items-center mb-3">
-            <p className="font-semibold">Add a comment</p>
+            <p className="font-semibold">Reply</p>
             <Button
               variant="ghost"
               size="sm"
@@ -181,7 +181,7 @@ export const WebCommentSection = ({
             )}
 
             <Textarea
-              placeholder="Add a comment..."
+              placeholder="What's on your mind?"
               value={comment}
               onChange={e => setComment(e.target.value)}
               className="max-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"

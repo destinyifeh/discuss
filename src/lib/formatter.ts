@@ -1,4 +1,5 @@
 import {formatDistanceToNow} from 'date-fns';
+import moment from 'moment';
 
 export function extractLinks(text: string) {
   const urlRegex =
@@ -264,4 +265,19 @@ export const urlFormatter = (targetUrl: string) => {
     targetUrl = 'https://' + targetUrl;
   }
   return targetUrl; // return the formatted URL
+};
+
+export const getTimeAgo = (date: string) => {
+  const duration = moment.duration(moment().diff(moment(date)));
+  const minutes = duration.asMinutes();
+  const hours = duration.asHours();
+  const days = duration.asDays();
+
+  if (minutes < 60) {
+    return `${Math.floor(minutes)}m ago`;
+  } else if (hours < 24) {
+    return `${Math.floor(hours)}h ago`;
+  } else {
+    return `${Math.floor(days)}d ago`;
+  }
 };

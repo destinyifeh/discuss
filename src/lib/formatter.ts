@@ -260,6 +260,20 @@ export function normalizeDomain(input?: string | null): string {
   }
 }
 
+export function normalizeDomainLink(input?: string | null): string {
+  if (!input) return '';
+  const withProto = /^[a-z][a-z0-9+.-]*:\/\//i.test(input)
+    ? input
+    : `https://${input}`;
+
+  try {
+    const url = new URL(withProto);
+    return url.origin.replace(/^https?:\/\//i, 'https://'); // force https://domain.com
+  } catch {
+    return withProto;
+  }
+}
+
 export const urlFormatter = (targetUrl: string) => {
   if (!/^https?:\/\//i.test(targetUrl)) {
     targetUrl = 'https://' + targetUrl;
@@ -281,3 +295,7 @@ export const getTimeAgo = (date: string) => {
     return `${Math.floor(days)}d ago`;
   }
 };
+
+export function capitalizeName(name: string): string {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}

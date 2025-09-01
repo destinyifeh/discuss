@@ -3,6 +3,7 @@
 import {HomeDashboardSkeleton} from '@/components/skeleton/home-dashboard-skeleton';
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {useQuery} from '@tanstack/react-query';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect} from 'react';
@@ -11,7 +12,7 @@ import {getGoogleUserRequestAction} from '../../actions';
 export const GoogleCallbackPage = () => {
   const router = useRouter();
   const setUser = useAuthStore(s => s.setUser);
-
+  const {item} = useGlobalStore(state => state);
   const searchParams = useSearchParams();
   const token = searchParams.get('token') as string;
 
@@ -40,7 +41,9 @@ export const GoogleCallbackPage = () => {
 
     if (googleUser) {
       setUser(googleUser.user);
-      router.replace('/home');
+      const storedNext = localStorage.getItem('nextRoute') as string;
+      localStorage.removeItem('nextRoute');
+      router.replace(storedNext);
     }
   }, [error, googleUser, router, setUser]);
 

@@ -99,6 +99,10 @@ api.interceptors.response.use(
         }
         processQueue(refreshErr);
         //logout
+
+        if (typeof window !== 'undefined') {
+          return (window.location.href = '/login?reason=sessionExpired');
+        }
         redirect('/login?reason=sessionExpired');
 
         //return Promise.reject(err);

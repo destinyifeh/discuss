@@ -109,7 +109,7 @@ export const AdPlanPage = () => {
     } = previewData;
 
     // Only the basic plan requires section
-    const requiresSection = plan === 'basic';
+    const requiresSection = plan === 'basic' || plan === 'professional';
     const isCommonInvalid =
       !title || !targetUrl || !duration || (requiresSection && !section);
 
@@ -257,26 +257,31 @@ export const AdPlanPage = () => {
                 </div>
 
                 {/* <div className="mb-5 md:mb-0">
-              <h2 className="text-lg font-bold mb-4">Target Section</h2>
-              <Select
-                value={previewData.category}
-                onValueChange={value => {
-                  console.log(value, 'valueee');
+                  <h2 className="text-lg font-bold mb-4">Target Section</h2>
+                  <Select
+                    value={previewData.section}
+                    onValueChange={value => {
+                      setPreviewData(prev => ({...prev, section: value}));
+                    }}>
+                    <SelectTrigger className="w-full md:w-[300px] form-input">
+                      <SelectValue placeholder="Select section" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Sections.map(section => (
+                        <SelectItem key={section.id} value={section.name}>
+                          {section.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <input
+                    type="text"
+                    className="w-full p-2 border rounded-md form-input"
+                    placeholder="All Section"
+                    disabled
+                  />
+                </div> */}
 
-                  setPreviewData(prev => ({...prev, category: value}));
-                }}>
-                <SelectTrigger className="w-full md:w-[300px] form-input">
-                  <SelectValue placeholder="Select section" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Sections.map(category => (
-                    <SelectItem key={category.id} value={category.name}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
                 {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:w-[300px] md:mb-0">
                     <h2 className="text-lg font-bold mb-4">

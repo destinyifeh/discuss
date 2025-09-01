@@ -43,7 +43,7 @@ import {WebCommentSection} from './components/web-comment-section';
 export const PostDetailPage = () => {
   const {currentUser} = useAuthStore(state => state);
   const {theme} = useGlobalStore(state => state);
-  const {postId} = useParams<{postId: string}>();
+  const {slug} = useParams<{slug: string}>();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
   const isMobile = useMediaQuery({maxWidth: 767});
@@ -69,15 +69,16 @@ export const PostDetailPage = () => {
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const {createComment, updateCommentRequest} = usePostActions();
 
-  const shouldQuery = !!postId;
+  const shouldQuery = !!slug;
   const {
     isLoading,
     error,
     data: post,
+    status: postStatus,
     refetch: refetchPost,
   } = useQuery({
-    queryKey: ['post-details', postId],
-    queryFn: () => postService.getPostRequestAction(postId),
+    queryKey: ['post-details', slug],
+    queryFn: () => postService.getPostBySlugRequestAction(slug),
     retry: 1,
     enabled: shouldQuery,
   });
@@ -95,15 +96,16 @@ export const PostDetailPage = () => {
     error: commentErr,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['comment-feed-posts', postId],
+    queryKey: ['comment-feed-posts', post?._id],
     queryFn: ({pageParam = 1}) =>
-      postService.getCommentFeeds(postId, pageParam, 10),
+      postService.getCommentFeeds(post?._id, pageParam, 10),
     initialPageParam: 1,
     getNextPageParam: lastPage => {
       const {page, pages} = lastPage.pagination;
       return page < pages ? page + 1 : undefined;
     },
     placeholderData: previousData => previousData,
+    enabled: !!post?._id,
   });
 
   const commentsData = useMemo(() => {
@@ -123,7 +125,7 @@ export const PostDetailPage = () => {
       onSuccess(data, variables, context) {
         console.log(data, 'comment data');
         queryClient.invalidateQueries({
-          queryKey: ['comment-feed-posts', postId],
+          queryKey: ['comment-feed-posts', post._id],
         });
         queryClient.invalidateQueries({
           queryKey: ['unreadCount'],
@@ -160,7 +162,7 @@ export const PostDetailPage = () => {
       onSuccess(data, variables, context) {
         console.log(data, 'update comment data');
         queryClient.invalidateQueries({
-          queryKey: ['comment-feed-posts', postId],
+          queryKey: ['comment-feed-posts', post._id],
         });
         // Clear input and close comment section if open on mobile
         setComment('');
@@ -286,7 +288,7 @@ export const PostDetailPage = () => {
 
       if (isEditing) {
         updateComment({
-          postId: postId,
+          postId: post._id,
           content: comment.trim(),
           images: images,
           commentId: editComment?._id as string,
@@ -296,7 +298,7 @@ export const PostDetailPage = () => {
       }
 
       addComment({
-        postId: postId,
+        postId: post._id,
         content: comment.trim(),
         images: images,
         quotedComment: quotePayload,
@@ -379,7 +381,7 @@ export const PostDetailPage = () => {
   };
 
   const onComment = () => {
-    navigate.push(`/post/${postId}/reply`);
+    navigate.push(`/post/${post._id}/reply`);
   };
 
   const getButtonLabel = () => {
@@ -392,13 +394,24 @@ export const PostDetailPage = () => {
   const allowMainCom = false;
   const mob = true;
 
-  if (error?.message === 'Post not found' || !postId) {
+  if (error?.message === 'Post not found' || !slug) {
     return (
       <ErrorFeedback
         showGoBack
         showRetry
         onRetry={refetchPost}
         message="Post not found"
+      />
+    );
+  }
+
+  if (postStatus === 'error') {
+    return (
+      <ErrorFeedback
+        showRetry
+        onRetry={refetchPost}
+        message="We encountered an unexpected error. Please try again"
+        variant="minimal"
       />
     );
   }
@@ -494,7 +507,7 @@ export const PostDetailPage = () => {
                   <h2 className="font-bold text-lg">All replies</h2>
                 </div>
 
-                {post.commentsClosed && (
+                {post?.commentsClosed && (
                   <div className="text-sm text-gray-600 flex items-center gap-2 justify-center my-3">
                     <LockIcon className="w-4 h-4 text-gray-500" />
                     This discussion has been locked. No new comments can be
@@ -610,7 +623,7 @@ export const PostDetailPage = () => {
         />
       </div>
 
-      {!post.commentsClosed && (
+      {!post?.commentsClosed && (
         <>
           {/* Mobile comment section - slides up from bottom */}
           {!mob ? (

@@ -15,11 +15,9 @@ import React, {useState} from 'react';
 import {formatTimeAgo2} from '@/lib/formatter';
 import {
   EllipsisVertical,
-  Flag,
   Heart,
   MessageSquare,
   MoreHorizontal,
-  Pencil,
   ThumbsDown,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -58,9 +56,12 @@ const CommentCard = ({
 
         queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
       },
-      onError(error, variables, context) {
+      onError(error: any, variables, context) {
         console.log(error, 'err');
-        toast.error('Oops! Something went wrong, try again');
+        toast.error(
+          error?.response?.data?.message ??
+            'Oops! Something went wrong, try again',
+        );
       },
     });
   };
@@ -72,9 +73,12 @@ const CommentCard = ({
 
         queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
       },
-      onError(error, variables, context) {
+      onError(error: any, variables, context) {
         console.log(error, 'err');
-        toast.error('Oops! Something went wrong, try again');
+        toast.error(
+          error?.response?.data?.message ??
+            'Oops! Something went wrong, try again',
+        );
       },
     });
   };
@@ -215,6 +219,7 @@ const CommentCard = ({
   };
 
   const isLiked = comment.likedBy.includes(currentUser?._id as string);
+  const isCommentedUser = comment.commentBy?._id === currentUser?._id;
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
@@ -248,18 +253,22 @@ const CommentCard = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => handleReport(comment._id)}
-                  className="cursor-pointer">
-                  <Flag size={16} className="mr-2" />
-                  Report comment
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleEdit}
-                  className="cursor-pointer">
-                  <Pencil size={16} className="mr-2" />
-                  Edit
-                </DropdownMenuItem>
+                {!isCommentedUser && (
+                  <DropdownMenuItem
+                    onClick={() => handleReport(comment._id)}
+                    className="cursor-pointer justify-center">
+                    {/* <Flag size={16} className="mr-2" /> */}
+                    Report
+                  </DropdownMenuItem>
+                )}
+                {isCommentedUser && (
+                  <DropdownMenuItem
+                    onClick={handleEdit}
+                    className="cursor-pointer justify-center">
+                    {/* <Pencil size={16} className="mr-2" /> */}
+                    Edit
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

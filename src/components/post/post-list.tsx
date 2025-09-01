@@ -815,12 +815,12 @@ export const SectionPlaceholder = (props: {section: string}) => {
   const navigate = useRouter();
   return (
     <div className="p-8 text-center">
-      <h2 className="text-xl font-bold mb-2">No posts yet</h2>
+      <h2 className="text-xl font-bold mb-2">No discussions yet</h2>
       <p className="text-app-gray">Be the first to post in this section!</p>
       <Button
         className="mt-4 bg-app hover:bg-app/90"
         onClick={() => navigate.push(`/create-post?section=${props.section}`)}>
-        Create Post
+        Start Discussion
       </Button>
     </div>
   );

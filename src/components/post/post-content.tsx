@@ -1,6 +1,7 @@
 import {extractLinks, extractLinks2} from '@/lib/formatter';
+import React from 'react';
 
-export const PostContent = ({content}: {content: string}) => {
+export const PostContent3 = ({content}: {content: string}) => {
   return (
     <div
       className="text-base leading-relaxed"
@@ -14,6 +15,13 @@ export const PostContent = ({content}: {content: string}) => {
     </div>
   );
 };
+export const PostContent = React.memo(({content}: {content: string}) => {
+  return (
+    <div className="text-base leading-relaxed" style={{whiteSpace: 'pre-wrap'}}>
+      <div dangerouslySetInnerHTML={{__html: extractLinks2(content)}} />
+    </div>
+  );
+});
 
 export const PostContent2 = ({content}: {content: string}) => {
   return (

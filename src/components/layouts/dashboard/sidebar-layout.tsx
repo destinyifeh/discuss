@@ -281,12 +281,14 @@ export const SidebarLayoutLeft = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem asChild>
-                <Link href="/profile" className="flex items-center">
+                <Link
+                  href={`/profile/${currentUser?.username}`}
+                  className="flex items-center">
                   <User className="mr-2 h-4 w-4" />
                   <span className="">Profile</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="">
+              {/* <DropdownMenuItem asChild className="">
                 <Link href="/profile/edit">
                   <span className="">Edit Profile</span>
                 </Link>
@@ -295,7 +297,7 @@ export const SidebarLayoutLeft = () => {
                 <Link href="/settings">
                   <span className="">Settings</span>
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />

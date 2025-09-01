@@ -79,10 +79,10 @@ export const AdPreviewPage = ({
         previewAdData.duration as DurationValue,
         previewAdData.plan,
       ),
-      // section:
-      //   previewAdData.plan === 'enterprise'
-      //     ? 'enterprise'
-      //     : previewAdData.section.toLowerCase(),
+      section:
+        previewAdData.plan === 'enterprise'
+          ? 'enterprise'
+          : previewAdData.section.toLowerCase(),
     };
     console.log(payload, 'previewDataa');
     createAd.mutate(payload, {
@@ -92,7 +92,7 @@ export const AdPreviewPage = ({
         setIsAdSubmitted(true);
       },
       onError(error, variables, context) {
-        toast.success('Oops! Something went wrong, please try again.');
+        toast.error('Oops! Something went wrong, please try again.');
       },
       onSettled(data, error, variables, context) {
         setIsSubmitting(false);

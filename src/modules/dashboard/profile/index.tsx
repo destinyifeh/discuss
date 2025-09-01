@@ -13,7 +13,7 @@ import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {usePostStore} from '@/hooks/stores/use-post-store';
-import {normalizeDomain} from '@/lib/formatter';
+import {normalizeDomain, urlFormatter} from '@/lib/formatter';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {ArrowUp, Calendar, Link as LinkIcon, Settings} from 'lucide-react';
 import moment from 'moment';
@@ -257,7 +257,9 @@ export const ProfilePage = () => {
                             <div className="flex items-center gap-2">
                               <LinkIcon size={16} />
                               <Link
-                                href={currentUser?.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                href={urlFormatter(currentUser?.website)}
                                 className="text-app">
                                 {normalizeDomain(currentUser?.website)}
                               </Link>

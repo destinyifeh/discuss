@@ -5,17 +5,20 @@ import {create} from 'zustand';
 type States = {
   showBottomTab: boolean;
   theme: ThemeProps;
+  item: any;
 };
 
 type Actions = {
   setShowBottomTab: (state: boolean) => void;
   setTheme: (theme: ThemeProps) => void;
   getStoredTheme: () => ThemeProps;
+  setItem: (item: any) => void;
 };
 
 const initialState: States = {
   showBottomTab: true,
   theme: defaultTheme,
+  item: null,
 };
 
 export const useGlobalStore = create<States & Actions>(set => ({
@@ -28,6 +31,9 @@ export const useGlobalStore = create<States & Actions>(set => ({
     console.log('themeColor:', theme);
     localStorage.setItem('theme', theme.type);
     set({theme: theme});
+  },
+  setItem: (item: any) => {
+    set({item: item});
   },
   getStoredTheme() {
     const storedTheme = localStorage.getItem('theme');

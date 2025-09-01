@@ -14,6 +14,7 @@ import {Input} from '@/components/ui/input';
 import {toast} from '@/components/ui/toast';
 import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -35,7 +36,7 @@ export const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const {setUser, sessionExpiredAction} = useAuthStore(state => state);
-
+  const {setItem} = useGlobalStore(state => state);
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -127,6 +128,7 @@ export const LoginPage = () => {
   };
 
   const handleGoogleLogin = async () => {
+    localStorage.setItem('nextRoute', next);
     setIsGoogleLoading(true);
     window.location.href = GOOGLE_SIGNIN_URL;
   };
@@ -295,10 +297,6 @@ export const LoginPage = () => {
                     ? 'Signing in with Google...'
                     : 'Sign in with Google'}
                 </Button>
-
-                <div className="text-center text-sm text-app-gray">
-                  <span>For demo, use: johndoe / password</span>
-                </div>
               </form>
             </CardContent>
             <CardFooter className="flex justify-center">

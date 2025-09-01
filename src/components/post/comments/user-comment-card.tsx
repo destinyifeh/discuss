@@ -313,7 +313,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
             <p>Replying to</p>
             <Link
               href={`/discuss/${comment.post.section.toLowerCase()}/${
-                comment.post._id
+                comment.post.slug
               }`}
               className="text-blue-500">
               {comment.post.title}

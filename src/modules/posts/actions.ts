@@ -60,8 +60,21 @@ class PostService {
   }
 
   async getPostRequestAction(postId: string) {
-    const response = await api.get(`/posts/${postId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/posts/${postId}`);
+      return response.data;
+    } catch (err: any) {
+      throw err?.response?.data ?? err;
+    }
+  }
+
+  async getPostBySlugRequestAction(slug: string) {
+    try {
+      const response = await api.get(`/posts/details/${slug}`);
+      return response.data;
+    } catch (err: any) {
+      throw err?.response?.data ?? err;
+    }
   }
 
   async getPostCommentsCountRequestAction(postId: string) {

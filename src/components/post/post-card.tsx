@@ -12,7 +12,6 @@ import {
   LinkIcon,
   MessageSquare,
   MoreHorizontal,
-  Pencil,
   Share2,
   UserCheck,
   UserPlus,
@@ -60,7 +59,7 @@ const PostCard = ({
   const [expanded, setExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [likesCount, setLikesCount] = useState<number>(
-    post.likedBy.length || 0,
+    post?.likedBy.length || 0,
   );
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
   const [liked, setLiked] = useState(
@@ -113,9 +112,12 @@ const PostCard = ({
           queryKey: ['public-user-posts', 'posts'],
         });
       },
-      onError(error, variables, context) {
+      onError(error: any, variables, context) {
         console.log(error, 'err');
-        toast.error('Oops! Something went wrong, try again');
+        toast.error(
+          error?.response?.data?.message ??
+            'Oops! Something went wrong, try again',
+        );
       },
     });
   };
@@ -157,9 +159,12 @@ const PostCard = ({
           toast.success('Bookmark removed');
         }
       },
-      onError(error, variables, context) {
+      onError(error: any, variables, context) {
         console.log(error, 'err');
-        toast.error('Oops! Something went wrong, try again');
+        toast.error(
+          error?.response?.data?.message ??
+            'Oops! Something went wrong, try again',
+        );
       },
     });
   };
@@ -239,13 +244,13 @@ const PostCard = ({
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(`/post/${post._id}`);
+    navigate.push(`/discuss/${post.section.toLowerCase()}/${post.slug}`);
   };
 
   const navigateToUserProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(`/profile/${post.user.username}`);
+    navigate.push(`/user/${post.user.username}`);
   };
 
   const shouldTruncate = post.content.length > 100;
@@ -258,7 +263,7 @@ const PostCard = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const postUrl = `${window.location.origin}/discuss/${post.section}/${post._id}`;
+    const postUrl = `${window.location.origin}/discuss/${post.section}/${post.slug}`;
     try {
       copy(postUrl);
       toast.success('Link Copied', {
@@ -333,8 +338,8 @@ const PostCard = ({
                         <>
                           <DropdownMenuItem
                             onClick={handleEditPost}
-                            className="cursor-pointer">
-                            <Pencil size={16} className="mr-2 font-bold" />
+                            className="cursor-pointer justify-center">
+                            {/* <Pencil size={16} className="mr-2 font-bold" /> */}
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -379,7 +384,7 @@ const PostCard = ({
           </div>
 
           <Link
-            href={`/discuss/${post.section.toLowerCase()}/${post._id}`}
+            href={`/discuss/${post.section.toLowerCase()}/${post.slug}`}
             className="block">
             <div className="mt-1">
               {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}
@@ -392,7 +397,9 @@ const PostCard = ({
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    navigate.push(`/post/${post._id}`);
+                    navigate.push(
+                      `/discuss/${post.section.toLowerCase()}/${post.slug}`,
+                    );
                   }}>
                   See more
                 </Button>

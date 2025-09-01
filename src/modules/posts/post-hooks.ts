@@ -12,9 +12,6 @@ export const usePostActions = () => {
     mutationFn: postService.updatePostRequestAction,
   });
 
-  const get = useMutation({
-    mutationFn: postService.updatePostRequestAction,
-  });
   const likePost = useMutation({
     mutationFn: postService.likePostRequestAction,
   });
@@ -42,7 +39,6 @@ export const usePostActions = () => {
   return {
     createPostRequest: create,
     updatePostRequest: update,
-    getPostsRequest: get,
     createComment: createComment,
     updateCommentRequest: updateComment,
     likePostRequest: likePost,

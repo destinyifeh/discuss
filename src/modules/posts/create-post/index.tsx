@@ -18,6 +18,7 @@ import {toast} from '@/components/ui/toast';
 import {Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
+import {capitalizeName} from '@/lib/formatter';
 import {SectionName} from '@/types/section';
 import {useQuery} from '@tanstack/react-query';
 import {ChevronLeft, FileImage, Trash2, X} from 'lucide-react';
@@ -79,7 +80,7 @@ export const CreatePostPage = () => {
       setIsEditing(true);
       setPostToEdit(post);
       setContent(post.content);
-      setSelectedSection(post.section as SectionName);
+      setSelectedSection(capitalizeName(post.section) as SectionName);
       const originals = post.images || [];
       setOriginalImages(originals);
       setImageUrls(originals.map((img: any) => img.secure_url));

@@ -113,7 +113,7 @@ const PostCard = ({
         });
       },
       onError(error: any, variables, context) {
-        console.log(error, 'err');
+        console.log(error, 'error');
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',

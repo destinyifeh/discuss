@@ -9,7 +9,13 @@ import {Sections} from '@/constants/data';
 import {useParams} from 'next/navigation';
 import {useEffect, useState} from 'react';
 
-export const SectionPage = () => {
+type SectionPageProps = {
+  params: {
+    section: string;
+  };
+};
+export const SectionPage = ({params}: SectionPageProps) => {
+  //  const {section} = params;
   const {section: theSection} = useParams<{section: string}>();
   const [mounted, setMounted] = useState(false);
   const section = Sections.find(cat => cat.name.toLowerCase() === theSection);

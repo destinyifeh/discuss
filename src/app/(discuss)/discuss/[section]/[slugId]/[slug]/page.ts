@@ -2,12 +2,17 @@ import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
 import {Metadata} from 'next';
 
-type PageProps = {
-  params: {section: string; slugId: string; slug: string};
-};
+interface PageProps {
+  params: {
+    section: string;
+    slugId: string;
+    slug: string;
+  };
+}
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
-  const {section, slugId, slug} = params; // ✅ no await
+  // ✅ no await here
+  const {section, slugId, slug} = params;
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/details/${slugId}`,
@@ -29,12 +34,12 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
     openGraph: {
       title: post.title,
       description: post.content?.slice(0, 120),
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/${section}/${slugId}/${slug}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/discuss/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [
         {
           url:
-            post.images[0]?.secure_url ??
+            post.images?.[0]?.secure_url ??
             `${process.env.NEXT_PUBLIC_APP_URL}/assets/default.jpg`,
           width: 1200,
           height: 630,
@@ -48,7 +53,7 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
       title: post.title,
       description: post.content?.slice(0, 120),
       images: [
-        post.images[0]?.secure_url ??
+        post.images?.[0]?.secure_url ??
           `${process.env.NEXT_PUBLIC_APP_URL}/assets/default.jpg`,
       ],
     },

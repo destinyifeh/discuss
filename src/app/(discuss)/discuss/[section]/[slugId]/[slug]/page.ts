@@ -1,21 +1,17 @@
 import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
-
 import {Metadata} from 'next';
 
-type Props = {
+export async function generateMetadata({
+  params,
+}: {
   params: {section: string; slugId: string; slug: string};
-};
-
-export async function generateMetadata({params}: Props): Promise<Metadata> {
+}): Promise<Metadata> {
   const {section, slugId, slug} = params;
 
-  // if you need to fetch post data:
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/details/${slugId}`,
-    {
-      next: {revalidate: 60}, // optional
-    },
+    {next: {revalidate: 60}},
   );
 
   if (!res.ok) {
@@ -38,7 +34,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
       images: [
         {
           url:
-            post.images[0]?.secure_url ??
+            post.images?.[0]?.secure_url ??
             `${process.env.NEXT_PUBLIC_APP_URL}/assets/default.jpg`,
           width: 1200,
           height: 630,
@@ -52,7 +48,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
       title: post.title,
       description: post.content?.slice(0, 120),
       images: [
-        post.images[0]?.secure_url ??
+        post.images?.[0]?.secure_url ??
           `${process.env.NEXT_PUBLIC_APP_URL}/assets/default.jpg`,
       ],
     },

@@ -2,16 +2,12 @@ import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
 import {Metadata} from 'next';
 
-interface PageProps {
-  params: {
-    section: string;
-    slugId: string;
-    slug: string;
-  };
-}
-
-export async function generateMetadata({params}: PageProps): Promise<Metadata> {
-  // ✅ no await here
+// Next.js will automatically know params = { section: string; slugId: string; slug: string }
+export async function generateMetadata({
+  params,
+}: {
+  params: {section: string; slugId: string; slug: string};
+}): Promise<Metadata> {
   const {section, slugId, slug} = params;
 
   const res = await fetch(

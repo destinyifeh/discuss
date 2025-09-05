@@ -9,12 +9,12 @@ import {cookies} from 'next/headers';
 
 export const removeCookieAccessToken = async () => {
   const cookieStore = await cookies();
-  cookieStore.delete(ACCESS_TOKEN);
+  cookieStore.delete(ACCESS_TOKEN as string);
 };
 
 /* ------------ refresh‑token cookie ------------ */
 
 export const removeCookieRefreshToken = async () => {
   const cookieStore = await cookies();
-  cookieStore.delete(REFRESH_TOKEN);
+  cookieStore.delete(REFRESH_TOKEN as string);
 };

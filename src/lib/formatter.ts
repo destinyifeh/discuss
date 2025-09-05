@@ -113,26 +113,9 @@ export function extractLinks9(text: string): string {
         return `<div style="line-height:0.7; margin:0 0 8px 0;">&nbsp;</div>`;
       }
 
-      // YouTube link handling
-      //   const ytMatch = trimmedLine.match(
-      //     /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w\-]{11})/,
-      //   );
-
       const ytFullMatch = trimmedLine.match(
         /((?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]{11}(?:\S+)?)/,
       );
-
-      //   if (ytMatch) {
-      //     const videoId = ytMatch[1];
-      //     const textBefore = originalLine.replace(ytMatch[0], '').trim();
-
-      //     return (
-      //       (textBefore
-      //         ? `<div style="line-height:1.4; margin:0 0 4px 0; padding:0;">${textBefore}</div>`
-      //         : '') +
-      //       `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="margin:0;padding:0;border:0;display:block;line-height:0;height:315px;"></iframe>`
-      //     );
-      //   }
 
       // Normal text with URLs
 

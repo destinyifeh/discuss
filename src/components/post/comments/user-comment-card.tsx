@@ -114,8 +114,8 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
     setPost(comment.post as PostFeedProps);
 
     navigate.push(
-      `/discuss/${comment.post.section.toLowerCase()}/${
-        comment.post._id
+      `/discuss/${comment.post.section.toLowerCase()}/${comment.post.slugId}/${
+        comment.post.slug
       }/reply`,
     );
   };
@@ -140,7 +140,12 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
     } else {
       setPostComment(comment);
     }
-    navigate.push(`/post/${comment.post._id}/reply`);
+    //navigate.push(`/post/${comment.post._id}/reply`);
+    navigate.push(
+      `/discuss/${comment.post.section.toLowerCase()}/${comment.post.slugId}/${
+        comment.post.slug
+      }/reply`,
+    );
   };
 
   const renderCommentContent = () => {
@@ -258,11 +263,17 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
 
   const isLiked = comment.likedBy.includes(currentUser?._id as string);
 
+  const navigateToUserProfile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate.push(`/user/${comment.commentBy.username}`);
+  };
+
   console.log(checkUser, 'theUserr');
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
-        <Avatar className="w-10 h-10">
+        <Avatar className="w-10 h-10" onClick={navigateToUserProfile}>
           <AvatarImage src={comment.commentBy.avatar} />
           <AvatarFallback className="capitalize text-app text-3xl">
             {comment.commentBy.username.charAt(0)}
@@ -273,7 +284,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Link
-                href={`/profile/${comment.commentBy.username}`}
+                href={`/user/${comment.commentBy.username}`}
                 className="font-bold hover:underline capitalize">
                 {comment.commentBy.username}
               </Link>
@@ -313,8 +324,8 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
             <p>Replying to</p>
             <Link
               href={`/discuss/${comment.post.section.toLowerCase()}/${
-                comment.post.slug
-              }`}
+                comment.post.slugId
+              }/${comment.post.slug}`}
               className="text-blue-500">
               {comment.post.title}
             </Link>

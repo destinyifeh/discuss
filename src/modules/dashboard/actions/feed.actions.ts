@@ -5,6 +5,7 @@ class FeedService {
   async getHomePostFeeds(
     page = 1,
     limit = 10,
+    activeTab?: string,
     search?: string,
     pattern: string = '4, 9, 15',
     adPlan: AdPlan = 'enterprise',
@@ -15,6 +16,7 @@ class FeedService {
     if (search) params.search = search;
     if (pattern) params.pattern = pattern;
     if (adPlan) params.adPlan = adPlan;
+    if (activeTab) params.activeTab = activeTab;
 
     const response = await api.get(`/feeds`, {params});
     return response.data?.data;

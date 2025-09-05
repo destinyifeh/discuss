@@ -195,7 +195,7 @@ export const HomePostList = () => {
   console.log(currentUser, 'currentooo');
   const [mounted, setMounted] = useState(false);
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
-
+  console.log(activeTab, 'activtabbb');
   const {
     data, // This 'data' contains { pages: [], pageParams: [] }
     fetchNextPage,
@@ -206,8 +206,9 @@ export const HomePostList = () => {
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['home-feed-posts'],
-    queryFn: ({pageParam = 1}) => feedService.getHomePostFeeds(pageParam, 10),
+    queryKey: ['home-feed-posts', activeTab],
+    queryFn: ({pageParam = 1}) =>
+      feedService.getHomePostFeeds(pageParam, 10, activeTab),
     initialPageParam: 1,
     getNextPageParam: lastPage => {
       const {page, pages} = lastPage.pagination;
@@ -290,7 +291,7 @@ export const HomePostList = () => {
             <Fragment>
               <MobileNavigation />
 
-              {allowTab && (
+              {!allowTab && (
                 <Tabs
                   defaultValue="for-you"
                   value={activeTab}
@@ -312,7 +313,7 @@ export const HomePostList = () => {
                   </div>
                 </Tabs>
               )}
-              <div className="px-0 py-3 border-b border-app-border lg:hidden md:mt-7">
+              <div className="px-0 py-3 mt-3 border-b border-app-border lg:hidden md:mt-7">
                 <div className="px-4">
                   <h2 className="font-semibold mb-2 mt-0">Discuss</h2>
                   <div className="flex flex-wrap gap-2 mb-2">
@@ -769,7 +770,7 @@ export const PostPlaceholder = ({tab}: {tab: string}) => {
           </p>
           <button
             className="bg-app hover:bg-app/90 text-white px-5 py-2 rounded-full text-sm font-medium"
-            onClick={() => navigate.push('/explore')}>
+            onClick={() => navigate.push('/users')}>
             Find people to follow
           </button>
         </>

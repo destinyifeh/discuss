@@ -22,7 +22,7 @@ import {capitalizeName} from '@/lib/formatter';
 import {SectionName} from '@/types/section';
 import {useQuery} from '@tanstack/react-query';
 import {ChevronLeft, FileImage, Trash2, X} from 'lucide-react';
-import {useRouter, useSearchParams} from 'next/navigation';
+import {useParams, useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {postService} from '../actions';
 import {PostDto, UpdatePostDto} from '../dto/post-dto';
@@ -47,20 +47,20 @@ export const CreatePostPage = () => {
 
   const navigate = useRouter();
   const location = useSearchParams();
-
+  const {slugId} = useParams<{slugId: string}>();
   const {createPostRequest, updatePostRequest} = usePostActions();
-  const postId = location.get('postId');
+  const postId = location.get('discussId');
   const theSection = location.get('section');
   console.log(theSection, 'section001');
-  const shouldQuery = !!postId;
+  const shouldQuery = !!slugId;
   const {
     isLoading,
     error,
     data: post,
     refetch: refetchPost,
   } = useQuery({
-    queryKey: ['edit-post', postId],
-    queryFn: () => postService.getPostRequestAction(postId as string),
+    queryKey: ['edit-post', slugId],
+    queryFn: () => postService.getPostBySlugIdRequestAction(slugId as string),
     retry: 1,
     enabled: shouldQuery,
   });
@@ -87,7 +87,7 @@ export const CreatePostPage = () => {
     }
   }, [post]);
 
-  if (isEditing && (error?.message === 'Post not found' || !postId)) {
+  if (isEditing && (error?.message === 'Post not found' || !slugId)) {
     return (
       <ErrorFeedback
         showGoBack
@@ -127,7 +127,7 @@ export const CreatePostPage = () => {
     updatePostRequest.mutate(dataToUpdate, {
       onSuccess(data, variables, context) {
         console.log(data, 'post data');
-        queryClient.invalidateQueries({queryKey: ['edit-post', postId]});
+        queryClient.invalidateQueries({queryKey: ['edit-post', slugId]});
         toast.success('Your post has been updated successfully.');
         navigate.push(`/discuss/${dataToUpdate.section}`);
       },
@@ -216,7 +216,7 @@ export const CreatePostPage = () => {
         title: content.split(' ').slice(0, 10).join(' ') + '...',
         images: images,
         section: selectedSection.toLowerCase() as SectionName,
-        postId: postId as string,
+        postId: post._id as string,
         removedImageIds: removedImageIds,
       });
     } else {
@@ -245,7 +245,7 @@ export const CreatePostPage = () => {
               <ChevronLeft />
             </Button>
             <h1 className="text-xl font-bold">
-              {isEditing ? 'Edit Post' : 'Discuss'}
+              {isEditing ? 'Edit' : 'Discuss'}
             </h1>
           </div>
           <Button

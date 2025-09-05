@@ -24,9 +24,12 @@ import React, {useState} from 'react';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
 import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
+import {userService} from '@/modules/dashboard/actions/user.actions';
 import {postService} from '@/modules/posts/actions';
 import {usePostActions} from '@/modules/posts/post-hooks';
-import {useQuery} from '@tanstack/react-query';
+import {UserProps} from '@/types/user.types';
+import {useMutation, useQuery} from '@tanstack/react-query';
+import ErrorFeedback from '../feedbacks/error-feedback';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
 import {
@@ -54,8 +57,8 @@ const PostCard = ({
   hideMenu = false,
 }: PostCardProps) => {
   const {theme} = useGlobalStore(state => state);
-  const {currentUser} = useAuthStore(state => state);
-
+  const {currentUser, setUser} = useAuthStore(state => state);
+  const [isPending, setIsPending] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [likesCount, setLikesCount] = useState<number>(
@@ -66,18 +69,17 @@ const PostCard = ({
     currentUser ? (post?.likedBy || []).includes(currentUser._id) : false,
   );
   const {likePostRequest, bookmarkPostRequest} = usePostActions();
-  const [isFollowing, setIsFollowing] = useState(
-    currentUser
-      ? (currentUser.following || []).includes(post?.user._id)
-      : false,
-  );
+
+  const {mutate} = useMutation({
+    mutationFn: userService.followUserRequestAction,
+  });
 
   const {reportPost} = useReportActions();
 
-  const shouldQuery = !!post._id;
+  const shouldQuery = !!post?._id;
   const {error, data: commentData} = useQuery({
-    queryKey: ['post-comments-count', post._id],
-    queryFn: () => postService.getPostCommentsCountRequestAction(post._id),
+    queryKey: ['post-comments-count', post?._id],
+    queryFn: () => postService.getPostCommentsCountRequestAction(post?._id),
     retry: 1,
     enabled: shouldQuery,
   });
@@ -226,11 +228,39 @@ const PostCard = ({
   const handleFollow = () => {
     if (!currentUser || post.user._id === currentUser._id) return;
 
-    setIsFollowing(!isFollowing);
-    toast.success(isFollowing ? 'Unfollowed' : 'Following', {
-      description: isFollowing
-        ? `You unfollowed ${post.user.username}`
-        : `You're now following ${post.user.username}`,
+    setIsPending(true);
+    mutate(post.user._id, {
+      onSuccess(response, variables, context) {
+        console.log(response, 'datameee');
+
+        const {
+          currentUserFollowers,
+          currentUserFollowings,
+          message,
+          isFollowing,
+          following,
+          followers,
+        } = response.data;
+
+        setUser({
+          ...(currentUser as UserProps),
+          following: currentUserFollowings,
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ['home-feed-posts', 'following'],
+        });
+
+        toast.success(message);
+      },
+
+      onError(error, variables, context) {
+        console.log(error, 'err');
+        toast.error('Oops! Something went wrong, please try again.');
+      },
+      onSettled(data, error, variables, context) {
+        setIsPending(false);
+      },
     });
   };
 
@@ -238,13 +268,17 @@ const PostCard = ({
     e.preventDefault();
     e.stopPropagation();
 
-    navigate.push(`/create-post?postId=${post._id}`);
+    navigate.push(
+      `/discuss/${post.section.toLowerCase()}/${post.slugId}/${post.slug}/edit`,
+    );
   };
 
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(`/discuss/${post.section.toLowerCase()}/${post.slug}`);
+    navigate.push(
+      `/discuss/${post.section.toLowerCase()}/${post.slugId}/${post.slug}`,
+    );
   };
 
   const navigateToUserProfile = (e: React.MouseEvent) => {
@@ -253,17 +287,17 @@ const PostCard = ({
     navigate.push(`/user/${post.user.username}`);
   };
 
-  const shouldTruncate = post.content.length > 100;
+  const shouldTruncate = post?.content.length > 100;
   const displayContent =
     shouldTruncate && !expanded && !isInDetailView
-      ? post.content.slice(0, 100) + '...'
-      : post.content;
+      ? post?.content.slice(0, 100) + '...'
+      : post?.content;
 
   const handleCopyLink = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const postUrl = `${window.location.origin}/discuss/${post.section}/${post.slug}`;
+    const postUrl = `${window.location.origin}/discuss/${post.section}/${post.slugId}/${post.slug}`;
     try {
       copy(postUrl);
       toast.success('Link Copied', {
@@ -278,7 +312,18 @@ const PostCard = ({
     }
   };
 
-  const isLiked = post.likedBy.includes(currentUser?._id as string);
+  const isLiked = post?.likedBy.includes(currentUser?._id as string);
+
+  console.log(post, 'the postss');
+
+  if (!post || post === null) {
+    return <ErrorFeedback showGoBack message="Post not found" />;
+  }
+
+  const isFollowing = currentUser?.following?.includes(
+    post.user._id?.toString(),
+  );
+
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background ">
       <div className="flex gap-3">
@@ -384,7 +429,9 @@ const PostCard = ({
           </div>
 
           <Link
-            href={`/discuss/${post.section.toLowerCase()}/${post.slug}`}
+            href={`/discuss/${post.section.toLowerCase()}/${post.slugId}/${
+              post.slug
+            }`}
             className="block">
             <div className="mt-1">
               {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}

@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
   const {pathname} = req.nextUrl;
   const token = req.cookies.get(ACCESS_TOKEN as string)?.value;
   const guestRoute = isGuestOnly(pathname);
-  // console.log(token, 'tone midd');
+  console.log(token, 'tone midd');
   //console.log('Cookies in middleware:', req.cookies);
   // ──────────────── LOGGED‑IN user ────────────────
   if (token && guestRoute) {

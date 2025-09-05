@@ -47,6 +47,7 @@ export type ImageProps = {
 export interface PostFeedProps {
   _id: string;
   slug: string;
+  slugId: string;
   user: PostFeedAuthor;
   title: string;
   content: string;

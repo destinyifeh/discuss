@@ -28,8 +28,12 @@ import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
 import {ChangePasswordErrorMessages} from '@/constants/messages';
+import {ALLOW_DEACTIVATION} from '@/constants/settings';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {changePasswordRequestAction} from '@/modules/auth/actions';
+import {
+  changePasswordRequestAction,
+  deleteUserRequest,
+} from '@/modules/auth/actions';
 import {InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -72,13 +76,17 @@ export const SettingsPage = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const {logout} = useAuthStore(state => state);
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const {theme, setTheme} = useTheme();
-
+  const {currentUser} = useAuthStore(state => state);
   const {mutate: chagePass} = useMutation({
     mutationFn: changePasswordRequestAction,
+  });
+  const {mutate: deleteAccounnt} = useMutation({
+    mutationFn: deleteUserRequest,
   });
 
   useEffect(() => {
@@ -177,6 +185,31 @@ export const SettingsPage = () => {
   };
   const handleReportAbuse = () => {
     toast.success('Report submitted. Our team will review it shortly.');
+  };
+
+  const handleAccountDeletion = () => {
+    setIsDeleting(true);
+
+    deleteAccounnt(currentUser?._id as string, {
+      onSuccess(response) {
+        console.log(response, 'respoo');
+
+        toast.success('Account deleted.');
+        setShowDeleteDialog(false);
+        logout();
+      },
+      onError(error: any, variables, context) {
+        const {data} = error?.response ?? {};
+        console.log(data, 'error data');
+
+        toast.error(
+          'Account could not be deleted due to a server error. Please try again in a few minutes.',
+        );
+      },
+      onSettled(data, error, variables, context) {
+        setIsDeleting(false);
+      },
+    });
   };
 
   return (
@@ -364,42 +397,46 @@ export const SettingsPage = () => {
             Danger Zone
           </h2>
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">Deactivate Account</h3>
-                <p className="text-sm text-muted-foreground">
-                  Temporarily disable your account
-                </p>
-              </div>
-              <AlertDialog
-                open={showDeactivateDialog}
-                onOpenChange={setShowDeactivateDialog}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="text-red-500 border-red-500 hover:bg-red-50">
-                    Deactivate
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Deactivate Account</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to deactivate your account? This
-                      will temporarily disable your account and hide your
-                      profile from other users. You can reactivate it anytime by
-                      logging back in.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-500 hover:bg-red-600 dark:text-white">
-                      Yes, Deactivate
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+            {ALLOW_DEACTIVATION && (
+              <>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">Deactivate Account</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Temporarily disable your account
+                    </p>
+                  </div>
+                  <AlertDialog
+                    open={showDeactivateDialog}
+                    onOpenChange={setShowDeactivateDialog}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-red-500 border-red-500 hover:bg-red-50">
+                        Deactivate
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Deactivate Account</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to deactivate your account? This
+                          will temporarily disable your account and hide your
+                          profile from other users. You can reactivate it
+                          anytime by logging back in.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-500 hover:bg-red-600 dark:text-white">
+                          Yes, Deactivate
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </>
+            )}
 
             <div className="flex justify-between items-center">
               <div>
@@ -425,9 +462,13 @@ export const SettingsPage = () => {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-500 hover:bg-red-600 dark:text-white">
-                      Yes, Delete Forever
+                    <AlertDialogCancel disabled={isDeleting}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-500 hover:bg-red-600 dark:text-white"
+                      onClick={handleAccountDeletion}>
+                      {isDeleting ? 'Deleting...' : 'Yes, Delete Forever'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

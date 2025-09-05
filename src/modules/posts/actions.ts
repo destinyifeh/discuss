@@ -77,6 +77,24 @@ class PostService {
     }
   }
 
+  async getViewPostBySlugIdRequestAction(slugId: string) {
+    try {
+      const response = await api.get(`/posts/view-post-details/${slugId}`);
+      return response.data;
+    } catch (err: any) {
+      throw err?.response?.data ?? err;
+    }
+  }
+
+  async getPostBySlugIdRequestAction(slugId: string) {
+    try {
+      const response = await api.get(`/posts/post-details/${slugId}`);
+      return response.data;
+    } catch (err: any) {
+      throw err?.response?.data ?? err;
+    }
+  }
+
   async getPostCommentsCountRequestAction(postId: string) {
     const response = await api.get(`/posts/comment-count/${postId}`);
     return response.data;

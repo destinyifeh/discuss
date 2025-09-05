@@ -53,6 +53,7 @@ export const ContentTab: FC<ContentProps> = ({
   const [selectedContent, setSelectedContent] = useState<string>('');
   const [commentStatus, setCommentStatus] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [thePost, setThePost] = useState<any>();
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const [contentAction, setContentAction] = useState<
     'delete' | 'edit' | 'close'
@@ -99,12 +100,14 @@ export const ContentTab: FC<ContentProps> = ({
     contentId: string,
     action: 'delete' | 'edit' | 'close',
     commentsClosed?: boolean,
+    post?: any,
   ) => {
     setSelectedContent(contentId);
     setContentAction(action);
     setContentActionReason('');
     setContentActionDialog(true);
     setCommentStatus(commentsClosed as boolean);
+    setThePost(post);
   };
 
   const handleContentAction = () => {
@@ -140,7 +143,12 @@ export const ContentTab: FC<ContentProps> = ({
       });
     } else if (contentAction === 'edit') {
       setContentActionDialog(false);
-      navigate.push(`/create-post?postId=${selectedContent}`);
+
+      navigate.push(
+        `/discuss/${thePost.section.toLowerCase()}/${thePost.slugId}/${
+          thePost.slug
+        }/edit`,
+      );
     } else {
       closePostCommentRequest.mutate(selectedContent, {
         onSuccess(data, variables, context) {
@@ -299,7 +307,11 @@ export const ContentTab: FC<ContentProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        navigate.push(`/discuss/${post.section}/${post._id}`)
+                        navigate.push(
+                          `/discuss/${post.section.toLowerCase()}/${
+                            post.slugId
+                          }/${post.slug}`,
+                        )
                       }>
                       View
                     </Button>
@@ -308,7 +320,12 @@ export const ContentTab: FC<ContentProps> = ({
                       size="sm"
                       className="text-blue-500"
                       onClick={() =>
-                        handleOpenContentActionDialog(post._id, 'edit')
+                        handleOpenContentActionDialog(
+                          post._id,
+                          'edit',
+                          post.commentsClosed,
+                          post,
+                        )
                       }>
                       <Edit size={14} className="mr-1" /> Edit
                     </Button>
@@ -321,6 +338,7 @@ export const ContentTab: FC<ContentProps> = ({
                           post._id,
                           'close',
                           post.commentsClosed,
+                          post,
                         )
                       }>
                       {post.commentsClosed === false

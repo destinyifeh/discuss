@@ -44,6 +44,7 @@ export const PostDetailPage = () => {
   const {currentUser} = useAuthStore(state => state);
   const {theme} = useGlobalStore(state => state);
   const {slug} = useParams<{slug: string}>();
+  const {slugId} = useParams<{slugId: string}>();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
   const isMobile = useMediaQuery({maxWidth: 767});
@@ -68,8 +69,8 @@ export const PostDetailPage = () => {
   const [quotedUserImage, setQuotedUserImage] = useState('');
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const {createComment, updateCommentRequest} = usePostActions();
-
-  const shouldQuery = !!slug;
+  console.log(slugId, 'slugId', slug);
+  const shouldQuery = !!slugId;
   const {
     isLoading,
     error,
@@ -77,8 +78,8 @@ export const PostDetailPage = () => {
     status: postStatus,
     refetch: refetchPost,
   } = useQuery({
-    queryKey: ['post-details', slug],
-    queryFn: () => postService.getPostBySlugRequestAction(slug),
+    queryKey: ['post-details', slugId],
+    queryFn: () => postService.getViewPostBySlugIdRequestAction(slugId),
     retry: 1,
     enabled: shouldQuery,
   });
@@ -394,7 +395,7 @@ export const PostDetailPage = () => {
   const allowMainCom = false;
   const mob = true;
 
-  if (error?.message === 'Post not found' || !slug) {
+  if (error?.message === 'Post not found' || !slugId || !slug) {
     return (
       <ErrorFeedback
         showGoBack

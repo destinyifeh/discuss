@@ -4,15 +4,15 @@ import {PostDetailPage} from '@/modules/posts/post-detail';
 import {Metadata} from 'next';
 
 type Props = {
-  params: {section: string; postId: string};
+  params: {section: string; slugId: string; slug: string};
 };
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
-  const {section, postId} = await params;
+  const {section, slugId, slug} = await params;
 
   // if you need to fetch post data:
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/${postId}`,
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/details/${slugId}`,
     {
       next: {revalidate: 60}, // optional
     },
@@ -33,7 +33,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     openGraph: {
       title: post.title,
       description: post.content?.slice(0, 120),
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/${section}/${postId}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [
         {

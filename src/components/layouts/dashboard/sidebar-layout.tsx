@@ -104,7 +104,8 @@ export const SidebarLayoutLeft = () => {
       path: '/advertise/ad-performance',
     },
 
-    ...(currentUser?.role === Role.SUPER_ADMIN
+    ...(currentUser?.role === Role.SUPER_ADMIN ||
+    currentUser?.role === Role.ADMIN
       ? [
           {
             label: 'Admin',

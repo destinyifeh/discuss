@@ -98,7 +98,7 @@ export async function updateUserRequest(
 export async function deleteUserRequest(
   userId: string,
 ): Promise<AxiosResponse> {
-  return await api.delete(`/auth/${userId}`);
+  return await api.delete(`/user/${userId}`);
 }
 
 export async function changePasswordRequestAction(
@@ -107,7 +107,7 @@ export async function changePasswordRequestAction(
   return await api.patch('/auth/change-password', data);
 }
 
-export async function getGoogleUserRequestAction(token: string) {
-  const response = await api.get(`/auth/google/user/${token}`);
+export async function getGoogleUser() {
+  const response = await api.get(`/auth/google-user`);
   return response.data;
 }

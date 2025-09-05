@@ -25,6 +25,7 @@ import {usePostActions} from '../post-hooks';
 
 export const CreateCommentPage = () => {
   const {postId} = useParams<{postId: string}>();
+  const {slugId} = useParams<{slugId: string}>();
 
   const {currentUser} = useAuthStore(state => state);
   const navigate = useRouter();
@@ -84,7 +85,7 @@ export const CreateCommentPage = () => {
 
       if (postComment?.content) {
         updateComment({
-          postId: postId,
+          postId: thePost?._id as string,
           content: comment.trim(),
           images: images,
           commentId: postComment?._id as string,
@@ -286,12 +287,19 @@ export const CreateCommentPage = () => {
     return isSubmitting ? 'Replying...' : 'Reply';
   };
 
+  const getTitle = () => {
+    if (postComment?.content) {
+      return 'Edit Reply';
+    }
+    return 'Reply';
+  };
+
   return (
     <div>
       <div className="flex flex-col h-full">
         {/* Header */}
 
-        <PageHeader title="Reply" />
+        <PageHeader title={getTitle()} />
 
         {/* Original post */}
         <PostCard post={thePost as PostFeedProps} showActions={false} />

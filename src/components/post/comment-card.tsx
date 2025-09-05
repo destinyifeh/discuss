@@ -218,12 +218,18 @@ const CommentCard = ({
     }
   };
 
+  const navigateToUserProfile = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate.push(`/user/${comment.commentBy.username}`);
+  };
+
   const isLiked = comment.likedBy.includes(currentUser?._id as string);
   const isCommentedUser = comment.commentBy?._id === currentUser?._id;
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
-        <Avatar className="w-10 h-10">
+        <Avatar className="w-10 h-10" onClick={navigateToUserProfile}>
           <AvatarImage src={comment.commentBy.avatar} />
           <AvatarFallback className="capitalize text-app text-3xl">
             {comment.commentBy.username.charAt(0)}
@@ -234,7 +240,7 @@ const CommentCard = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Link
-                href={`/profile/${comment.commentBy.username}`}
+                href={`/user/${comment.commentBy.username}`}
                 className="font-bold hover:underline capitalize">
                 {comment.commentBy.username}
               </Link>

@@ -39,10 +39,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Individual posts
     ...posts.map(
-      (post: {slug: string; section: string; updatedAt?: string}) => ({
+      (post: {
+        slug: string;
+        section: string;
+        slugId: string;
+        updatedAt?: string;
+      }) => ({
         url: `${
           process.env.NEXT_PUBLIC_APP_URL
-        }/discuss/${post.section.toLowerCase()}/${post.slug}`,
+        }/discuss/${post.section.toLowerCase()}/${post.slugId}/${post.slug}`,
         lastModified: new Date(post.updatedAt || Date.now()),
         changeFrequency: 'daily',
         priority: 0.6,

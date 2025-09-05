@@ -1,21 +1,17 @@
 import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
-
 import {Metadata} from 'next';
 
-type Props = {
+type PageProps = {
   params: {section: string; slugId: string; slug: string};
 };
 
-export async function generateMetadata({params}: Props): Promise<Metadata> {
-  const {section, slugId, slug} = params;
+export async function generateMetadata({params}: PageProps): Promise<Metadata> {
+  const {section, slugId, slug} = params; // ✅ no await
 
-  // if you need to fetch post data:
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/details/${slugId}`,
-    {
-      next: {revalidate: 60}, // optional
-    },
+    {next: {revalidate: 60}},
   );
 
   if (!res.ok) {

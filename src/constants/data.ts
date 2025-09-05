@@ -1,8 +1,8 @@
-import {AdCTA, AdProps} from '@/types/ad-types';
+import {AdCTA} from '@/types/ad-types';
 import {CommentProps, PostProps} from '@/types/post-item.type';
 import {Section} from '@/types/section';
 
-export const mockAds: AdProps[] = [
+export const mockAds: any[] = [
   {
     id: 'summer-sale',
     author: {

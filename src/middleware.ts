@@ -5,11 +5,10 @@ import {isGuestOnly} from './lib/auth/paths';
 
 export function middleware(req: NextRequest) {
   const {pathname} = req.nextUrl;
-  const token = req.cookies.get(
-    process.env.NEXT_PUBLIC_ACCESS_TOKEN_KEY as string,
-  )?.value;
+  const token = req.cookies.get('encrypted_access_token')?.value;
   const guestRoute = isGuestOnly(pathname);
   console.log(token, 'tone midd');
+  console.log(req.cookies, 'dez midd');
   //console.log('Cookies in middleware:', req.cookies);
   // ──────────────── LOGGED‑IN user ────────────────
   if (token && guestRoute) {

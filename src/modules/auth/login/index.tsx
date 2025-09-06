@@ -15,6 +15,7 @@ import {toast} from '@/components/ui/toast';
 import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {setSecureToken} from '@/lib/server/cookies';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -82,9 +83,8 @@ export const LoginPage = () => {
     loginUser(credentials, {
       onSuccess(response) {
         console.log(response, 'respoo');
-        const {user, accessToken} = response?.data ?? {};
-        document.cookie = `encrypted_access_token=${accessToken}; Path=/; SameSite=Lax; Secure; Max-Age=900`;
-
+        const {user, accessToken, refreshToken} = response?.data ?? {};
+        setSecureToken(accessToken, refreshToken);
         if (!user) {
           toast.error('Login failed: incomplete response');
           return;

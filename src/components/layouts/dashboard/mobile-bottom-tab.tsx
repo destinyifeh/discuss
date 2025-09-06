@@ -32,7 +32,7 @@ export const MobileBottomTab = () => {
             <Search size={24} />
           </Link>
           <Link
-            href="/create-post"
+            href="/discuss"
             className={cn('p-2', isActive('/create-post') && 'text-app')}>
             <PenSquare size={24} />
           </Link>

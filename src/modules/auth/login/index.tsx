@@ -89,11 +89,13 @@ export const LoginPage = () => {
           toast.error('Login failed: incomplete response');
           return;
         }
-        reset();
-        setUser(user);
 
-        toast.success('Login successful!');
-        router.replace(next);
+        setUser(user);
+        setTimeout(() => {
+          reset();
+          toast.success('Login successful!');
+          router.replace(next);
+        }, 500);
       },
       onError(error: any, variables, context) {
         console.log(error, 'error');
@@ -105,7 +107,9 @@ export const LoginPage = () => {
         toast.error('Oops! Something went wrong, please try again');
       },
       onSettled(data, error, variables, context) {
-        setIsSubmitting(false);
+        setTimeout(() => {
+          setIsSubmitting(false);
+        }, 500);
       },
     });
   };

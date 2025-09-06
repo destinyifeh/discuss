@@ -445,7 +445,9 @@ const PostCard = ({
                     e.preventDefault();
                     e.stopPropagation();
                     navigate.push(
-                      `/discuss/${post.section.toLowerCase()}/${post.slug}`,
+                      `/discuss/${post.section.toLowerCase()}/${post.slugId}/${
+                        post.slug
+                      }`,
                     );
                   }}>
                   See more

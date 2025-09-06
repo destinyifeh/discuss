@@ -82,7 +82,8 @@ export const LoginPage = () => {
     loginUser(credentials, {
       onSuccess(response) {
         console.log(response, 'respoo');
-        const {user} = response?.data ?? {};
+        const {user, accessToken} = response?.data ?? {};
+        document.cookie = `encrypted_access_token=${accessToken}; Path=/; SameSite=Lax; Secure; Max-Age=900`;
 
         if (!user) {
           toast.error('Login failed: incomplete response');

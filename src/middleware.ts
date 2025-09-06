@@ -1,18 +1,18 @@
 // middleware.ts
 import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
+import {ACCESS_TOKEN} from './constants/api-resources';
 import {isGuestOnly} from './lib/auth/paths';
 
 export function middleware(req: NextRequest) {
   const {pathname} = req.nextUrl;
-  const token = req.cookies.get('encrypted_access_token')?.value;
+  const token = req.cookies.get(ACCESS_TOKEN as string)?.value;
   const guestRoute = isGuestOnly(pathname);
   console.log(token, 'tone midd');
   console.log(
     'Cookies in middleware:',
     req.cookies.get('encrypted_access_token')?.value,
   );
-  console.log(guestRoute, 'tonyy32');
   // ──────────────── LOGGED‑IN user ────────────────
   if (token && guestRoute) {
     // Already authenticated ➜ redirect away from guest pages

@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://discuss-server-bh9l.onrender.com/api/:path*', // Render backend
+      },
+    ];
+  },
 };
 
 export default nextConfig;

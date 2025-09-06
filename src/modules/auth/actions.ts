@@ -31,10 +31,6 @@ export async function registerRequestAction(
   });
 }
 
-export async function loginRequestAction2(data: LoginRequestProps) {
-  return await api.post('/auth/login', data);
-}
-
 export async function loginRequestAction(data: LoginRequestProps) {
   return await api.post('/auth/login', data);
 }

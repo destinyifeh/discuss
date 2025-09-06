@@ -8,7 +8,11 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get('encrypted_access_token')?.value;
   const guestRoute = isGuestOnly(pathname);
   console.log(token, 'tone midd');
-  console.log('Cookies in middleware:', req.cookies);
+  console.log(
+    'Cookies in middleware:',
+    req.cookies.get('encrypted_access_token')?.value,
+  );
+  console.log(guestRoute, 'tonyy32');
   // ──────────────── LOGGED‑IN user ────────────────
   if (token && guestRoute) {
     // Already authenticated ➜ redirect away from guest pages

@@ -5,6 +5,7 @@ import {
   REFRESH_TOKEN,
 } from '@/constants/api-resources';
 import axios from 'axios';
+import {cookies} from 'next/headers';
 import {NextRequest, NextResponse} from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -21,8 +22,9 @@ export async function POST(req: NextRequest) {
     console.log(data, 'restooo22data');
     const res = NextResponse.json(data);
     console.log(res, 'restooo22');
+    const cookie = await cookies();
     // Set cookies for access & refresh tokens
-    res.cookies.set(ACCESS_TOKEN as string, accessToken, {
+    cookie.set(ACCESS_TOKEN as string, accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
       path: '/',
     });
 
-    res.cookies.set(REFRESH_TOKEN as string, refreshToken, {
+    cookie.set(REFRESH_TOKEN as string, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',

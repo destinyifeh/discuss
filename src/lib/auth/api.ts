@@ -90,23 +90,23 @@ api.interceptors.response.use(
 
       isRefreshing = true;
       try {
-        // const {data} = await axios.post(
-        //   `${API_BASE_URL}/auth/refresh-token`,
-        //   {},
-        //   {withCredentials: true},
-        // );
-
-        // 🔹 Call Next.js refresh route (not backend directly)
-        const refresh = await axios.post(
-          `${
-            typeof window !== 'undefined' ? window.location.origin : ''
-          }/api/routes/auth/refresh`,
+        const {data} = await axios.post(
+          `${API_BASE_URL}/auth/refresh-token`,
           {},
           {withCredentials: true},
         );
+
+        // 🔹 Call Next.js refresh route (not backend directly)
+        // const refresh = await axios.post(
+        //   `${
+        //     typeof window !== 'undefined' ? window.location.origin : ''
+        //   }/api/routes/auth/refresh`,
+        //   {},
+        //   {withCredentials: true},
+        // );
         // await callRefresh();
 
-        console.log('Refreshed:', refresh.data);
+        console.log('Refreshed:', data);
 
         console.log(orig, 'dataanewwwhereee');
 

@@ -8,45 +8,59 @@ export async function POST(req: NextRequest) {
 
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, body, {
-      withCredentials: true, // forward cookies
+      withCredentials: true, // forward cookies from backend
     });
 
-    // axios parses JSON automatically
+    // Axios automatically parses JSON
     const data = response.data;
 
-    // Get cookies from backend response
+    // Get Set-Cookie headers from backend
     const cookies = response.headers['set-cookie'];
     console.log(cookies, 'cookies from backend');
 
-    // Forward response + cookies to client
     const res = NextResponse.json(data);
 
-    // if (cookies) {
-    //   // ✅ Forward each cookie individually
-    //   (Array.isArray(cookies) ? cookies : [cookies]).forEach(cookie => {
-    //     console.log(cookie, 'my cookieeee');
-    //     res.headers.append('Set-Cookie', cookie);
-    //   });
-    // }
+    if (cookies) {
+      const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
 
-    (Array.isArray(cookies) ? cookies : [cookies]).forEach((cookie: any) => {
-      const [cookiePair, ...attributes] = cookie.split(';');
-      const [name, value] = cookiePair.split('=');
+      cookieArray.forEach(cookieStr => {
+        console.log(cookieStr, 'raw cookie');
 
-      res.cookies.set(name.trim(), value, {
-        path: '/',
-        httpOnly: attributes.includes('HttpOnly'),
-        secure: attributes.includes('Secure'),
-        sameSite: attributes
-          .find((attr: any) => attr.includes('SameSite'))
-          ?.split('=')[1] as any,
-        maxAge: Number(
-          attributes
-            .find((attr: any) => attr.includes('Max-Age'))
-            ?.split('=')[1],
-        ),
+        // Split cookie string into name=value and attributes
+        const [cookiePair, ...attributes] = cookieStr.split(';');
+        const [name, value] = cookiePair.split('=');
+        console.log(name, 'raw cookie22', value);
+
+        // Parse attributes
+        const httpOnly = attributes.some(attr =>
+          attr.toLowerCase().includes('httponly'),
+        );
+        const secure = attributes.some(attr =>
+          attr.toLowerCase().includes('secure'),
+        );
+        const sameSiteAttr = attributes.find(attr =>
+          attr.toLowerCase().includes('samesite'),
+        );
+        const sameSite = sameSiteAttr
+          ? (sameSiteAttr.split('=')[1] as 'lax' | 'strict' | 'none')
+          : 'lax';
+        const maxAgeAttr = attributes.find(attr =>
+          attr.toLowerCase().includes('max-age'),
+        );
+        const maxAge = maxAgeAttr
+          ? Number(maxAgeAttr.split('=')[1])
+          : undefined;
+
+        // Set cookie in Next.js response
+        res.cookies.set(name.trim(), value, {
+          httpOnly,
+          secure,
+          sameSite,
+          maxAge,
+          path: '/',
+        });
       });
-    });
+    }
 
     return res;
   } catch (err: any) {

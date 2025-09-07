@@ -22,6 +22,21 @@ const api: AxiosInstance = axios.create({
 });
 
 /* ------------------------------------------------------------------ */
+/* Refresh + logout helpers that bypass baseURL                       */
+/* ------------------------------------------------------------------ */
+async function callRefresh() {
+  return axios.post(
+    '/api/auth/refresh', // 👈 Next.js route, not backend
+    {},
+    {withCredentials: true},
+  );
+}
+
+async function callLogout() {
+  return axios.post('/api/auth/logout', {}, {withCredentials: true});
+}
+
+/* ------------------------------------------------------------------ */
 /* 2 . REQUEST – attach access token                                   */
 /* ------------------------------------------------------------------ */
 api.interceptors.request.use(
@@ -75,13 +90,23 @@ api.interceptors.response.use(
 
       isRefreshing = true;
       try {
-        const {data} = await axios.post(
-          `${API_BASE_URL}/auth/refresh-token`,
+        // const {data} = await axios.post(
+        //   `${API_BASE_URL}/auth/refresh-token`,
+        //   {},
+        //   {withCredentials: true},
+        // );
+
+        // 🔹 Call Next.js refresh route (not backend directly)
+        const refresh = await axios.post(
+          `${
+            typeof window !== 'undefined' ? window.location.origin : ''
+          }/api/routes/auth/refresh`,
           {},
           {withCredentials: true},
         );
+        // await callRefresh();
 
-        console.log(data, 'dataa refr');
+        console.log('Refreshed:', refresh.data);
 
         console.log(orig, 'dataanewwwhereee');
 
@@ -99,7 +124,7 @@ api.interceptors.response.use(
         }
         processQueue(refreshErr);
         //logout
-
+        // await callLogout();
         if (typeof window !== 'undefined') {
           return (window.location.href = '/login?reason=sessionExpired');
         }

@@ -18,8 +18,10 @@ import {cn} from '@/lib/utils';
 import {getUnreadNotificationsCounntRequestAction} from '@/modules/dashboard/notifications/actions';
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden';
 import {useQuery} from '@tanstack/react-query';
+import axios from 'axios';
 import {Bell, BookmarkIcon, Home, LogOut, Search, User} from 'lucide-react';
 import Link from 'next/link';
+import {toast} from 'sonner';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -39,8 +41,18 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
 
   const isActive = (path: string) => location === path;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      const res = await axios.post('/api/routes/auth/logout');
+      console.log(res, 'restooo');
+      toast.success('Successfully logged out.');
+      router.push('/login');
+      // logout();
+    } catch (err) {
+      toast.error(
+        'Something went wrong while logging you out. Please try again.',
+      );
+    }
   };
 
   // Get Technology section for the resources section

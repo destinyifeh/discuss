@@ -4,7 +4,7 @@ import {
   removeCookieAccessToken,
   removeCookieRefreshToken,
 } from '@/lib/server/cookies';
-import {AxiosResponse} from 'axios';
+import axios, {AxiosResponse} from 'axios';
 import {redirect} from 'next/navigation';
 import {
   LoginRequestProps,
@@ -33,6 +33,9 @@ export async function registerRequestAction(
 
 export async function loginRequestAction(data: LoginRequestProps) {
   return await api.post('/auth/login', data);
+}
+export async function loginRequestAction2(data: LoginRequestProps) {
+  return await axios.post('/api/routes/auth/login', data);
 }
 
 export async function logoutRequest() {

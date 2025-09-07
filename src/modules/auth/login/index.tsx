@@ -15,7 +15,6 @@ import {toast} from '@/components/ui/toast';
 import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import {setSecureToken} from '@/lib/server/cookies';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -24,7 +23,7 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
-import {loginRequestAction} from '../actions';
+import {loginRequestAction, loginRequestAction2} from '../actions';
 const formSchema = z.object({
   username: z.string().trim().min(1, {message: 'Please enter username'}),
 
@@ -47,6 +46,9 @@ export const LoginPage = () => {
 
   const {mutate: loginUser} = useMutation({
     mutationFn: loginRequestAction,
+  });
+  const {mutate: loginUser2} = useMutation({
+    mutationFn: loginRequestAction2,
   });
 
   useEffect(() => {
@@ -80,22 +82,20 @@ export const LoginPage = () => {
     setIsSubmitting(true);
     resetFormError();
 
-    loginUser(credentials, {
+    loginUser2(credentials, {
       onSuccess(response) {
         console.log(response, 'respoo');
         const {user, accessToken, refreshToken} = response?.data ?? {};
-        setSecureToken(accessToken, refreshToken);
+        // setSecureToken(accessToken, refreshToken);
         if (!user) {
           toast.error('Login failed: incomplete response');
           return;
         }
 
         setUser(user);
-        setTimeout(() => {
-          reset();
-          toast.success('Login successful!');
-          router.replace(next);
-        }, 500);
+        reset();
+        toast.success('Login successful!');
+        router.replace(next);
       },
       onError(error: any, variables, context) {
         console.log(error, 'error');
@@ -107,9 +107,7 @@ export const LoginPage = () => {
         toast.error('Oops! Something went wrong, please try again');
       },
       onSettled(data, error, variables, context) {
-        setTimeout(() => {
-          setIsSubmitting(false);
-        }, 500);
+        setIsSubmitting(false);
       },
     });
   };

@@ -21,12 +21,32 @@ export async function POST(req: NextRequest) {
     // Forward response + cookies to client
     const res = NextResponse.json(data);
 
-    if (cookies) {
-      // ✅ Forward each cookie individually
-      (Array.isArray(cookies) ? cookies : [cookies]).forEach(cookie => {
-        res.headers.append('Set-Cookie', cookie);
+    // if (cookies) {
+    //   // ✅ Forward each cookie individually
+    //   (Array.isArray(cookies) ? cookies : [cookies]).forEach(cookie => {
+    //     console.log(cookie, 'my cookieeee');
+    //     res.headers.append('Set-Cookie', cookie);
+    //   });
+    // }
+
+    (Array.isArray(cookies) ? cookies : [cookies]).forEach((cookie: any) => {
+      const [cookiePair, ...attributes] = cookie.split(';');
+      const [name, value] = cookiePair.split('=');
+
+      res.cookies.set(name.trim(), value, {
+        path: '/',
+        httpOnly: attributes.includes('HttpOnly'),
+        secure: attributes.includes('Secure'),
+        sameSite: attributes
+          .find((attr: any) => attr.includes('SameSite'))
+          ?.split('=')[1] as any,
+        maxAge: Number(
+          attributes
+            .find((attr: any) => attr.includes('Max-Age'))
+            ?.split('=')[1],
+        ),
       });
-    }
+    });
 
     return res;
   } catch (err: any) {

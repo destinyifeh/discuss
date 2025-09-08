@@ -99,7 +99,6 @@ api.interceptors.response.use(
         }
         processQueue(refreshErr);
         //logout
-        // await callLogout();
         if (typeof window !== 'undefined') {
           return (window.location.href = '/login?reason=sessionExpired');
         }

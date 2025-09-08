@@ -10,7 +10,6 @@ export const GUEST_ONLY = [
   '/forgot-password',
   '/reset-password',
   '/login/google/callback',
-  '/api/routes/auth/login',
 ];
 
 /** Returns true if the current pathname matches any guest‑only route */

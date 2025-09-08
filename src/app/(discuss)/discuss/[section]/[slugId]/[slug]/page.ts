@@ -1,3 +1,4 @@
+import {API_BASE_URL} from '@/constants/api-resources';
 import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
 import {Metadata} from 'next';
@@ -15,12 +16,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const {section, slugId, slug} = params;
 
-  const res = await fetch(
-    `https://discuss-mu-three.vercel.app/posts/details/${slugId}`,
-    {
-      next: {revalidate: 60},
-    },
-  );
+  const res = await fetch(`${API_BASE_URL}/posts/post-details/${slugId}`, {
+    next: {revalidate: 60},
+  });
 
   if (!res.ok) {
     return {

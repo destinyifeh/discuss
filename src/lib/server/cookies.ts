@@ -66,6 +66,7 @@ export async function loginRequestAction3(data: LoginRequestProps) {
     httpOnly: true,
     path: '/',
     maxAge: 2 * 60,
+    sameSite: 'none',
   });
   cookieStore.set({
     name: REFRESH_TOKEN as string,
@@ -73,6 +74,7 @@ export async function loginRequestAction3(data: LoginRequestProps) {
     httpOnly: true,
     path: '/',
     maxAge: 3 * 60,
+    sameSite: 'none',
   });
 
   return {user};

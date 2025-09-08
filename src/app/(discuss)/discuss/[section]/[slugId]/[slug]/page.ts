@@ -1,20 +1,24 @@
 import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
-
 import {Metadata} from 'next';
 
-type Props = {
-  params: {section: string; slugId: string; slug: string};
+type PageParams = {
+  section: string;
+  slugId: string;
+  slug: string;
 };
 
-export async function generateMetadata({params}: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: PageParams;
+}): Promise<Metadata> {
   const {section, slugId, slug} = params;
 
-  // if you need to fetch post data:
   const res = await fetch(
     `https://discuss-mu-three.vercel.app/posts/details/${slugId}`,
     {
-      next: {revalidate: 60}, // optional
+      next: {revalidate: 60},
     },
   );
 
@@ -27,19 +31,22 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 
   const post = await res.json();
 
+  const previewText = post.content?.slice(0, 120) ?? 'Check out this post';
+  const firstImage =
+    post.images?.[0]?.secure_url ??
+    `https://discuss-mu-three.vercel.app/assets/default.jpg`;
+
   return {
     title: `${post.title} | ${APP_NAME}`,
-    description: post.content?.slice(0, 120) ?? 'Check out this post',
+    description: previewText,
     openGraph: {
       title: post.title,
-      description: post.content?.slice(0, 120),
+      description: previewText,
       url: `https://discuss-mu-three.vercel.app/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [
         {
-          url:
-            post.images[0]?.secure_url ??
-            `https://discuss-mu-three.vercel.app/public/wizzy.jpg`,
+          url: firstImage,
           width: 1200,
           height: 630,
           alt: post.title,
@@ -50,11 +57,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: post.title,
-      description: post.content?.slice(0, 120),
-      images: [
-        post.images[0]?.secure_url ??
-          `https://discuss-mu-three.vercel.app/public/wizzy.jpg`,
-      ],
+      description: previewText,
+      images: [firstImage],
     },
   };
 }

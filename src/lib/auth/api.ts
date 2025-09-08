@@ -22,21 +22,6 @@ const api: AxiosInstance = axios.create({
 });
 
 /* ------------------------------------------------------------------ */
-/* Refresh + logout helpers that bypass baseURL                       */
-/* ------------------------------------------------------------------ */
-async function callRefresh() {
-  return axios.post(
-    '/api/auth/refresh', // 👈 Next.js route, not backend
-    {},
-    {withCredentials: true},
-  );
-}
-
-async function callLogout() {
-  return axios.post('/api/auth/logout', {}, {withCredentials: true});
-}
-
-/* ------------------------------------------------------------------ */
 /* 2 . REQUEST – attach access token                                   */
 /* ------------------------------------------------------------------ */
 api.interceptors.request.use(
@@ -95,16 +80,6 @@ api.interceptors.response.use(
           {},
           {withCredentials: true},
         );
-
-        // 🔹 Call Next.js refresh route (not backend directly)
-        // const refresh = await axios.post(
-        //   `${
-        //     typeof window !== 'undefined' ? window.location.origin : ''
-        //   }/api/routes/auth/refresh`,
-        //   {},
-        //   {withCredentials: true},
-        // );
-        // await callRefresh();
 
         console.log('Refreshed:', data);
 

@@ -12,10 +12,13 @@ import {
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
 import {toast} from '@/components/ui/toast';
-import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
+import {
+  ACCESS_TOKEN,
+  GOOGLE_SIGNIN_URL,
+  REFRESH_TOKEN,
+} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import {loginRequestAction3, setSecureToken} from '@/lib/server/cookies';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -47,9 +50,6 @@ export const LoginPage = () => {
 
   const {mutate: loginUser} = useMutation({
     mutationFn: loginRequestAction,
-  });
-  const {mutate: loginUser2} = useMutation({
-    mutationFn: loginRequestAction3,
   });
 
   useEffect(() => {
@@ -88,14 +88,14 @@ export const LoginPage = () => {
       onSuccess(response) {
         console.log(response, 'respoo');
         const {user, accessToken, refreshToken} = response?.data ?? {};
-        // document.cookie = `${ACCESS_TOKEN}=${accessToken}; Path=/; Max-Age=${
-        //   10 * 60
-        // }; SameSite=none; Secure`;
-        // document.cookie = `${REFRESH_TOKEN}=${refreshToken}; Path=/; Max-Age=${
-        //   15 * 60
-        // }; SameSite=none; Secure`;
+        document.cookie = `${ACCESS_TOKEN}=${accessToken}; Path=/; Max-Age=${
+          2 * 60
+        }; SameSite=none; Secure`;
+        document.cookie = `${REFRESH_TOKEN}=${refreshToken}; Path=/; Max-Age=${
+          3 * 60
+        }; SameSite=none; Secure`;
 
-        setSecureToken(accessToken, refreshToken);
+        // setSecureToken(accessToken, refreshToken);
         if (!user) {
           toast.error('Login failed: incomplete response');
           return;

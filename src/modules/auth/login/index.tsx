@@ -12,11 +12,7 @@ import {
 } from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
 import {toast} from '@/components/ui/toast';
-import {
-  ACCESS_TOKEN,
-  GOOGLE_SIGNIN_URL,
-  REFRESH_TOKEN,
-} from '@/constants/api-resources';
+import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
@@ -86,16 +82,16 @@ export const LoginPage = () => {
     setIsSubmitting(true);
     resetFormError();
 
-    loginUser(credentials, {
+    loginUser2(credentials, {
       onSuccess(response) {
         console.log(response, 'respoo');
         const {user, accessToken, refreshToken} = response?.data ?? {};
-        document.cookie = `${ACCESS_TOKEN}=${accessToken}; Path=/; Max-Age=${
-          10 * 60
-        }; SameSite=none; Secure`;
-        document.cookie = `${REFRESH_TOKEN}=${refreshToken}; Path=/; Max-Age=${
-          15 * 60
-        }; SameSite=none; Secure`;
+        // document.cookie = `${ACCESS_TOKEN}=${accessToken}; Path=/; Max-Age=${
+        //   10 * 60
+        // }; SameSite=none; Secure`;
+        // document.cookie = `${REFRESH_TOKEN}=${refreshToken}; Path=/; Max-Age=${
+        //   15 * 60
+        // }; SameSite=none; Secure`;
 
         // setSecureToken(accessToken, refreshToken);
         if (!user) {
@@ -148,7 +144,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
         <div className="hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app dark:bg-app/90">
           <div>
@@ -231,6 +227,7 @@ export const LoginPage = () => {
                     autoComplete="username"
                     className="form-input"
                     required
+                    disabled={isSubmitting}
                     {...register('username')}
                   />
 

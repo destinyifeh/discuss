@@ -56,6 +56,7 @@ export async function loginRequestAction3(data: LoginRequestProps) {
   const res = await axios.post(`${API_BASE_URL}/auth/login`, data, {
     withCredentials: true,
   });
+  console.log(res, 'restooman');
 
   const {user, accessToken, refreshToken} = res?.data ?? {};
 

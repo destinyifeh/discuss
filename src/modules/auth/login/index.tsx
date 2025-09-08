@@ -84,10 +84,10 @@ export const LoginPage = () => {
     resetFormError();
     // const res = await loginRequestAction3(credentials);
     //  console.log(res, 'des80');
-    loginUser2(credentials, {
+    loginUser(credentials, {
       onSuccess(response) {
         console.log(response, 'respoo');
-        const {user} = response ?? {};
+        const {user, accessToken, refreshToken} = response?.data ?? {};
         // document.cookie = `${ACCESS_TOKEN}=${accessToken}; Path=/; Max-Age=${
         //   10 * 60
         // }; SameSite=none; Secure`;

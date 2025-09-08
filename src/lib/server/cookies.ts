@@ -66,7 +66,9 @@ export async function loginRequestAction3(data: LoginRequestProps) {
     httpOnly: true,
     path: '/',
     maxAge: 2 * 60,
-    sameSite: 'lax',
+    sameSite: 'none',
+    domain: 'discuss-server-bh9l.onrender.com',
+    secure: true,
   });
   cookieStore.set({
     name: REFRESH_TOKEN as string,
@@ -74,7 +76,9 @@ export async function loginRequestAction3(data: LoginRequestProps) {
     httpOnly: true,
     path: '/',
     maxAge: 3 * 60,
-    sameSite: 'lax',
+    sameSite: 'none',
+    domain: 'discuss-server-bh9l.onrender.com',
+    secure: true,
   });
 
   return {user};

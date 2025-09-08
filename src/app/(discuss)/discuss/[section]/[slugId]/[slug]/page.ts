@@ -11,7 +11,7 @@ type PageParams = {
 export async function generateMetadata({
   params,
 }: {
-  params: PageParams;
+  params: any;
 }): Promise<Metadata> {
   const {section, slugId, slug} = params;
 

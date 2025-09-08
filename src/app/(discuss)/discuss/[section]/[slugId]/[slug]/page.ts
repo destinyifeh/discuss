@@ -29,6 +29,8 @@ export async function generateMetadata({
 
   const post = await res.json();
 
+  console.log(post, 'postakkkk');
+
   const previewText = post.content?.slice(0, 120) ?? 'Check out this post';
   const firstImage =
     post.images?.[0]?.secure_url ??

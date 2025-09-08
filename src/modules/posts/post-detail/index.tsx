@@ -19,6 +19,7 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
+import {APP_NAME} from '@/constants/settings';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -30,6 +31,7 @@ import {
 import {useInfiniteQuery, useQuery} from '@tanstack/react-query';
 import clsx from 'clsx';
 import {ImagePlus, LockIcon, MessageSquare, Reply, Send, X} from 'lucide-react';
+import Head from 'next/head';
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
@@ -430,214 +432,257 @@ export const PostDetailPage = () => {
     }
   };
   return (
-    <Fragment>
-      <PageHeader title="Discuss" />
-      <div>
-        <Virtuoso
-          className="custom-scrollbar"
-          style={{height: '100vh'}}
-          ref={virtuosoRef}
-          // onScroll={handleScroll}
-          // initialTopMostItemIndex={0}
+    <>
+      <Head>
+        <title>
+          {post.title} | {APP_NAME}
+        </title>
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.content?.slice(0, 120)} />
+        <meta property="og:image" content={post.images?.[0]?.secure_url} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
 
-          data={commentsData}
-          endReached={() => {
-            if (hasNextPage && !isFetchingNextPage) {
-              handleFetchNext();
-            }
-          }}
-          itemContent={(index, comment) => {
-            if (status === 'pending') {
-              return <PostSkeleton />;
-            } else {
-              if (!comment || !comment.data) {
-                return null;
+      <Fragment>
+        <PageHeader title="Discuss" />
+        <div>
+          <Virtuoso
+            className="custom-scrollbar"
+            style={{height: '100vh'}}
+            ref={virtuosoRef}
+            // onScroll={handleScroll}
+            // initialTopMostItemIndex={0}
+
+            data={commentsData}
+            endReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                handleFetchNext();
               }
-              if (comment._type === 'ad') {
+            }}
+            itemContent={(index, comment) => {
+              if (status === 'pending') {
+                return <PostSkeleton />;
+              } else {
+                if (!comment || !comment.data) {
+                  return null;
+                }
+                if (comment._type === 'ad') {
+                  return (
+                    <AdCard
+                      key={comment.data._id || `ad-${index}`}
+                      ad={comment.data}
+                    />
+                  );
+                }
                 return (
-                  <AdCard
-                    key={comment.data._id || `ad-${index}`}
-                    ad={comment.data}
+                  <CommentCard
+                    key={comment.data._id || `comment-${index}`}
+                    comment={comment.data}
+                    onQuote={() => handleQuoteComment(comment.data)}
+                    handleQuoteClick={handleQuoteClick}
+                    onEdit={() => handleEditComment(comment.data)}
                   />
                 );
               }
-              return (
-                <CommentCard
-                  key={comment.data._id || `comment-${index}`}
-                  comment={comment.data}
-                  onQuote={() => handleQuoteComment(comment.data)}
-                  handleQuoteClick={handleQuoteClick}
-                  onEdit={() => handleEditComment(comment.data)}
-                />
-              );
-            }
-          }}
-          components={{
-            Footer: () =>
-              status === 'error' ? (
-                <ErrorFeedback
-                  showRetry
-                  onRetry={refetch}
-                  message="We encountered an unexpected error. Please try again"
-                  variant="minimal"
-                />
-              ) : isFetchingNextPage ? (
-                <LoadingMore />
-              ) : fetchNextError ? (
-                <LoadMoreError
-                  fetchNextError={fetchNextError}
-                  handleFetchNext={handleFetchNext}
-                />
-              ) : null,
-            Header: () => (
-              <Fragment>
-                <div>
-                  <BannerAds placement="details_feed" />
-                </div>
-                {/* <div className="pb-2 border-b border-app-border"> */}
-                <div className="pb-2">
-                  <PostCard
-                    post={post}
-                    showActions={true}
-                    isInDetailView={true}
+            }}
+            components={{
+              Footer: () =>
+                status === 'error' ? (
+                  <ErrorFeedback
+                    showRetry
+                    onRetry={refetch}
+                    message="We encountered an unexpected error. Please try again"
+                    variant="minimal"
                   />
-                </div>
-
-                {/* All replies header with add comment button for web */}
-                <div className="px-4 py-3 border-b flex justify-between items-center border-app-border">
-                  <h2 className="font-bold text-lg">All replies</h2>
-                </div>
-
-                {post?.commentsClosed && (
-                  <div className="text-sm text-gray-600 flex items-center gap-2 justify-center my-3">
-                    <LockIcon className="w-4 h-4 text-gray-500" />
-                    This discussion has been locked. No new comments can be
-                    added.
+                ) : isFetchingNextPage ? (
+                  <LoadingMore />
+                ) : fetchNextError ? (
+                  <LoadMoreError
+                    fetchNextError={fetchNextError}
+                    handleFetchNext={handleFetchNext}
+                  />
+                ) : null,
+              Header: () => (
+                <Fragment>
+                  <div>
+                    <BannerAds placement="details_feed" />
                   </div>
-                )}
+                  {/* <div className="pb-2 border-b border-app-border"> */}
+                  <div className="pb-2">
+                    <PostCard
+                      post={post}
+                      showActions={true}
+                      isInDetailView={true}
+                    />
+                  </div>
 
-                {/* Web view comment input area */}
-                {allowInlineCom && (
-                  <div className="hidden md:block px-4 py-4 border-b border-app-border">
-                    <CommunityGuidelines />
-                    <form
-                      onSubmit={handleSubmitComment}
-                      className="mt-4 space-y-4">
-                      <div className="flex gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={currentUser?.avatar ?? undefined} />
-                          <AvatarFallback className="capitalize text-app text-3xl">
-                            {currentUser?.username.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          {quotedUser && (
-                            <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app flex flex-row justify-between">
-                              <div>
-                                <div className="font-semibold mb-1 text-app">
-                                  @{quotedUser}
-                                </div>
-                                <div className="text-gray-700">
-                                  {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setQuoteContent('');
-                                  setQuotedUser('');
-                                  setComment('');
-                                  setImagePreview(null);
-                                }}>
-                                <X />
-                              </Button>
-                            </div>
-                          )}
+                  {/* All replies header with add comment button for web */}
+                  <div className="px-4 py-3 border-b flex justify-between items-center border-app-border">
+                    <h2 className="font-bold text-lg">All replies</h2>
+                  </div>
 
-                          <Textarea
-                            placeholder="Add your comment..."
-                            value={comment}
-                            onChange={e => setComment(e.target.value)}
-                            className="min-h-[120px] resize-none form-input"
-                            autoFocus
-                          />
+                  {post?.commentsClosed && (
+                    <div className="text-sm text-gray-600 flex items-center gap-2 justify-center my-3">
+                      <LockIcon className="w-4 h-4 text-gray-500" />
+                      This discussion has been locked. No new comments can be
+                      added.
+                    </div>
+                  )}
 
-                          {imagePreview && (
-                            <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
-                              <img
-                                src={imagePreview}
-                                alt="Preview"
-                                className="w-full max-h-60 object-contain"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                //onClick={removeImage}
-                                className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                                <X size={16} />
-                              </Button>
-                            </div>
-                          )}
-
-                          <div className="mt-3 flex justify-end items-center">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                              ref={fileInputRef}
-                              id="image-upload"
+                  {/* Web view comment input area */}
+                  {allowInlineCom && (
+                    <div className="hidden md:block px-4 py-4 border-b border-app-border">
+                      <CommunityGuidelines />
+                      <form
+                        onSubmit={handleSubmitComment}
+                        className="mt-4 space-y-4">
+                        <div className="flex gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage
+                              src={currentUser?.avatar ?? undefined}
                             />
-                            <div className="flex gap-3">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="text-app"
-                                onClick={() => fileInputRef.current?.click()}>
-                                <ImagePlus size={18} />
-                              </Button>
-                              <Button
-                                type="submit"
-                                className="bg-app hover:bg-app/90"
-                                disabled={
-                                  isSubmitting ||
-                                  (!comment.trim() && !imagePreview)
-                                }>
-                                <Send size={16} className="mr-2" />
-                                Post Reply
-                              </Button>
+                            <AvatarFallback className="capitalize text-app text-3xl">
+                              {currentUser?.username.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            {quotedUser && (
+                              <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app flex flex-row justify-between">
+                                <div>
+                                  <div className="font-semibold mb-1 text-app">
+                                    @{quotedUser}
+                                  </div>
+                                  <div className="text-gray-700">
+                                    {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setQuoteContent('');
+                                    setQuotedUser('');
+                                    setComment('');
+                                    setImagePreview(null);
+                                  }}>
+                                  <X />
+                                </Button>
+                              </div>
+                            )}
+
+                            <Textarea
+                              placeholder="Add your comment..."
+                              value={comment}
+                              onChange={e => setComment(e.target.value)}
+                              className="min-h-[120px] resize-none form-input"
+                              autoFocus
+                            />
+
+                            {imagePreview && (
+                              <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
+                                <img
+                                  src={imagePreview}
+                                  alt="Preview"
+                                  className="w-full max-h-60 object-contain"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  //onClick={removeImage}
+                                  className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                                  <X size={16} />
+                                </Button>
+                              </div>
+                            )}
+
+                            <div className="mt-3 flex justify-end items-center">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                ref={fileInputRef}
+                                id="image-upload"
+                              />
+                              <div className="flex gap-3">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-app"
+                                  onClick={() => fileInputRef.current?.click()}>
+                                  <ImagePlus size={18} />
+                                </Button>
+                                <Button
+                                  type="submit"
+                                  className="bg-app hover:bg-app/90"
+                                  disabled={
+                                    isSubmitting ||
+                                    (!comment.trim() && !imagePreview)
+                                  }>
+                                  <Send size={16} className="mr-2" />
+                                  Post Reply
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </form>
-                  </div>
-                )}
-              </Fragment>
-            ),
+                      </form>
+                    </div>
+                  )}
+                </Fragment>
+              ),
 
-            EmptyPlaceholder: () => <CommentPlaceholder />,
-          }}
-        />
-      </div>
+              EmptyPlaceholder: () => <CommentPlaceholder />,
+            }}
+          />
+        </div>
 
-      {!post?.commentsClosed && (
-        <>
-          {/* Mobile comment section - slides up from bottom */}
-          {!mob ? (
-            <Button
-              className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
-              size="icon"
-              onClick={onComment}>
-              <MessageSquare size={24} />
-            </Button>
-          ) : (
-            <MobileCommentSection
-              showMobileComment={showMobileComment}
-              setShowMobileComment={setShowMobileComment}
+        {!post?.commentsClosed && (
+          <>
+            {/* Mobile comment section - slides up from bottom */}
+            {!mob ? (
+              <Button
+                className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
+                size="icon"
+                onClick={onComment}>
+                <MessageSquare size={24} />
+              </Button>
+            ) : (
+              <MobileCommentSection
+                showMobileComment={showMobileComment}
+                setShowMobileComment={setShowMobileComment}
+                setQuoteContent={setQuoteContent}
+                setQuotedUser={setQuotedUser}
+                imagePreview={imagePreview}
+                isSubmitting={isSubmitting}
+                handleImageUpload={handleImageUpload}
+                removeImage={removeImage}
+                imageUrls={imageUrls}
+                setComment={setComment}
+                setImagePreview={setImagePreview}
+                quoteContent={quoteContent}
+                quotedUser={quotedUser}
+                comment={comment}
+                virtuosoRef={virtuosoRef}
+                fileInputRef={fileInputRef}
+                handleSubmitComment={handleSubmitComment}
+                setEditComment={setEditComment}
+                setIsEditing={setIsEditing}
+                setImageUrls={setImageUrls}
+                setImages={setImages}
+                isEditing={isEditing}
+                getButtonLabel={getButtonLabel}
+                quotedImages={quotedImages}
+                setQuotedImages={setQuotedImages}
+                quotedUserImage={quotedUserImage}
+              />
+            )}
+
+            <WebCommentSection
+              showWebComment={showWebComment}
+              setShowWebComment={setShowWebComment}
               setQuoteContent={setQuoteContent}
               setQuotedUser={setQuotedUser}
               imagePreview={imagePreview}
@@ -663,309 +708,286 @@ export const PostDetailPage = () => {
               setQuotedImages={setQuotedImages}
               quotedUserImage={quotedUserImage}
             />
-          )}
+          </>
+        )}
+        {allowMainCom && (
+          <>
+            <div className="lg:hidden">
+              {/* Comment button for mobile */}
+              <Button
+                className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
+                size="icon"
+                onClick={() => {
+                  setShowMobileComment(!showMobileComment);
+                  virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                }}>
+                <MessageSquare size={24} />
+              </Button>
 
-          <WebCommentSection
-            showWebComment={showWebComment}
-            setShowWebComment={setShowWebComment}
-            setQuoteContent={setQuoteContent}
-            setQuotedUser={setQuotedUser}
-            imagePreview={imagePreview}
-            isSubmitting={isSubmitting}
-            handleImageUpload={handleImageUpload}
-            removeImage={removeImage}
-            imageUrls={imageUrls}
-            setComment={setComment}
-            setImagePreview={setImagePreview}
-            quoteContent={quoteContent}
-            quotedUser={quotedUser}
-            comment={comment}
-            virtuosoRef={virtuosoRef}
-            fileInputRef={fileInputRef}
-            handleSubmitComment={handleSubmitComment}
-            setEditComment={setEditComment}
-            setIsEditing={setIsEditing}
-            setImageUrls={setImageUrls}
-            setImages={setImages}
-            isEditing={isEditing}
-            getButtonLabel={getButtonLabel}
-            quotedImages={quotedImages}
-            setQuotedImages={setQuotedImages}
-            quotedUserImage={quotedUserImage}
-          />
-        </>
-      )}
-      {allowMainCom && (
-        <>
-          <div className="lg:hidden">
-            {/* Comment button for mobile */}
-            <Button
-              className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
-              size="icon"
-              onClick={() => {
-                setShowMobileComment(!showMobileComment);
-                virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-              }}>
-              <MessageSquare size={24} />
-            </Button>
+              {/* Mobile inline comment section that slides up from bottom */}
+              <div
+                // className={`fixed left-0 right-0 bottom-0 bg-white border-t border-app-border transition-transform duration-300 ease-in-out transform ${
+                //   showMobileComment ? 'translate-y-0' : 'translate-y-full'
+                // } z-50`}>
 
-            {/* Mobile inline comment section that slides up from bottom */}
-            <div
-              // className={`fixed left-0 right-0 bottom-0 bg-white border-t border-app-border transition-transform duration-300 ease-in-out transform ${
-              //   showMobileComment ? 'translate-y-0' : 'translate-y-full'
-              // } z-50`}>
-
-              className={clsx(
-                'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform bg-app-hover border-app-border dark:bg-background',
-                {
-                  'translate-y-0': showMobileComment === true,
-                  'translate-y-full': showMobileComment === false,
-                },
-              )}>
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <p className="font-semibold">Add a comment</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowMobileComment(false);
-                      setQuoteContent('');
-                      setQuotedUser('');
-                      setComment('');
-                      setImagePreview(null);
-                      // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-                    }}>
-                    Cancel
-                  </Button>
-                </div>
-
-                <div className="mt-1">
-                  {/* User info with community guidelines */}
-                  <div className="flex items-center mb-3">
-                    <Avatar className="h-8 w-8 mr-2">
-                      <AvatarImage src={currentUser?.avatar ?? undefined} />
-                      <AvatarFallback className="capitalize text-app text-3xl">
-                        {currentUser?.username.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="text-sm text-app">
-                      <Link href="/community-guidelines">
-                        Community Guidelines
-                      </Link>
-                      <span className="mx-1">•</span>
-                      <span className="text-[#666]">
-                        Be respectful and constructive in your comments.
-                      </span>
-                    </div>
+                className={clsx(
+                  'fixed left-0 right-0 bottom-0 border-t transition-transform duration-300 ease-in-out transform bg-app-hover border-app-border dark:bg-background',
+                  {
+                    'translate-y-0': showMobileComment === true,
+                    'translate-y-full': showMobileComment === false,
+                  },
+                )}>
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="font-semibold">Add a comment</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowMobileComment(false);
+                        setQuoteContent('');
+                        setQuotedUser('');
+                        setComment('');
+                        setImagePreview(null);
+                        // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                      }}>
+                      Cancel
+                    </Button>
                   </div>
 
-                  {quotedUser && (
-                    <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
-                      <div className="font-semibold mb-1 text-app">
-                        @{quotedUser}
-                      </div>
-                      <div className="text-sm">
-                        {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
-                        <PostContent2
-                          content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                        />
+                  <div className="mt-1">
+                    {/* User info with community guidelines */}
+                    <div className="flex items-center mb-3">
+                      <Avatar className="h-8 w-8 mr-2">
+                        <AvatarImage src={currentUser?.avatar ?? undefined} />
+                        <AvatarFallback className="capitalize text-app text-3xl">
+                          {currentUser?.username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-sm text-app">
+                        <Link href="/community-guidelines">
+                          Community Guidelines
+                        </Link>
+                        <span className="mx-1">•</span>
+                        <span className="text-[#666]">
+                          Be respectful and constructive in your comments.
+                        </span>
                       </div>
                     </div>
-                  )}
 
-                  {/* <Textarea
+                    {quotedUser && (
+                      <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
+                        <div className="font-semibold mb-1 text-app">
+                          @{quotedUser}
+                        </div>
+                        <div className="text-sm">
+                          {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
+                          <PostContent2
+                            content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* <Textarea
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
               /> */}
-                  <AddCommentField content={comment} setContent={setComment} />
+                    <AddCommentField
+                      content={comment}
+                      setContent={setComment}
+                    />
 
-                  {imagePreview && (
-                    <div className="relative mt-3 rounded-md overflow-hidden border border-app-border ">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full max-h-30 object-contain"
+                    {imagePreview && (
+                      <div className="relative mt-3 rounded-md overflow-hidden border border-app-border ">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full max-h-30 object-contain"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          // onClick={removeImage}
+                          className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                          <X size={16} />
+                        </Button>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center mt-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        ref={fileInputRef}
+                        id="image-upload"
                       />
                       <Button
                         type="button"
-                        variant="destructive"
+                        variant="ghost"
                         size="icon"
-                        // onClick={removeImage}
-                        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                        <X size={16} />
+                        className="text-app"
+                        onClick={() => fileInputRef.current?.click()}>
+                        <ImagePlus size={18} />
+                      </Button>
+                      <Button
+                        onClick={handleSubmitComment}
+                        className="rounded-full bg-app hover:bg-app/90 text-white"
+                        disabled={
+                          isSubmitting || (!comment.trim() && !imagePreview)
+                        }>
+                        <Reply size={16} className="mr-2" />
+                        Reply
                       </Button>
                     </div>
-                  )}
-
-                  <div className="flex justify-between items-center mt-3">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      ref={fileInputRef}
-                      id="image-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-app"
-                      onClick={() => fileInputRef.current?.click()}>
-                      <ImagePlus size={18} />
-                    </Button>
-                    <Button
-                      onClick={handleSubmitComment}
-                      className="rounded-full bg-app hover:bg-app/90 text-white"
-                      disabled={
-                        isSubmitting || (!comment.trim() && !imagePreview)
-                      }>
-                      <Reply size={16} className="mr-2" />
-                      Reply
-                    </Button>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="hidden lg:block">
-            {/* Comment button for web */}
-            <Button
-              className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1 bg-app hover:bg-app/90 dark:hover:bg-app dark:bg-app/90 text-white"
-              size="icon"
-              onClick={() => {
-                setShowWebComment(!showWebComment);
-                virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-              }}>
-              <MessageSquare size={24} />
-            </Button>
+            <div className="hidden lg:block">
+              {/* Comment button for web */}
+              <Button
+                className="fixedBottomBtn max-w-3xl mx-auto fixed bottom-6 right-[26%] h-14 w-14 rounded-full shadow-lg z-1 bg-app hover:bg-app/90 dark:hover:bg-app dark:bg-app/90 text-white"
+                size="icon"
+                onClick={() => {
+                  setShowWebComment(!showWebComment);
+                  virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                }}>
+                <MessageSquare size={24} />
+              </Button>
 
-            {/* Web inline comment section that slides up from bottom */}
-            <div
-              className={clsx(
-                'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50 bg-app-hover dark:bg-background border-app-border',
-                {
-                  'translate-y-0': showWebComment === true,
-                  'translate-y-full': showWebComment === false,
-                },
-              )}>
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <p className="font-semibold">Add a comment</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowWebComment(false);
-                      setQuoteContent('');
-                      setQuotedUser('');
-                      setComment('');
-                      setImagePreview(null);
-                      // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-                    }}>
-                    Cancel
-                  </Button>
-                </div>
+              {/* Web inline comment section that slides up from bottom */}
+              <div
+                className={clsx(
+                  'max-w-3xl mx-auto fixed left-0 right-16 bottom-0 border-t transition-transform duration-300 ease-in-out transform z-50 bg-app-hover dark:bg-background border-app-border',
+                  {
+                    'translate-y-0': showWebComment === true,
+                    'translate-y-full': showWebComment === false,
+                  },
+                )}>
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="font-semibold">Add a comment</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowWebComment(false);
+                        setQuoteContent('');
+                        setQuotedUser('');
+                        setComment('');
+                        setImagePreview(null);
+                        // virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
+                      }}>
+                      Cancel
+                    </Button>
+                  </div>
 
-                <div className="mt-1">
-                  {/* User info with community guidelines */}
-                  <div className="flex items-center mb-3">
-                    <Avatar className="h-8 w-8 mr-2">
-                      <AvatarImage src={currentUser?.avatar ?? undefined} />
-                      <AvatarFallback className="capitalize text-app text-3xl">
-                        {currentUser?.username.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {/* <div className="text-sm text-app">
+                  <div className="mt-1">
+                    {/* User info with community guidelines */}
+                    <div className="flex items-center mb-3">
+                      <Avatar className="h-8 w-8 mr-2">
+                        <AvatarImage src={currentUser?.avatar ?? undefined} />
+                        <AvatarFallback className="capitalize text-app text-3xl">
+                          {currentUser?.username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {/* <div className="text-sm text-app">
                   <span>Community Guidelines</span>
                   <span className="mx-1">•</span>
                   <span className="text-[#666]">
                     Be respectful and constructive in your comments.
                   </span>
                 </div> */}
-                    <CommunityGuidelines />
-                  </div>
-
-                  {quotedUser && (
-                    <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
-                      <div className="font-semibold mb-1 text-app">
-                        @{quotedUser}
-                      </div>
-                      <div className="text-sm">
-                        {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
-                        <PostContent2
-                          content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                        />
-                      </div>
+                      <CommunityGuidelines />
                     </div>
-                  )}
 
-                  {/* <Textarea
+                    {quotedUser && (
+                      <div className="p-3 rounded-md mb-3 border-l-4 border-app bg-gray-100 text-gray-700">
+                        <div className="font-semibold mb-1 text-app">
+                          @{quotedUser}
+                        </div>
+                        <div className="text-sm">
+                          {/* {quoteContent.replace(/^>\s[\w]+:\s/gm, '')} */}
+                          <PostContent2
+                            content={quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* <Textarea
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 className="min-h-[100px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
               /> */}
-                  <AddCommentField content={comment} setContent={setComment} />
+                    <AddCommentField
+                      content={comment}
+                      setContent={setComment}
+                    />
 
-                  {imagePreview && (
-                    <div className="relative mt-3 rounded-md overflow-hidden border py-1 border-app-border">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full max-h-30 object-contain"
+                    {imagePreview && (
+                      <div className="relative mt-3 rounded-md overflow-hidden border py-1 border-app-border">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full max-h-30 object-contain"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          // onClick={removeImage}
+                          className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                          <X size={16} />
+                        </Button>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center mt-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        ref={fileInputRef}
+                        id="image-upload"
                       />
                       <Button
                         type="button"
-                        variant="destructive"
+                        variant="ghost"
                         size="icon"
-                        // onClick={removeImage}
-                        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                        <X size={16} />
+                        className={clsx('text-app', {
+                          'hover:bg-app-dark-bg/10 hover:text-app':
+                            theme.type === 'dark',
+                        })}
+                        onClick={() => fileInputRef.current?.click()}>
+                        <ImagePlus size={18} />
+                      </Button>
+                      <Button
+                        onClick={handleSubmitComment}
+                        className="rounded-full bg-app hover:bg-app/90 text-white"
+                        disabled={
+                          isSubmitting || (!comment.trim() && !imagePreview)
+                        }>
+                        <Reply size={16} className="mr-2" />
+                        Reply
                       </Button>
                     </div>
-                  )}
-
-                  <div className="flex justify-between items-center mt-3">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      ref={fileInputRef}
-                      id="image-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={clsx('text-app', {
-                        'hover:bg-app-dark-bg/10 hover:text-app':
-                          theme.type === 'dark',
-                      })}
-                      onClick={() => fileInputRef.current?.click()}>
-                      <ImagePlus size={18} />
-                    </Button>
-                    <Button
-                      onClick={handleSubmitComment}
-                      className="rounded-full bg-app hover:bg-app/90 text-white"
-                      disabled={
-                        isSubmitting || (!comment.trim() && !imagePreview)
-                      }>
-                      <Reply size={16} className="mr-2" />
-                      Reply
-                    </Button>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
-    </Fragment>
+          </>
+        )}
+      </Fragment>
+    </>
   );
 };

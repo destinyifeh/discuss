@@ -20,47 +20,47 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json(data);
 
-    if (cookies) {
-      const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
+    // if (cookies) {
+    //   const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
 
-      cookieArray.forEach(cookieStr => {
-        console.log(cookieStr, 'raw cookie');
+    //   cookieArray.forEach(cookieStr => {
+    //     console.log(cookieStr, 'raw cookie');
 
-        // Split cookie string into name=value and attributes
-        const [cookiePair, ...attributes] = cookieStr.split(';');
-        const [name, value] = cookiePair.split('=');
-        console.log(name, 'raw cookie22', value);
+    //     // Split cookie string into name=value and attributes
+    //     const [cookiePair, ...attributes] = cookieStr.split(';');
+    //     const [name, value] = cookiePair.split('=');
+    //     console.log(name, 'raw cookie22', value);
 
-        // Parse attributes
-        const httpOnly = attributes.some(attr =>
-          attr.toLowerCase().includes('httponly'),
-        );
-        const secure = attributes.some(attr =>
-          attr.toLowerCase().includes('secure'),
-        );
-        const sameSiteAttr = attributes.find(attr =>
-          attr.toLowerCase().includes('samesite'),
-        );
-        const sameSite = sameSiteAttr
-          ? (sameSiteAttr.split('=')[1] as 'lax' | 'strict' | 'none')
-          : 'lax';
-        const maxAgeAttr = attributes.find(attr =>
-          attr.toLowerCase().includes('max-age'),
-        );
-        const maxAge = maxAgeAttr
-          ? Number(maxAgeAttr.split('=')[1])
-          : undefined;
+    //     // Parse attributes
+    //     const httpOnly = attributes.some(attr =>
+    //       attr.toLowerCase().includes('httponly'),
+    //     );
+    //     const secure = attributes.some(attr =>
+    //       attr.toLowerCase().includes('secure'),
+    //     );
+    //     const sameSiteAttr = attributes.find(attr =>
+    //       attr.toLowerCase().includes('samesite'),
+    //     );
+    //     const sameSite = sameSiteAttr
+    //       ? (sameSiteAttr.split('=')[1] as 'lax' | 'strict' | 'none')
+    //       : 'lax';
+    //     const maxAgeAttr = attributes.find(attr =>
+    //       attr.toLowerCase().includes('max-age'),
+    //     );
+    //     const maxAge = maxAgeAttr
+    //       ? Number(maxAgeAttr.split('=')[1])
+    //       : undefined;
 
-        // Set cookie in Next.js response
-        res.cookies.set(name.trim(), value, {
-          httpOnly,
-          secure,
-          sameSite,
-          maxAge,
-          path: '/',
-        });
-      });
-    }
+    //     // Set cookie in Next.js response
+    //     res.cookies.set(name.trim(), value, {
+    //       httpOnly,
+    //       secure,
+    //       sameSite,
+    //       maxAge,
+    //       path: '/',
+    //     });
+    //   });
+    // }
 
     return res;
   } catch (err: any) {

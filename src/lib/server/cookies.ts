@@ -1,6 +1,12 @@
 'use server';
 
-import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
+import {
+  ACCESS_TOKEN,
+  API_BASE_URL,
+  REFRESH_TOKEN,
+} from '@/constants/api-resources';
+import {LoginRequestProps} from '@/modules/auth/types';
+import axios from 'axios';
 import {cookies} from 'next/headers';
 
 /** HTTP‑only cookie helpers for SSR, server actions, route handlers */
@@ -45,3 +51,29 @@ export const setSecureToken = async (
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   });
 };
+
+export async function loginRequestAction3(data: LoginRequestProps) {
+  const res = await axios.post(`${API_BASE_URL}/auth/login`, data, {
+    withCredentials: true,
+  });
+
+  const {user, accessToken, refreshToken} = res?.data ?? {};
+
+  const cookieStore = await cookies();
+  cookieStore.set({
+    name: ACCESS_TOKEN as string,
+    value: accessToken,
+    httpOnly: true,
+    path: '/',
+    maxAge: 2 * 60,
+  });
+  cookieStore.set({
+    name: REFRESH_TOKEN as string,
+    value: refreshToken,
+    httpOnly: true,
+    path: '/',
+    maxAge: 3 * 60,
+  });
+
+  return {user};
+}

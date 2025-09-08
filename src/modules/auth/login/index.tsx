@@ -15,6 +15,7 @@ import {toast} from '@/components/ui/toast';
 import {GOOGLE_SIGNIN_URL} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {loginRequestAction3} from '@/lib/server/cookies';
 import {InputLabel, InputMessage} from '@/modules/components/form-info';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useMutation} from '@tanstack/react-query';
@@ -23,7 +24,7 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
-import {loginRequestAction, loginRequestAction2} from '../actions';
+import {loginRequestAction} from '../actions';
 const formSchema = z.object({
   username: z.string().trim().min(1, {message: 'Please enter username'}),
 
@@ -48,7 +49,7 @@ export const LoginPage = () => {
     mutationFn: loginRequestAction,
   });
   const {mutate: loginUser2} = useMutation({
-    mutationFn: loginRequestAction2,
+    mutationFn: loginRequestAction3,
   });
 
   useEffect(() => {
@@ -81,11 +82,12 @@ export const LoginPage = () => {
   const handleLogin = async (credentials: loginFormData) => {
     setIsSubmitting(true);
     resetFormError();
-
+    // const res = await loginRequestAction3(credentials);
+    //  console.log(res, 'des80');
     loginUser2(credentials, {
       onSuccess(response) {
         console.log(response, 'respoo');
-        const {user, accessToken, refreshToken} = response?.data ?? {};
+        const {user} = response ?? {};
         // document.cookie = `${ACCESS_TOKEN}=${accessToken}; Path=/; Max-Age=${
         //   10 * 60
         // }; SameSite=none; Secure`;

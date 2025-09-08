@@ -4,6 +4,7 @@ import {HomeDashboardSkeleton} from '@/components/skeleton/home-dashboard-skelet
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {setSecureToken} from '@/lib/server/cookies';
 import {useQuery} from '@tanstack/react-query';
 import {useRouter} from 'next/navigation';
 import {useEffect} from 'react';
@@ -35,6 +36,8 @@ export const GoogleCallbackPage = () => {
 
     if (googleUser) {
       setUser(googleUser.user);
+      //will be remove later
+      setSecureToken(googleUser.accessToken, googleUser.refreshToken);
       const storedNext = localStorage.getItem('nextRoute') as string;
       localStorage.removeItem('nextRoute');
       router.replace(storedNext);

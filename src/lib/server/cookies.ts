@@ -38,7 +38,7 @@ export const setSecureToken = async (
     path: '/',
     maxAge: 2 * 60, // 2 minutes
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax',
   });
 
   cookieStore.set({
@@ -48,7 +48,7 @@ export const setSecureToken = async (
     path: '/',
     maxAge: 3 * 60, // 2 minutes
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax',
   });
 };
 

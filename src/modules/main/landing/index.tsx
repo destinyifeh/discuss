@@ -107,9 +107,8 @@ export const LandingPage = () => {
             </Button>
           </div>
         </div>
+        <AppFooter />
       </div>
-
-      <AppFooter />
     </div>
   );
 };

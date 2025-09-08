@@ -56,7 +56,7 @@ export const LandingPage = () => {
         </div>
 
         <div
-          className="flex-1 flex flex-col justify-center items-center md:items-start"
+          className="flex-1 p-8 flex flex-col justify-center items-center md:items-start"
           //className="text-center"
         >
           {/* <svg

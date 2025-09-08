@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export const AppFooter = () => {
   return (
-    <footer className="py-8 px-4 text-center text-app-gray border-t border-app-border">
+    <footer className=" px-4 text-center text-app-gray border-t border-app-border">
       <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto mb-4">
         <Link href="/about" className="hover:underline text-sm">
           About

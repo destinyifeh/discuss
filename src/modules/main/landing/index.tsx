@@ -5,14 +5,7 @@ import {Button} from '@/components/ui/button';
 import {useRouter} from 'next/navigation';
 
 export const LandingPage = () => {
-  // const { isAuthenticated } = useAuth();
   const navigate = useRouter();
-
-  //   useEffect(() => {
-  //     if (isAuthenticated) {
-  //       navigate('/home');
-  //     }
-  //   }, [isAuthenticated, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -107,8 +100,9 @@ export const LandingPage = () => {
             </Button>
           </div>
         </div>
-        <AppFooter />
       </div>
+
+      <AppFooter />
     </div>
   );
 };

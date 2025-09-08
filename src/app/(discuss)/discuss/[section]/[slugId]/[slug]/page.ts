@@ -32,7 +32,7 @@ export async function generateMetadata({
   const previewText = post.content?.slice(0, 120) ?? 'Check out this post';
   const firstImage =
     post.images?.[0]?.secure_url ??
-    `https://discuss-mu-three.vercel.app/assets/default.jpg`;
+    `https://discuss-mu-three.vercel.app/public/wizzy.jpg`;
 
   return {
     title: `${post.title} | ${APP_NAME}`,

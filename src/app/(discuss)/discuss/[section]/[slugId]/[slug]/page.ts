@@ -40,13 +40,16 @@ export async function generateMetadata({
     title: `${post.title}`,
     description: previewText,
     openGraph: {
-      title: post.title,
+      //title: post.title,
       description: previewText,
       url: `https://discuss-mu-three.vercel.app/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [
         {
           url: firstImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
         },
       ],
       type: 'article',

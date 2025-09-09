@@ -2,7 +2,7 @@
 import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {ACCESS_TOKEN} from './constants/api-resources';
-import {isGuestOnly} from './lib/auth/paths';
+import {isGuestOnly, isPublicPath} from './lib/auth/paths';
 
 export function middleware(req: NextRequest) {
   const {pathname} = req.nextUrl;
@@ -13,6 +13,10 @@ export function middleware(req: NextRequest) {
     'Cookies in middleware:',
     req.cookies.get('encrypted_access_token')?.value,
   );
+
+  if (isPublicPath(pathname)) {
+    return NextResponse.next();
+  }
   // ──────────────── LOGGED‑IN user ────────────────
   if (token && guestRoute) {
     // Already authenticated ➜ redirect away from guest pages

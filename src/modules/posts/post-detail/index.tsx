@@ -13,8 +13,8 @@ import CommunityGuidelines from '@/components/post/community-guidelines';
 import PostCard from '@/components/post/post-card';
 import {PostContent2} from '@/components/post/post-content';
 import {CommentPlaceholder} from '@/components/post/post-list';
+import CommentSkeleton from '@/components/skeleton/comment-skeleton';
 import PostDetailSkeleton from '@/components/skeleton/post-detail-skeleton';
-import PostSkeleton from '@/components/skeleton/post-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
@@ -448,7 +448,7 @@ export const PostDetailPage = () => {
           }}
           itemContent={(index, comment) => {
             if (status === 'pending') {
-              return <PostSkeleton />;
+              return <CommentSkeleton />;
             } else {
               if (!comment || !comment.data) {
                 return null;
@@ -619,7 +619,16 @@ export const PostDetailPage = () => {
               </Fragment>
             ),
 
-            EmptyPlaceholder: () => <CommentPlaceholder />,
+            EmptyPlaceholder: () => {
+              if (status === 'error') {
+                return null;
+              }
+              if (status === 'pending') {
+                return <CommentSkeleton />;
+              }
+
+              return <CommentPlaceholder />;
+            },
           }}
         />
       </div>

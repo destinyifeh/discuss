@@ -106,10 +106,16 @@ export const SectionPostList = ({
               <BannerAds section={bannerAd} placement="section_feed" />
             </div>
           ),
-          EmptyPlaceholder: () =>
-            status === 'error' ? null : (
-              <SectionPlaceholder section={section} />
-            ),
+          EmptyPlaceholder: () => {
+            if (status === 'error') {
+              return null;
+            }
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            }
+
+            return <SectionPlaceholder section={section} />;
+          },
 
           Footer: () =>
             status === 'error' ? (
@@ -362,8 +368,16 @@ export const HomePostList = () => {
               </div>
             </Fragment>
           ),
-          EmptyPlaceholder: () =>
-            status === 'error' ? null : <PostPlaceholder tab={activeTab} />,
+          EmptyPlaceholder: () => {
+            if (status === 'error') {
+              return null;
+            }
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            }
+
+            return <PostPlaceholder tab={activeTab} />;
+          },
 
           Footer: () =>
             status === 'error' ? (
@@ -557,8 +571,16 @@ export const ExplorePostList = () => {
               </div>
             </Fragment>
           ),
-          EmptyPlaceholder: () =>
-            status === 'error' ? null : <Placeholder holder={'explore'} />,
+          EmptyPlaceholder: () => {
+            if (status === 'error') {
+              return null;
+            }
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            }
+
+            return <Placeholder holder={'explore'} />;
+          },
 
           Footer: () =>
             status === 'error' ? (
@@ -693,8 +715,18 @@ export const BookmarkPostList = () => {
         data={bookmarkedData}
         components={{
           Header: () => <PageHeader title="Bookmarks" />,
-          EmptyPlaceholder: () =>
-            status === 'error' ? null : <Placeholder holder={'bookmark'} />,
+
+          EmptyPlaceholder: () => {
+            if (status === 'error') {
+              return null;
+            }
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            }
+
+            return <Placeholder holder={'bookmark'} />;
+          },
+
           Footer: () =>
             status === 'error' ? (
               <ErrorFeedback

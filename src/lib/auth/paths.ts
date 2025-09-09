@@ -19,3 +19,13 @@ export const isGuestOnly = (pathname: string) =>
       ? pathname === '/' // exact root
       : pathname === p || pathname.startsWith(`${p}/`),
   );
+
+export function isPublicPath(pathname: string) {
+  // detail pages: /discuss/{section}/{slugId}/{slug}
+  const parts = pathname.split('/').filter(Boolean);
+  if (parts[0] === 'discuss' && parts.length >= 4) {
+    return true;
+  }
+
+  return false;
+}

@@ -1,5 +1,4 @@
 import {API_BASE_URL} from '@/constants/api-resources';
-import {APP_NAME} from '@/constants/settings';
 import {PostDetailPage} from '@/modules/posts/post-detail';
 import {Metadata} from 'next';
 
@@ -37,19 +36,16 @@ export async function generateMetadata({
     `https://discuss-mu-three.vercel.app/wizzy.jpeg`;
 
   return {
-    title: `${post.title}`,
-    description: previewText,
+    //title: `${post.title}`,
+    // description: previewText,
     openGraph: {
-      //title: post.title,
+      title: post.title,
       description: previewText,
       url: `https://discuss-mu-three.vercel.app/${section}/${slugId}/${slug}`,
-      siteName: APP_NAME,
+      // siteName: APP_NAME,
       images: [
         {
           url: firstImage,
-          width: 1200,
-          height: 630,
-          alt: post.title,
         },
       ],
       type: 'article',

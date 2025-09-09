@@ -36,8 +36,8 @@ export async function generateMetadata({
     `https://discuss-mu-three.vercel.app/wizzy.jpeg`;
 
   return {
-    title: `${post.title}`,
-    description: previewText,
+    // title: `${post.title}`,
+    // description: previewText,
     openGraph: {
       title: post.title,
       description: previewText,

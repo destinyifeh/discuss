@@ -1,6 +1,4 @@
 import {DashboardLayout} from '@/components/layouts/dashboard';
-import {APP_DESCRIPTION, APP_NAME} from '@/constants/settings';
-import {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import '../globals.css';
 
@@ -13,10 +11,10 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-export const metadata: Metadata = {
-  title: `${APP_NAME}-${APP_DESCRIPTION}`,
-  description: APP_DESCRIPTION,
-};
+// export const metadata: Metadata = {
+//   title: `${APP_NAME}-${APP_DESCRIPTION}`,
+//   description: APP_DESCRIPTION,
+// };
 
 type LayoutProps = {
   children: React.ReactNode;

@@ -11,10 +11,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-// export const metadata: Metadata = {
-//   title: `${APP_NAME}-${APP_DESCRIPTION}`,
-//   description: APP_DESCRIPTION,
-// };
 
 type LayoutProps = {
   children: React.ReactNode;

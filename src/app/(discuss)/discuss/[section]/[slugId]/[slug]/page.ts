@@ -41,7 +41,7 @@ export async function generateMetadata({
     openGraph: {
       // title: post.title,
       description: previewText,
-      url: `https://discuss-mu-three.vercel.app/${section}/${slugId}/${slug}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [
         {

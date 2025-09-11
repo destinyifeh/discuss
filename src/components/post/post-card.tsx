@@ -89,7 +89,7 @@ const PostCard = ({
     likePostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post like');
-        // setLikesCount(data.likesCount);
+
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
         queryClient.invalidateQueries({queryKey: ['bookmarked-feed-posts']});
         queryClient.invalidateQueries({
@@ -127,22 +127,21 @@ const PostCard = ({
   const handleBookmark = () => {
     bookmarkPostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
-        console.log(data, 'post like');
+        console.log(data, 'post bookmark');
+        queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
+
         queryClient.invalidateQueries({
-          queryKey: ['home-feed-posts', 'for-you'],
+          queryKey: ['bookmarked-feed-posts'],
         });
         queryClient.invalidateQueries({
-          queryKey: ['bookmarked-feed-posts', 'for-you'],
+          queryKey: ['section-feed-posts'],
         });
         queryClient.invalidateQueries({
-          queryKey: ['section-feed-posts', 'section'],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['explore-feed-posts', 'search'],
+          queryKey: ['explore-feed-posts'],
         });
 
         queryClient.invalidateQueries({
-          queryKey: ['post-details', 'slug'],
+          queryKey: ['post-details'],
         });
         queryClient.invalidateQueries({
           queryKey: ['user-profile-posts', 'posts'],

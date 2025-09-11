@@ -35,7 +35,7 @@ export async function generateMetadata({
   const previewText = post.content?.slice(0, 120) ?? 'Check out this post';
   const firstImage =
     post.images?.[0]?.secure_url ??
-    `https://discuss-mu-three.vercel.app/wizzy.jpeg`;
+    `${process.env.NEXT_PUBLIC_APP_URL}/wizzy.jpeg`;
 
   return {
     title: `${post.title} | ${capitalizeName(post.section)} | ${APP_NAME}`,
@@ -44,7 +44,6 @@ export async function generateMetadata({
       // title: post.title,
       //description: previewText,
       description: `Join the discussion on ${APP_NAME} — read and share thoughts on "${post.title}".`,
-
       url: `${process.env.NEXT_PUBLIC_APP_URL}/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [

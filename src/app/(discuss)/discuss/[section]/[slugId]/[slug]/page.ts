@@ -37,16 +37,13 @@ export async function generateMetadata({
     `https://discuss-mu-three.vercel.app/wizzy.jpeg`;
 
   return {
-    // Browser tab only
-    title: {
-      default: `${post.title} | ${APP_NAME}`,
-      template: `%s | ${APP_NAME}`, // applied only in tab, not OG
-    },
-    //title: `${post.title} | ${APP_NAME}`,
+    title: `${post.title}`,
     description: previewText,
     openGraph: {
       // title: post.title,
-      description: previewText,
+      //description: previewText,
+      description: `Join the discussion on ${APP_NAME} — read and share thoughts on "${post.title}".`,
+
       url: `${process.env.NEXT_PUBLIC_APP_URL}/${section}/${slugId}/${slug}`,
       siteName: APP_NAME,
       images: [

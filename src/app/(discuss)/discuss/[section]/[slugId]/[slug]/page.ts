@@ -1,5 +1,6 @@
 import {API_BASE_URL} from '@/constants/api-resources';
 import {APP_NAME} from '@/constants/settings';
+import {capitalizeName} from '@/lib/formatter';
 import {PostDetailPage} from '@/modules/posts/post-detail';
 import {Metadata} from 'next';
 
@@ -37,7 +38,7 @@ export async function generateMetadata({
     `https://discuss-mu-three.vercel.app/wizzy.jpeg`;
 
   return {
-    title: `${post.title} | ${post.section} | ${APP_NAME}`,
+    title: `${post.title} | ${capitalizeName(post.section)} | ${APP_NAME}`,
     description: previewText,
     openGraph: {
       // title: post.title,

@@ -7,13 +7,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {toast} from '@/components/ui/toast';
 import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
 import {resourceItems, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
+import {logoutRequestAction} from '@/modules/auth/actions';
 import {getUnreadNotificationsCounntRequestAction} from '@/modules/dashboard/notifications/actions';
 import {Role} from '@/types/user.types';
-import {useQuery} from '@tanstack/react-query';
+import {useMutation, useQuery} from '@tanstack/react-query';
 import {
   BarChart2,
   Bell,
@@ -77,7 +79,9 @@ export const SidebarLayoutLeft = () => {
   const location = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isActive = (path: string) => location === path;
-
+  const {mutate: logoutRequest} = useMutation({
+    mutationFn: logoutRequestAction,
+  });
   const {logout, currentUser} = useAuthStore(state => state);
   const [mounted, setMounted] = useState(false);
 
@@ -152,13 +156,32 @@ export const SidebarLayoutLeft = () => {
     },
   ];
 
-  const handleLogout = () => {
-    // Remove the access token
-    document.cookie = `${ACCESS_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
+  const handleLogout = async () => {
+    try {
+      console.log('here....');
+      // Remove the access token
+      const res = await logoutRequestAction();
+      if (res?.data?.code === '200') {
+        // removeCookieAccessToken();
+        // removeCookieRefreshToken();
+        logout();
+        toast.success('Successfully logged out.');
 
-    // Remove the refresh token
-    document.cookie = `${REFRESH_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
-    logout();
+        document.cookie = `${ACCESS_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
+
+        // Remove the refresh token
+        document.cookie = `${REFRESH_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
+        navigate.push('/login');
+      } else {
+        toast.error(
+          'Something went wrong while logging you out. Please try again.',
+        );
+      }
+    } catch (err) {
+      toast.error(
+        'Something went wrong while logging you out. Please try again.',
+      );
+    }
   };
 
   const onToggleTheme = () => {

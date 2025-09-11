@@ -1,6 +1,5 @@
 // stores/useAuthStore.ts
 import {toast} from '@/components/ui/toast';
-import {logoutRequest} from '@/modules/auth/actions';
 import {UserProps} from '@/types/user.types';
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
@@ -38,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         set({});
-        logoutRequest();
+        // logoutRequest();
       },
       sessionExpiredAction: () => {
         set({currentUser: null, isAuthenticated: false});

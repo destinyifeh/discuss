@@ -16,6 +16,7 @@ import {
   ACCESS_TOKEN,
   GOOGLE_SIGNIN_URL,
   REFRESH_TOKEN,
+  SESSION_EXPIRED,
 } from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
@@ -46,14 +47,18 @@ export const LoginPage = () => {
   const searchParams = useSearchParams();
   const next = searchParams.get('next') || '/home';
 
-  const sessionExpired = searchParams.get('reason') === 'sessionExpired';
+  const sessionExpired = searchParams.get('reason');
 
   const {mutate: loginUser} = useMutation({
     mutationFn: loginRequestAction,
   });
 
+  console.log(sessionExpired, 'sesExpired');
+
   useEffect(() => {
-    if (sessionExpired) sessionExpiredAction();
+    if (sessionExpired && sessionExpired === SESSION_EXPIRED) {
+      sessionExpiredAction();
+    }
   }, [sessionExpired]);
 
   const {

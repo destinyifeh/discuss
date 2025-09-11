@@ -58,4 +58,8 @@ export async function generateMetadata({
   };
 }
 
-export default PostDetailPage;
+export default async function Page({params}: {params: any}) {
+  const {slug, slugId, section} = await params;
+
+  return <PostDetailPage params={{slug, slugId, section}} />;
+}

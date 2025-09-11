@@ -31,7 +31,7 @@ import {useInfiniteQuery, useQuery} from '@tanstack/react-query';
 import clsx from 'clsx';
 import {ImagePlus, LockIcon, MessageSquare, Reply, Send, X} from 'lucide-react';
 import Link from 'next/link';
-import {useParams, useRouter} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {useMediaQuery} from 'react-responsive';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {postService} from '../actions';
@@ -40,11 +40,20 @@ import {usePostActions} from '../post-hooks';
 import {MobileCommentSection} from './components/mobile-comment-section';
 import {WebCommentSection} from './components/web-comment-section';
 
-export const PostDetailPage = () => {
+type PostDetailPageProps = {
+  params: {
+    section: string;
+    slugId: string;
+    slug: string;
+  };
+};
+
+export const PostDetailPage = ({params}: PostDetailPageProps) => {
   const {currentUser} = useAuthStore(state => state);
   const {theme} = useGlobalStore(state => state);
-  const {slug} = useParams<{slug: string}>();
-  const {slugId} = useParams<{slugId: string}>();
+  //  const {slug} = useParams<{slug: string}>();
+  //  const {slugId} = useParams<{slugId: string}>();
+  const {slug, slugId} = params;
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
   const isMobile = useMediaQuery({maxWidth: 767});

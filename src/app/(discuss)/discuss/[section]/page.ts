@@ -4,10 +4,6 @@ import {SectionPage} from '@/modules/posts/section';
 
 import {Metadata} from 'next';
 
-type Props = {
-  params: {section: string};
-};
-
 export async function generateMetadata({params}: any): Promise<Metadata> {
   const {section} = await params;
 

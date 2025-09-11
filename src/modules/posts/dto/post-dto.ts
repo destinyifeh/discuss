@@ -1,4 +1,3 @@
-import {APP_NAME} from '@/constants/settings';
 import {capitalizeWords} from '@/lib/formatter';
 import {QuotedCommentProps} from '@/types/post-item.type';
 import {SectionName} from '@/types/section';
@@ -45,7 +44,7 @@ export const formattedPostTitle = (content: string) => {
   // Build title or use fallback if empty
   let postTitle: string;
   if (cleanWords.length === 0) {
-    postTitle = `Post from ${APP_NAME}`; // fallback
+    postTitle = `Post`; // fallback
   } else {
     const rawTitle =
       cleanWords.length > 12

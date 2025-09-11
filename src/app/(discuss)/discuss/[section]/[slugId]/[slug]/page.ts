@@ -15,7 +15,7 @@ export async function generateMetadata({
 }: {
   params: any;
 }): Promise<Metadata> {
-  const {section, slugId, slug} = params;
+  const {section, slugId, slug} = await params;
 
   const res = await fetch(`${API_BASE_URL}/posts/post-details/${slugId}`, {
     next: {revalidate: 60},

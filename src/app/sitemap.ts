@@ -4,8 +4,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/sitemap-posts`,
   ).then(res => res.json());
-  console.log(posts, 'sitemapPost');
-  console.log(Sections, 'sitemapSection');
+
   return [
     // Static pages
     {
@@ -55,26 +54,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
   ];
 }
-
-// export default function sitemap(): MetadataRoute.Sitemap {
-//   return [
-//     {
-//       url: 'https://acme.com',
-//       lastModified: new Date(),
-//       changeFrequency: 'yearly',
-//       priority: 1,
-//     },
-//     {
-//       url: 'https://acme.com/about',
-//       lastModified: new Date(),
-//       changeFrequency: 'monthly',
-//       priority: 0.8,
-//     },
-//     {
-//       url: 'https://acme.com/blog',
-//       lastModified: new Date(),
-//       changeFrequency: 'weekly',
-//       priority: 0.5,
-//     },
-//   ];
-// }

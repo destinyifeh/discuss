@@ -25,7 +25,7 @@ import {ChevronLeft, FileImage, Trash2, X} from 'lucide-react';
 import {useParams, useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {postService} from '../actions';
-import {PostDto, UpdatePostDto} from '../dto/post-dto';
+import {formattedPostTitle, PostDto, UpdatePostDto} from '../dto/post-dto';
 import {usePostActions} from '../post-hooks';
 
 export const CreatePostPage = () => {
@@ -213,7 +213,7 @@ export const CreatePostPage = () => {
       // Update existing post
       updatePost({
         content: content,
-        title: content.split(' ').slice(0, 10).join(' ') + '...',
+        title: formattedPostTitle(content),
         images: images,
         section: selectedSection.toLowerCase() as SectionName,
         postId: post._id as string,
@@ -223,7 +223,7 @@ export const CreatePostPage = () => {
       // Create new post
       addPost({
         content: content,
-        title: content.split(' ').slice(0, 10).join(' ') + '...', // Generate title from content
+        title: formattedPostTitle(content),
         section: selectedSection.toLowerCase() as SectionName,
         images: images,
       });

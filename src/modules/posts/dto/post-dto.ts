@@ -1,3 +1,5 @@
+import {APP_NAME} from '@/constants/settings';
+import {capitalizeWords} from '@/lib/formatter';
 import {QuotedCommentProps} from '@/types/post-item.type';
 import {SectionName} from '@/types/section';
 
@@ -32,16 +34,25 @@ export type UpdateCommentDto = {
   removedImageIds?: string[];
 };
 
-export const QUOTE_START = '---QUOTE_START---';
-export const QUOTE_END = '---QUOTE_END---';
+export const formattedPostTitle = (content: string) => {
+  const plainContent = content.replace(/<[^>]*>/g, ''); // strip HTML
 
-export const formattedQuoteContent = (quoteContent: string) => {
-  const content = quoteContent
-    .replace(/^---QUOTE_START---\s[\w]+:\s/gm, '')
-    .replace(/---IMAGE:\[.*\]---/gm, '');
+  // Remove links (http://, https://, www.)
+  const cleanWords = plainContent
+    .split(/\s+/)
+    .filter(w => !/^https?:\/\//i.test(w) && !/^www\./i.test(w));
 
-  const theContent =
-    content.length > 100 ? content.slice(0, 100) + '...' : content || '';
+  // Build title or use fallback if empty
+  let postTitle: string;
+  if (cleanWords.length === 0) {
+    postTitle = `Shared from ${APP_NAME}`; // fallback
+  } else {
+    const rawTitle =
+      cleanWords.length > 20
+        ? cleanWords.slice(0, 20).join(' ') + '...'
+        : cleanWords.join(' ');
+    postTitle = capitalizeWords(rawTitle);
+  }
 
-  return theContent;
+  return postTitle;
 };

@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
 import {resourceItems, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
@@ -152,6 +153,11 @@ export const SidebarLayoutLeft = () => {
   ];
 
   const handleLogout = () => {
+    // Remove the access token
+    document.cookie = `${ACCESS_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
+
+    // Remove the refresh token
+    document.cookie = `${REFRESH_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
     logout();
   };
 

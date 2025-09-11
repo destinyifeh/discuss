@@ -13,7 +13,7 @@ type PageParams = {
 export async function generateMetadata({
   params,
 }: {
-  params: any;
+  params: Promise<PageParams>;
 }): Promise<Metadata> {
   const {section, slugId, slug} = await params;
 
@@ -58,7 +58,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({params}: {params: any}) {
+export default async function Page({params}: {params: Promise<PageParams>}) {
   const {slug, slugId, section} = await params;
 
   return <PostDetailPage params={{slug, slugId, section}} />;

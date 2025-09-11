@@ -45,11 +45,11 @@ export const formattedPostTitle = (content: string) => {
   // Build title or use fallback if empty
   let postTitle: string;
   if (cleanWords.length === 0) {
-    postTitle = `Shared from ${APP_NAME}`; // fallback
+    postTitle = `Post from ${APP_NAME}`; // fallback
   } else {
     const rawTitle =
-      cleanWords.length > 20
-        ? cleanWords.slice(0, 20).join(' ') + '...'
+      cleanWords.length > 12
+        ? cleanWords.slice(0, 12).join(' ') + '...'
         : cleanWords.join(' ');
     postTitle = capitalizeWords(rawTitle);
   }

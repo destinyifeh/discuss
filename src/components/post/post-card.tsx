@@ -87,10 +87,6 @@ const PostCard = ({
 
   const navigate = useRouter();
   const handleLike = () => {
-    if (navigator.vibrate) {
-      console.log('vibratedd');
-      navigator.vibrate(10); // 10ms vibration
-    }
     likePostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post like');

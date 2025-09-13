@@ -286,7 +286,6 @@ export const HomePostList = () => {
 
   return (
     <div className="">
-      <MobileNavigation />
       <Virtuoso
         className="custom-scrollbar min-h-screen"
         totalCount={totalCount}
@@ -296,6 +295,7 @@ export const HomePostList = () => {
         components={{
           Header: () => (
             <Fragment>
+              <MobileNavigation />
               {!allowTab && (
                 <Tabs
                   defaultValue="for-you"

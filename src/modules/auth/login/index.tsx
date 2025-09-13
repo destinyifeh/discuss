@@ -157,7 +157,7 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
-        <div className="hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app dark:bg-app/90">
+        <div className="hidden lg:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app dark:bg-app/90">
           <div>
             {/* <svg
                 viewBox="0 0 24 24"

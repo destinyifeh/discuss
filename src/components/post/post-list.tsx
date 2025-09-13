@@ -223,8 +223,8 @@ export const HomePostList = () => {
       return page < pages ? page + 1 : undefined;
     },
     placeholderData: previousData => previousData,
-    // refetchInterval: 5000, // Poll every 5s
-    // refetchIntervalInBackground: false,
+    refetchInterval: 5000, // Poll every 5s
+    refetchIntervalInBackground: false,
   });
   useEffect(() => {
     setMounted(true);
@@ -286,6 +286,7 @@ export const HomePostList = () => {
 
   return (
     <div className="">
+      <MobileNavigation />
       <Virtuoso
         className="custom-scrollbar min-h-screen"
         totalCount={totalCount}
@@ -295,8 +296,6 @@ export const HomePostList = () => {
         components={{
           Header: () => (
             <Fragment>
-              <MobileNavigation />
-
               {!allowTab && (
                 <Tabs
                   defaultValue="for-you"

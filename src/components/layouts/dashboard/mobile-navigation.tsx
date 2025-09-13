@@ -46,8 +46,8 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     queryKey: ['unreadCount'],
     queryFn: () => getUnreadNotificationsCounntRequestAction(),
     retry: 1,
-    refetchInterval: 5000,
-    refetchIntervalInBackground: false,
+    // refetchInterval: 5000,
+    //refetchIntervalInBackground: false,
   });
 
   const isActive = (path: string) => location === path;
@@ -91,7 +91,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     },
     {
       label: 'Ad View',
-      icon: <BarChart2 size={24} className="mr-4" />,
+      icon: <BarChart2 size={24} />,
       path: '/advertise/ad-performance',
     },
 
@@ -100,7 +100,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       ? [
           {
             label: 'Admin',
-            icon: <User size={24} className="mr-4" />,
+            icon: <User size={24} />,
             path: '/admin',
           },
         ]

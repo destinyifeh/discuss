@@ -181,10 +181,10 @@ export const Users = () => {
             <div
               key={user._id}
               className="flex items-center justify-between p-4">
-              <div
-                className="flex items-center gap-3 cursor-pointer flex-1"
-                onClick={() => navigate.push(`/user/${user.username}`)}>
-                <Avatar>
+              <div className="flex items-center gap-3 cursor-pointer flex-1">
+                <Avatar
+                  className="cursor-pointer active:scale-90 transition-transform duration-150"
+                  onClick={() => navigate.push(`/user/${user.username}`)}>
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback className="capitalize text-app text-2xl">
                     {user.username.charAt(0)}
@@ -209,7 +209,7 @@ export const Users = () => {
               </div>
               {!isCurrentUser && (
                 <Button
-                  className={`rounded-full ml-3 ${
+                  className={`rounded-full ml-3 active:scale-90 transition-transform duration-150 ${
                     isFollowing
                       ? 'bg-transparent text-black border border-gray-300 hover:bg-red-50 hover:text-red-600 hover:border-red-300 dark:text-white'
                       : 'bg-app text-white hover:bg-app/90'

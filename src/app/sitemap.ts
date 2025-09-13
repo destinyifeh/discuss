@@ -1,8 +1,10 @@
 import {Sections} from '@/constants/data';
 import type {MetadataRoute} from 'next';
+export const revalidate = 3600; // invalidate every hour
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/sitemap-posts`,
+    {next: {revalidate: 3600}},
   ).then(res => res.json());
 
   return [

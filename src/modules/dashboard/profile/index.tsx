@@ -221,7 +221,7 @@ export const ProfilePage = () => {
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="outline"
-                          className="rounded-full border-app-border"
+                          className="rounded-full border-app-border active:scale-90 transition-transform duration-150"
                           onClick={() =>
                             navigate.push(`/profile/${user}/edit`)
                           }>
@@ -229,7 +229,7 @@ export const ProfilePage = () => {
                         </Button>
                         <Button
                           variant="outline"
-                          className="rounded-full border-app-border"
+                          className="rounded-full border-app-border active:scale-90 transition-transform duration-150"
                           onClick={() => navigate.push('/settings')}>
                           <Settings className="h-4 w-4 mr-2" />
                           Settings
@@ -279,7 +279,7 @@ export const ProfilePage = () => {
 
                       <div className="flex gap-4 mt-3">
                         <Link
-                          className="flex items-center gap-1 cursor-pointer hover:underline"
+                          className="flex items-center gap-1 cursor-pointer hover:underline active:scale-90 transition-transform duration-150"
                           href={`/profile/${currentUser?.username}/following`}>
                           <span className="font-bold">
                             {currentUser?.following?.length}
@@ -287,7 +287,7 @@ export const ProfilePage = () => {
                           <span className="text-app-gray">Following</span>
                         </Link>
                         <Link
-                          className="flex items-center gap-1 cursor-pointer hover:underline"
+                          className="flex items-center gap-1 cursor-pointer hover:underline active:scale-90 transition-transform duration-150"
                           href={`/profile/${currentUser?.username}/followers`}>
                           <span className="font-bold">
                             {currentUser?.followers?.length}

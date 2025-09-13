@@ -200,7 +200,7 @@ export const SidebarLayoutLeft = () => {
             variant="ghost"
             size="icon"
             onClick={onToggleTheme}
-            className="hover:bg-app-hover">
+            className="hover:bg-app-hover active:scale-90 transition-transform duration-150">
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </Button>
         </div>
@@ -223,7 +223,7 @@ export const SidebarLayoutLeft = () => {
               key={item.path}
               href={item.path}
               className={cn(
-                'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition dark:hover:bg-app-dark-bg/10',
+                'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition dark:hover:bg-app-dark-bg/10 active:scale-90 transition-transform duration-150',
                 isActive(item.path) ? 'font-bold' : 'font-normal',
               )}>
               <div className="flex items-center w-full">
@@ -245,7 +245,7 @@ export const SidebarLayoutLeft = () => {
               key={item.path}
               href={item.path}
               className={cn(
-                'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition dark:hover:bg-app-dark-bg/10',
+                'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition dark:hover:bg-app-dark-bg/10 active:scale-90 transition-transform duration-150',
                 isActive(item.path) ? 'font-bold' : 'font-normal',
               )}>
               {item.icon}
@@ -264,7 +264,7 @@ export const SidebarLayoutLeft = () => {
         </div> */}
         <div className="mb-10">
           <Button
-            className="text-white rounded-full py-6 w-full mt-4 hover:bg-app/90 bg-app darK:hover:bg-app bg-app/90"
+            className="text-white rounded-full py-6 w-full mt-4 hover:bg-app/90 bg-app darK:hover:bg-app bg-app/90 active:scale-90 transition-transform duration-150"
             onClick={() => navigate.push('/discuss')}>
             Start Discussion
           </Button>
@@ -348,6 +348,8 @@ export const SidebarLayoutRight = () => {
     setMounted(true);
   }, []);
 
+  const showWhoTOFollow = false;
+
   if (!mounted) return null;
   return (
     <aside className="hidden lg:flex flex-col w-80 h-screen border-0 p-4 border-app-border ">
@@ -359,35 +361,38 @@ export const SidebarLayoutRight = () => {
               <Link
                 key={section.id}
                 href={`/discuss/${section.name.toLowerCase()}`}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-white dark:hover:bg-app-dark-bg/10">
+                className="flex items-center justify-between p-2 rounded-md hover:bg-white dark:hover:bg-app-dark-bg/10 active:scale-90 transition-transform duration-150">
                 <span className="text-app font-semibold">{section.name}</span>
               </Link>
             ))}
           </div>
         </div>
+
         {/* Who to follow  */}
-        <div className="rounded-lg p-4 bg-app-hover dark:bg-background border border-app-border">
-          <h2 className="font-bold text-xl mb-4">Who to follow</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <Avatar>
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" />
-                  <AvatarFallback>A</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-bold">Alex Johnson</p>
-                  <p className="text-app-gray">God is goood</p>
+        {showWhoTOFollow && (
+          <div className="rounded-lg p-4 bg-app-hover dark:bg-background border border-app-border">
+            <h2 className="font-bold text-xl mb-4">Who to follow</h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-3">
+                  <Avatar>
+                    <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" />
+                    <AvatarFallback>A</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-bold">Alex Johnson</p>
+                    <p className="text-app-gray">God is goood</p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  className="rounded-full text-white bg-app hover:bg-app/90">
+                  Follow
+                </Button>
               </div>
-              <Button
-                size="sm"
-                className="rounded-full text-white bg-app hover:bg-app/90">
-                Follow
-              </Button>
             </div>
           </div>
-        </div>
+        )}
         {/* Other resources  */}
         <div className="rounded-lg p-4 bg-app-hover dark:bg-background border border-app-border">
           <h2 className="font-bold text-xl mb-4">Resources</h2>
@@ -396,7 +401,7 @@ export const SidebarLayoutRight = () => {
               <Link
                 key={resource.label}
                 href={`${resource.path}`}
-                className="flex items-center justify-between p-2 hover:bg-white rounded-md dark:hover:bg-app-dark-bg/10">
+                className="flex items-center justify-between p-2 hover:bg-white rounded-md dark:hover:bg-app-dark-bg/10 active:scale-90 transition-transform duration-150">
                 <span className="text-app font-semibold">{resource.label}</span>
               </Link>
             ))}

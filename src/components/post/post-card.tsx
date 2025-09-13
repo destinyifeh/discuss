@@ -4,6 +4,8 @@ import {cn} from '@/lib/utils';
 import {PostFeedProps, PostStatus} from '@/types/post-item.type';
 import copy from 'copy-to-clipboard';
 import {formatDistanceToNow} from 'date-fns';
+import {motion} from 'framer-motion';
+
 import {
   BarChart3,
   Bookmark,
@@ -86,6 +88,10 @@ const PostCard = ({
 
   const navigate = useRouter();
   const handleLike = () => {
+    if (navigator.vibrate) {
+      console.log('vibratedd');
+      navigator.vibrate(10); // 10ms vibration
+    }
     likePostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post like');
@@ -331,7 +337,7 @@ const PostCard = ({
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background ">
       <div className="flex gap-3">
         <Avatar
-          className="w-10 h-10 cursor-pointer"
+          className="w-10 h-10 cursor-pointer active:scale-90 transition-transform duration-150"
           onClick={navigateToUserProfile}>
           <AvatarImage src={post.user.avatar ?? undefined} />
           <AvatarFallback className="capitalize text-app text-3xl">
@@ -343,10 +349,10 @@ const PostCard = ({
           <div className="flex items-center gap-1">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-1 overflow-hidden">
-                <div className="font-bold hover:underline truncate cursor-pointer">
+                <div className="font-bold hover:underline truncate cursor-pointer active:scale-90 transition-transform duration-150">
                   <Link
                     href={`/user/${post.user.username}`}
-                    className="capitalize">
+                    className="capitalize active:scale-90 transition-transform duration-150">
                     {post.user.username}
                   </Link>
                 </div>
@@ -355,7 +361,7 @@ const PostCard = ({
 
                 <Link
                   href={`/discuss/${post.section.toLowerCase()}`}
-                  className="text-app hover:underline truncate"
+                  className="text-app hover:underline truncate active:scale-90 transition-transform duration-150"
                   onClick={e => e.stopPropagation()}>
                   {post.section.toLowerCase()}
                 </Link>
@@ -416,13 +422,13 @@ const PostCard = ({
                     )}
                     <DropdownMenuItem
                       onClick={() => handleReport(post._id)}
-                      className="cursor-pointer justify-center">
+                      className="cursor-pointer justify-center active:scale-90 transition-transform duration-150">
                       Report
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => setIsMenuOpen(false)}
-                      className="cursor-pointer text-app justify-center">
+                      className="cursor-pointer text-app justify-center active:scale-90 transition-transform duration-150">
                       Cancel
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -435,7 +441,7 @@ const PostCard = ({
             href={`/discuss/${post.section.toLowerCase()}/${post.slugId}/${
               post.slug
             }`}
-            className="block">
+            className="block active:scale-90 transition-transform duration-150">
             <div className="mt-1">
               {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}
               <PostContent content={displayContent} />
@@ -486,7 +492,7 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app"
+                  className="text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
                   onClick={handleCommentClick}>
                   <div className="flex items-center gap-1">
                     <MessageSquare size={18} />
@@ -512,11 +518,28 @@ const PostCard = ({
                   </div>
                 </Button> */}
 
+                <motion.button
+                  whileTap={{scale: 0.9}}
+                  className={cn(
+                    'p-2 rounded-full text-app-gray hover:text-red-500',
+                    isLiked && 'text-red-500',
+                  )}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleLike();
+                  }}>
+                  <div className="flex items-center gap-1">
+                    <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
+                    <span className="text-xs">{post.likedBy.length || 0}</span>
+                  </div>
+                </motion.button>
+
                 <Button
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    'text-app-gray hover:text-red-500',
+                    'text-app-gray hover:text-red-500 active:scale-90 transition-transform duration-150',
                     isLiked && 'text-red-500',
                   )}
                   onClick={e => {
@@ -547,7 +570,7 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app"
+                  className="text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -575,7 +598,7 @@ const PostCard = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-app-gray hover:text-app"
+                      className="text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
                       onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -589,7 +612,7 @@ const PostCard = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="justify-start"
+                        className="justify-start active:scale-90 transition-transform duration-150"
                         onClick={handleCopyLink}>
                         <LinkIcon size={16} className="mr-2" />
                         Copy link

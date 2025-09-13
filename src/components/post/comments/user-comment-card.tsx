@@ -273,7 +273,9 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
-        <Avatar className="w-10 h-10" onClick={navigateToUserProfile}>
+        <Avatar
+          className="w-10 h-10 cursor-pointer active:scale-90 transition-transform duration-150"
+          onClick={navigateToUserProfile}>
           <AvatarImage src={comment.commentBy.avatar} />
           <AvatarFallback className="capitalize text-app text-3xl">
             {comment.commentBy.username.charAt(0)}
@@ -285,7 +287,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
             <div className="flex items-center gap-1">
               <Link
                 href={`/user/${comment.commentBy.username}`}
-                className="font-bold hover:underline capitalize">
+                className="font-bold hover:underline capitalize active:scale-90 transition-transform duration-150">
                 {comment.commentBy.username}
               </Link>
 
@@ -305,14 +307,14 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     onClick={handleEdit}
-                    className="cursor-pointer">
+                    className="cursor-pointer active:scale-90 transition-transform duration-150">
                     <Pencil size={16} className="mr-2" />
                     Edit
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
                     onClick={handleReport}
-                    className="cursor-pointer">
+                    className="cursor-pointer active:scale-90 transition-transform duration-150">
                     <Trash size={16} className="mr-2" />
                     Delete
                   </DropdownMenuItem>
@@ -321,12 +323,12 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
             )}
           </div>
           <div className="flex flex-row gap-2">
-            <p>Replying to</p>
+            <p>Replied</p>
             <Link
               href={`/discuss/${comment.post.section.toLowerCase()}/${
                 comment.post.slugId
               }/${comment.post.slug}`}
-              className="text-blue-500">
+              className="text-blue-500 active:scale-90 transition-transform duration-150">
               {comment.post.title}
             </Link>
           </div>
@@ -353,7 +355,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto"
+              className="text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
               //onClick={() => navigate.push(`/post/${comment.postId}/reply`)}
               onClick={handleQuote}>
               <MessageSquare size={16} className="mr-1" />
@@ -373,7 +375,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
               variant="ghost"
               size="sm"
               className={cn(
-                'text-app-gray hover:text-red-500 p-0 h-auto',
+                'text-app-gray hover:text-red-500 p-0 h-auto active:scale-90 transition-transform duration-150',
                 isLiked && 'text-red-500',
               )}
               onClick={handleLike}>
@@ -395,7 +397,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto"
+              className="text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
               onClick={handleDisLike}>
               <ThumbsDown
                 size={16}

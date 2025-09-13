@@ -13,7 +13,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
-import {Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {logoutRequestAction} from '@/modules/auth/actions';
@@ -48,6 +47,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       if (res?.data?.code === '200') {
         // removeCookieAccessToken();
         // removeCookieRefreshToken();
+        logout();
         toast.success('Successfully logged out.');
 
         document.cookie = `${ACCESS_TOKEN}=; Path=/; Max-Age=0; SameSite=None; Secure`;
@@ -66,19 +66,6 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       );
     }
   };
-
-  // Get Technology section for the resources section
-  const techSection = Sections.find(cat => cat.name === 'Technology');
-
-  // Add the "Advertise" section
-  const advertiseSection = {
-    id: 'advertise',
-    name: 'How to Advertise',
-    description: 'Learn about advertising opportunities on our platform',
-  };
-
-  // Resources categories with only tech and advertise
-  const resourceCategories = [techSection, advertiseSection].filter(Boolean);
 
   const navItems = [
     {icon: <Home size={24} />, label: 'Home', path: '/home'},
@@ -136,7 +123,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
                     <Link
                       href={item.path}
                       className={cn(
-                        'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition',
+                        'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition active:scale-90 transition-transform duration-150',
                         isActive(item.path) ? 'font-bold' : 'font-normal',
                       )}>
                       {item.icon}
@@ -149,7 +136,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
               <div className="p-4">
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start active:scale-90 transition-transform duration-150"
                   onClick={handleLogout}>
                   <LogOut size={18} className="mr-2" />
                   Log out
@@ -165,7 +152,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
           variant="ghost"
           size="icon"
           onClick={() => router.push('/notifications')}
-          className="relative">
+          className="relative active:scale-90 transition-transform duration-150">
           <Bell size={24} />
 
           {unreadCount && unreadCount > 0 && (

@@ -327,7 +327,7 @@ export const HomePostList = () => {
                       <Badge
                         key={section.id}
                         variant="outline"
-                        className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border"
+                        className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border active:scale-90 transition-transform duration-150"
                         onClick={() => onSectionNavigate(section.name)}>
                         {section.name}
                       </Badge>
@@ -339,7 +339,7 @@ export const HomePostList = () => {
                     <Badge
                       key={section.id}
                       variant="outline"
-                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold border-app-border text-app"
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold border-app-border text-app active:scale-90 transition-transform duration-150"
                       onClick={() =>
                         onSectionOptionsNavigate(section.description as string)
                       }>
@@ -357,7 +357,7 @@ export const HomePostList = () => {
                     />
                     <div
                       onClick={() => navigate.push('/explore')}
-                      className="border-0 rounded-full pl-10 form-input text-gray-500">
+                      className="border-0 rounded-full pl-10 form-input text-gray-500 active:scale-90 transition-transform duration-150">
                       Search
                     </div>
                   </div>

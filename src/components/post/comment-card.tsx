@@ -229,7 +229,9 @@ const CommentCard = ({
   return (
     <div className="border-b py-4 px-2 transition-colors hover:bg-app-hover border-app-border dark:hover:bg-background">
       <div className="flex gap-3">
-        <Avatar className="w-10 h-10" onClick={navigateToUserProfile}>
+        <Avatar
+          className="w-10 h-10 active:scale-90 transition-transform duration-150"
+          onClick={navigateToUserProfile}>
           <AvatarImage src={comment.commentBy.avatar} />
           <AvatarFallback className="capitalize text-app text-3xl">
             {comment.commentBy.username.charAt(0)}
@@ -241,7 +243,7 @@ const CommentCard = ({
             <div className="flex items-center gap-1">
               <Link
                 href={`/user/${comment.commentBy.username}`}
-                className="font-bold hover:underline capitalize">
+                className="font-bold hover:underline capitalize active:scale-90 transition-transform duration-150">
                 {comment.commentBy.username}
               </Link>
 
@@ -262,7 +264,7 @@ const CommentCard = ({
                 {!isCommentedUser && (
                   <DropdownMenuItem
                     onClick={() => handleReport(comment._id)}
-                    className="cursor-pointer justify-center">
+                    className="cursor-pointer justify-center active:scale-90 transition-transform duration-150">
                     {/* <Flag size={16} className="mr-2" /> */}
                     Report
                   </DropdownMenuItem>
@@ -270,7 +272,7 @@ const CommentCard = ({
                 {isCommentedUser && (
                   <DropdownMenuItem
                     onClick={handleEdit}
-                    className="cursor-pointer justify-center">
+                    className="cursor-pointer justify-center active:scale-90 transition-transform duration-150">
                     {/* <Pencil size={16} className="mr-2" /> */}
                     Edit
                   </DropdownMenuItem>
@@ -301,7 +303,7 @@ const CommentCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto"
+              className="text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
               //onClick={() => navigate.push(`/post/${comment.postId}/reply`)}
               onClick={handleQuote}>
               <MessageSquare size={16} className="mr-1" />
@@ -321,7 +323,7 @@ const CommentCard = ({
               variant="ghost"
               size="sm"
               className={cn(
-                'text-app-gray hover:text-red-500 p-0 h-auto',
+                'text-app-gray hover:text-red-500 p-0 h-auto active:scale-90 transition-transform duration-150',
                 isLiked && 'text-red-500',
               )}
               onClick={handleLike}>
@@ -343,7 +345,7 @@ const CommentCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto"
+              className="text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
               onClick={handleDisLike}>
               <ThumbsDown
                 size={16}

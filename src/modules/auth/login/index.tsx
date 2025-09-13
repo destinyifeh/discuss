@@ -59,6 +59,7 @@ export const LoginPage = () => {
     if (sessionExpired && sessionExpired === SESSION_EXPIRED) {
       sessionExpiredAction();
     }
+    setIsGoogleLoading(false);
   }, [sessionExpired]);
 
   const {

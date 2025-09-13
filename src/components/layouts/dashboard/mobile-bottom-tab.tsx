@@ -23,28 +23,40 @@ export const MobileBottomTab = () => {
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-app-border flex justify-around py-3 z-20 lg:hidden">
           <Link
             href="/home"
-            className={cn('p-2', isActive('/home') && 'text-app')}>
+            className={cn(
+              'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
+              isActive('/home') && 'text-app',
+            )}>
             <Home size={24} />
           </Link>
           <Link
             href="/explore"
-            className={cn('p-2', isActive('/explore') && 'text-app')}>
+            className={cn(
+              'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
+              isActive('/explore') && 'text-app',
+            )}>
             <Search size={24} />
           </Link>
           <Link
             href="/discuss"
-            className={cn('p-2', isActive('/create-post') && 'text-app')}>
+            className={cn(
+              'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
+              isActive('/create-post') && 'text-app',
+            )}>
             <PenSquare size={24} />
           </Link>
           <Link
             href="/bookmarks"
-            className={cn('p-2', isActive('/bookmarks') && 'text-app')}>
+            className={cn(
+              'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
+              isActive('/bookmarks') && 'text-app',
+            )}>
             <BookmarkIcon size={24} />
           </Link>
           <Link
             href={`/profile/${currentUser?.username}`}
             className={cn(
-              'p-2',
+              'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
               isActive(`/profile/${currentUser?.username}`) && 'text-app',
             )}>
             <User size={24} />

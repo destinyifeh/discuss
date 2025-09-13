@@ -152,7 +152,7 @@ export const SidebarLayoutLeft = () => {
     {
       icon: <User size={24} className="mr-4" />,
       label: 'Profile',
-      path: `/profile/${currentUser?.username}`,
+      path: `/profile/${currentUser?.username?.toLowerCase()}`,
     },
   ];
 
@@ -312,7 +312,7 @@ export const SidebarLayoutLeft = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem asChild>
                 <Link
-                  href={`/profile/${currentUser?.username}`}
+                  href={`/profile/${currentUser?.username?.toLowerCase()}`}
                   className="flex items-center">
                   <User className="mr-2 h-4 w-4" />
                   <span className="">Profile</span>

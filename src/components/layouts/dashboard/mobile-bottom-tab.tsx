@@ -54,10 +54,11 @@ export const MobileBottomTab = () => {
             <BookmarkIcon size={24} />
           </Link>
           <Link
-            href={`/profile/${currentUser?.username}`}
+            href={`/profile/${currentUser?.username.toLowerCase()}`}
             className={cn(
               'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
-              isActive(`/profile/${currentUser?.username}`) && 'text-app',
+              isActive(`/profile/${currentUser?.username.toLowerCase()}`) &&
+                'text-app',
             )}>
             <User size={24} />
           </Link>

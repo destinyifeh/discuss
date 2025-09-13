@@ -63,6 +63,8 @@ export const SectionPostList = ({
     placeholderData: previousData => previousData,
     enabled: shouldQuery,
     retry: 1,
+    refetchInterval: 5000, // 👈 Poll every 5s
+    refetchIntervalInBackground: false,
   });
 
   const sectionData = useMemo(() => {

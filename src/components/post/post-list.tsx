@@ -63,8 +63,8 @@ export const SectionPostList = ({
     placeholderData: previousData => previousData,
     enabled: shouldQuery,
     retry: 1,
-    //refetchInterval: 5000, // Poll every 5s
-    //refetchIntervalInBackground: false,
+    refetchInterval: 5000, // Poll every 5s
+    refetchIntervalInBackground: false,
   });
 
   const sectionData = useMemo(() => {
@@ -223,8 +223,8 @@ export const HomePostList = () => {
       return page < pages ? page + 1 : undefined;
     },
     placeholderData: previousData => previousData,
-    refetchInterval: 5000, // Poll every 5s
-    refetchIntervalInBackground: false,
+    // refetchInterval: 5000, // Poll every 5s
+    // refetchIntervalInBackground: false,
   });
   useEffect(() => {
     setMounted(true);

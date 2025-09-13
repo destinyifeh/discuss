@@ -17,9 +17,18 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {logoutRequestAction} from '@/modules/auth/actions';
 import {getUnreadNotificationsCounntRequestAction} from '@/modules/dashboard/notifications/actions';
+import {Role} from '@/types/user.types';
 import {VisuallyHidden} from '@radix-ui/react-visually-hidden';
 import {useQuery} from '@tanstack/react-query';
-import {Bell, BookmarkIcon, Home, LogOut, Search, User} from 'lucide-react';
+import {
+  BarChart2,
+  Bell,
+  BookmarkIcon,
+  Home,
+  LogOut,
+  Search,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
 import {toast} from 'sonner';
 
@@ -80,6 +89,22 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       label: 'Profile',
       path: `/profile/${currentUser?.username?.toLowerCase()}`,
     },
+    {
+      label: 'Ad View',
+      icon: <BarChart2 size={24} className="mr-4" />,
+      path: '/advertise/ad-performance',
+    },
+
+    ...(currentUser?.role === Role.SUPER_ADMIN ||
+    currentUser?.role === Role.ADMIN
+      ? [
+          {
+            label: 'Admin',
+            icon: <User size={24} className="mr-4" />,
+            path: '/admin',
+          },
+        ]
+      : []),
   ];
 
   return (

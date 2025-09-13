@@ -5,7 +5,13 @@ import React, {useState} from 'react';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
-import {Sheet, SheetContent, SheetTitle} from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
@@ -23,6 +29,7 @@ import {
   Search,
   User,
 } from 'lucide-react';
+import Link from 'next/link';
 import {toast} from 'sonner';
 
 interface MainLayoutProps {
@@ -34,7 +41,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   const location = usePathname();
   const {logout, currentUser} = useAuthStore(state => state);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [open, setOpen] = useState(false);
+
   const {error, data: unreadCount} = useQuery({
     queryKey: ['unreadCount'],
     queryFn: () => getUnreadNotificationsCounntRequestAction(),
@@ -105,80 +112,67 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       // className={clsx('min-h-screen flex lg:hidden', {
       className="lg:hidden">
       <div className="sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30 border-app-border">
-        <div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="p-0"
-            onClick={() => setOpen(true)}>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={currentUser?.avatar ?? undefined} />
-              <AvatarFallback className="capitalize text-app text-2xl">
-                {currentUser?.username.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            {/* <Menu size={24} /> */}
-          </Button>
-
-          <Sheet open={open} onOpenChange={setOpen}>
-            {/* <SheetTrigger asChild>
-           
-          </SheetTrigger> */}
-            {/* <SheetContent side="left" className="w-64"> */}
-            <SheetContent
-              side="left"
-              className="w-64"
-              onOpenAutoFocus={e => e.preventDefault()}>
-              <VisuallyHidden>
-                <SheetTitle>Mobile Sidebar</SheetTitle>
-              </VisuallyHidden>
-              <div className="flex flex-col h-full">
-                <div className="p-4 flex items-center gap-2">
-                  <Avatar>
-                    <AvatarImage src={currentUser?.avatar ?? undefined} />
-                    <AvatarFallback className="capitalize text-app text-3xl">
-                      {currentUser?.username.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold capitalize">
-                      {currentUser?.username}
-                    </p>
-                    {/* <p className="text-app-gray">@{currentUser?.username}</p> */}
-                  </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="p-0">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={currentUser?.avatar ?? undefined} />
+                <AvatarFallback className="capitalize text-app text-2xl">
+                  {currentUser?.username.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              {/* <Menu size={24} /> */}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64">
+            <VisuallyHidden>
+              <SheetTitle>Mobile Sidebar</SheetTitle>
+            </VisuallyHidden>
+            <div className="flex flex-col h-full">
+              <div className="p-4 flex items-center gap-2">
+                <Avatar>
+                  <AvatarImage src={currentUser?.avatar ?? undefined} />
+                  <AvatarFallback className="capitalize text-app text-3xl">
+                    {currentUser?.username.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-bold capitalize">
+                    {currentUser?.username}
+                  </p>
+                  {/* <p className="text-app-gray">@{currentUser?.username}</p> */}
                 </div>
+              </div>
 
-                {/* <nav className="flex-1 space-y-1 p-2">
-                  {navItems.map((item, index) => (
-                    // <SheetClose asChild key={item.label}>
+              <nav className="flex-1 space-y-1 p-2">
+                {navItems.map((item, index) => (
+                  <SheetClose asChild key={item.label}>
                     <Link
                       href={item.path}
                       className={cn(
                         'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition active:scale-90 transition-transform duration-150',
                         isActive(item.path) ? 'font-bold' : 'font-normal',
-                      )}
-                       onClick={() => setOpen(false)}
-                    >
+                      )}>
                       {item.icon}
                       <span>{item.label}</span>
                     </Link>
-                    // </SheetClose>
-                  ))}
-                </nav> */}
+                  </SheetClose>
+                ))}
+              </nav>
 
-                <div className="p-4">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start active:scale-90 transition-transform duration-150"
-                    onClick={handleLogout}>
-                    <LogOut size={18} className="mr-2" />
-                    Log out
-                  </Button>
-                </div>
+              <div className="p-4">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start active:scale-90 transition-transform duration-150"
+                  onClick={handleLogout}>
+                  <LogOut size={18} className="mr-2" />
+                  Log out
+                </Button>
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
         <h1 className="text-xl font-bold">Discussday</h1>
 
         <Button

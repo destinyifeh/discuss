@@ -441,7 +441,7 @@ const PostCard = ({
             href={`/discuss/${post.section.toLowerCase()}/${post.slugId}/${
               post.slug
             }`}
-            className="block active:scale-90 transition-transform duration-150">
+            className="block">
             <div className="mt-1">
               {/* <p className="whitespace-pre-wrap">{displayContent}</p> */}
               <PostContent content={displayContent} />

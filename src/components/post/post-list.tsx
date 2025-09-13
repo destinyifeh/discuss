@@ -63,7 +63,7 @@ export const SectionPostList = ({
     placeholderData: previousData => previousData,
     enabled: shouldQuery,
     retry: 1,
-    refetchInterval: 5000, // 👈 Poll every 5s
+    refetchInterval: 5000, // Poll every 5s
     refetchIntervalInBackground: false,
   });
 
@@ -223,10 +223,8 @@ export const HomePostList = () => {
       return page < pages ? page + 1 : undefined;
     },
     placeholderData: previousData => previousData,
-    // refetchOnWindowFocus: true,
-    // refetchIntervalInBackground: true,
-    // refetchOnReconnect: true,
-    // refetchInterval: 10000,
+    refetchInterval: 5000, // Poll every 5s
+    refetchIntervalInBackground: false,
   });
   useEffect(() => {
     setMounted(true);

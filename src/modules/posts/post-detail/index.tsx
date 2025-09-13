@@ -116,6 +116,8 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
     },
     placeholderData: previousData => previousData,
     enabled: !!post?._id,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
   });
 
   const commentsData = useMemo(() => {

@@ -4,7 +4,6 @@ import {cn} from '@/lib/utils';
 import {PostFeedProps, PostStatus} from '@/types/post-item.type';
 import copy from 'copy-to-clipboard';
 import {formatDistanceToNow} from 'date-fns';
-import {motion} from 'framer-motion';
 
 import {
   BarChart3,
@@ -14,7 +13,7 @@ import {
   LinkIcon,
   MessageSquare,
   MoreHorizontal,
-  Share2,
+  Share,
   UserCheck,
   UserPlus,
 } from 'lucide-react';
@@ -518,23 +517,6 @@ const PostCard = ({
                   </div>
                 </Button> */}
 
-                <motion.button
-                  whileTap={{scale: 0.9}}
-                  className={cn(
-                    'p-2 rounded-full text-app-gray hover:text-red-500',
-                    isLiked && 'text-red-500',
-                  )}
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleLike();
-                  }}>
-                  <div className="flex items-center gap-1">
-                    <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                    <span className="text-xs">{post.likedBy.length || 0}</span>
-                  </div>
-                </motion.button>
-
                 <Button
                   variant="ghost"
                   size="icon"
@@ -604,7 +586,7 @@ const PostCard = ({
                         e.stopPropagation();
                         setSharePopoverOpen(!sharePopoverOpen);
                       }}>
-                      <Share2 size={18} />
+                      <Share size={18} />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-48 p-2">

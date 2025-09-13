@@ -89,6 +89,8 @@ export const SidebarLayoutLeft = () => {
     queryKey: ['unreadCount'],
     queryFn: () => getUnreadNotificationsCounntRequestAction(),
     retry: 1,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
   });
 
   useEffect(() => {

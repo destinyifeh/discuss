@@ -1,6 +1,6 @@
 'use client';
 
-import {HomeDashboardSkeleton} from '@/components/skeleton/home-dashboard-skeleton';
+import ScreenLoader from '@/components/feedbacks/screen-loader';
 import {toast} from '@/components/ui/toast';
 import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
@@ -57,8 +57,8 @@ export const GoogleCallbackPage = () => {
   /* -------- render phase -------------------------------------- */
 
   if (isLoading) {
-    return <HomeDashboardSkeleton />;
+    return <ScreenLoader />;
   }
 
-  return null;
+  return <ScreenLoader />;
 };

@@ -7,7 +7,6 @@ import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetTitle,
   SheetTrigger,
@@ -41,13 +40,13 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
   const location = usePathname();
   const {logout, currentUser} = useAuthStore(state => state);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const [open, setOpen] = useState(false);
   const {error, data: unreadCount} = useQuery({
     queryKey: ['unreadCount'],
     queryFn: () => getUnreadNotificationsCounntRequestAction(),
     retry: 1,
-    // refetchInterval: 5000,
-    //refetchIntervalInBackground: false,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
   });
 
   const isActive = (path: string) => location === path;
@@ -112,7 +111,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
       // className={clsx('min-h-screen flex lg:hidden', {
       className="lg:hidden">
       <div className="sticky top-0 left-0 right-0 border-b flex justify-between items-center py-3 px-2 z-30 border-app-border">
-        <Sheet>
+        <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="p-0">
               <Avatar className="h-8 w-8">
@@ -146,17 +145,18 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
 
               <nav className="flex-1 space-y-1 p-2">
                 {navItems.map((item, index) => (
-                  <SheetClose asChild key={item.label}>
-                    <Link
-                      href={item.path}
-                      className={cn(
-                        'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition active:scale-90 transition-transform duration-150',
-                        isActive(item.path) ? 'font-bold' : 'font-normal',
-                      )}>
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  </SheetClose>
+                  // <SheetClose asChild key={item.label}>
+                  <Link
+                    href={item.path}
+                    className={cn(
+                      'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition active:scale-90 transition-transform duration-150',
+                      isActive(item.path) ? 'font-bold' : 'font-normal',
+                    )}
+                    onClick={() => setOpen(false)}>
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                  // </SheetClose>
                 ))}
               </nav>
 

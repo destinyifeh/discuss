@@ -111,10 +111,17 @@ export const AdPlanPage = () => {
     // Only the basic plan requires section
     const requiresSection = plan === 'basic' || plan === 'professional';
     const isCommonInvalid =
-      !title || !targetUrl || !duration || (requiresSection && !section);
+      title.length < 5 ||
+      !targetUrl ||
+      !duration ||
+      (requiresSection && !section);
 
     if (type === 'sponsored') {
-      if (!content || !callToAction || isCommonInvalid) {
+      if (
+        (content && content?.length < 50) ||
+        !callToAction ||
+        isCommonInvalid
+      ) {
         return true; // disable button
       }
     } else if (type === 'banner') {
@@ -364,6 +371,7 @@ export const AdPlanPage = () => {
 
                 <div className="mb-5 w-full md:mb-0">
                   <h2 className="text-lg font-bold mb-4">Ad Title</h2>
+
                   <input
                     type="text"
                     className="w-full p-2 border rounded-md form-input"
@@ -371,17 +379,19 @@ export const AdPlanPage = () => {
                     onChange={e =>
                       setPreviewData(prev => ({...prev, title: e.target.value}))
                     }
-                    placeholder="Discover the Future of AI"
+                    placeholder="Enter a catchy title (5-50 characters)"
                     maxLength={50}
                   />
                   <p className="text-xs text-muted-foreground mt-2">
                     {previewData.title?.length}/50 characters
                   </p>
+                  <small>Title must be between 5 and 50 characters.</small>
                 </div>
 
                 {previewData.type === 'sponsored' && (
                   <div className="mb-5 w-full md:mb-0">
                     <h2 className="text-lg font-bold mb-4">Ad Description</h2>
+
                     <textarea
                       className="w-full p-2 border rounded-md min-h-[100px] form-input"
                       value={previewData.content}
@@ -392,11 +402,14 @@ export const AdPlanPage = () => {
                         }))
                       }
                       maxLength={200}
-                      placeholder="Enter your ad description"
+                      placeholder="Describe your product or service (50-200 characters)"
                     />
                     <p className="text-xs text-muted-foreground mt-2">
                       {previewData?.content?.length}/200 characters
                     </p>
+                    <small>
+                      Description must be between 50 and 200 characters.
+                    </small>
                   </div>
                 )}
               </div>
@@ -610,6 +623,7 @@ export const AdPlanPage = () => {
                   <p className="text-xs text-muted-foreground mt-2">
                     {previewData.title?.length}/50 characters
                   </p>
+                  <small>Title must be between 5 and 50 characters.</small>
                 </div>
 
                 {previewData.type === 'sponsored' && (
@@ -629,6 +643,9 @@ export const AdPlanPage = () => {
                     <p className="text-xs text-muted-foreground mt-2">
                       {previewData?.content?.length}/200 characters
                     </p>
+                    <small>
+                      Description must be between 50 and 200 characters.
+                    </small>
                   </div>
                 )}
               </div>
@@ -842,6 +859,7 @@ export const AdPlanPage = () => {
                   <p className="text-xs text-muted-foreground mt-2">
                     {previewData.title?.length}/50 characters
                   </p>
+                  <small>Title must be between 5 and 50 characters.</small>
                 </div>
 
                 {previewData.type === 'sponsored' && (
@@ -861,6 +879,9 @@ export const AdPlanPage = () => {
                     <p className="text-xs text-muted-foreground mt-2">
                       {previewData?.content?.length}/200 characters
                     </p>
+                    <small>
+                      Description must be between 50 and 200 characters.
+                    </small>
                   </div>
                 )}
               </div>

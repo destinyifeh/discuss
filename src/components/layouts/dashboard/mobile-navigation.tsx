@@ -154,7 +154,8 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
                         'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition active:scale-90 transition-transform duration-150',
                         isActive(item.path) ? 'font-bold' : 'font-normal',
                       )}
-                      onClick={() => setOpen(false)}>
+                      // onClick={() => setOpen(false)}
+                    >
                       {item.icon}
                       <span>{item.label}</span>
                     </Link>

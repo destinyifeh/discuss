@@ -23,7 +23,6 @@ import {
   Search,
   User,
 } from 'lucide-react';
-import Link from 'next/link';
 import {toast} from 'sonner';
 
 interface MainLayoutProps {
@@ -125,7 +124,11 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
             {/* <SheetTrigger asChild>
            
           </SheetTrigger> */}
-            <SheetContent side="left" className="w-64">
+            {/* <SheetContent side="left" className="w-64"> */}
+            <SheetContent
+              side="left"
+              className="w-64"
+              onOpenAutoFocus={e => e.preventDefault()}>
               <VisuallyHidden>
                 <SheetTitle>Mobile Sidebar</SheetTitle>
               </VisuallyHidden>
@@ -145,7 +148,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
                   </div>
                 </div>
 
-                <nav className="flex-1 space-y-1 p-2">
+                {/* <nav className="flex-1 space-y-1 p-2">
                   {navItems.map((item, index) => (
                     // <SheetClose asChild key={item.label}>
                     <Link
@@ -154,14 +157,14 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
                         'flex items-center gap-4 p-3 rounded-full hover:bg-app-hover transition active:scale-90 transition-transform duration-150',
                         isActive(item.path) ? 'font-bold' : 'font-normal',
                       )}
-                      // onClick={() => setOpen(false)}
+                       onClick={() => setOpen(false)}
                     >
                       {item.icon}
                       <span>{item.label}</span>
                     </Link>
                     // </SheetClose>
                   ))}
-                </nav>
+                </nav> */}
 
                 <div className="p-4">
                   <Button

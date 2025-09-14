@@ -245,20 +245,35 @@ export const HomePostList = () => {
 
   const homeData = status === 'pending' ? Array(5).fill(null) : postsData;
 
-  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+  const handleScroll2: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
     // Compare current scrollTop to previous value to determine direction
     if (scrollTop < lastScrollTop.current) {
       // Scrolling up
-      //setShowBottomTab(true);
+      setShowBottomTab(true);
     } else if (scrollTop > lastScrollTop.current) {
+      // Scrolling down
+      setShowBottomTab(false);
+      setShowMobileNav(false);
+    }
+    setShowMobileNav(scrollTop < 300);
+    // Show "go up" button if scrolled more than 300px
+    setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+    // Compare current scrollTop to previous value to determine direction
+    if (scrollTop > lastScrollTop.current) {
       // Scrolling down
       //setShowBottomTab(false);
       setShowMobileNav(false);
     }
-    setShowMobileNav(scrollTop < 300);
-    // setShowBottomTab(scrollTop < 100);
-    // setShowBottomTab(scrollTop < 300);
+    // Scrolling up → show only if close to the top
+    if (scrollTop < 300) {
+      setShowMobileNav(true);
+    }
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
@@ -298,7 +313,7 @@ export const HomePostList = () => {
       </div>
 
       <Virtuoso
-        className="custom-scrollbar min-h-screen"
+        className="custom-scrollbar min-h-screen mb-10 lg:mb-0"
         totalCount={totalCount}
         data={homeData}
         onScroll={handleScroll}

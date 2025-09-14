@@ -1,7 +1,4 @@
 'use client';
-import {usePathname, useRouter} from 'next/navigation';
-import React, {useState} from 'react';
-
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
@@ -30,6 +27,9 @@ import {
   User,
 } from 'lucide-react';
 import Link from 'next/link';
+import {usePathname, useRouter} from 'next/navigation';
+import React, {useState} from 'react';
+import slugify from 'slugify';
 import {toast} from 'sonner';
 
 interface MainLayoutProps {
@@ -87,7 +87,10 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     {
       icon: <User size={24} />,
       label: 'Profile',
-      path: `/profile/${currentUser?.username?.toLowerCase()}`,
+      // path: `/profile/${currentUser?.username?.toLowerCase()}`,
+      path: `/profile/${slugify(currentUser?.username ?? '', {
+        lower: true,
+      })}`,
     },
     {
       label: 'Ad View',

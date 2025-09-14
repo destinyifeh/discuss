@@ -280,7 +280,7 @@ export const HomePostList = () => {
     //   setShowMobileNav(true);
     // }
     // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
+    //setShowGoUp(scrollTop > 300);
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 

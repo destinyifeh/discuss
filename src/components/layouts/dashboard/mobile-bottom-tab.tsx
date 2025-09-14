@@ -41,7 +41,7 @@ export const MobileBottomTab = () => {
             href="/discuss"
             className={cn(
               'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
-              isActive('/create-post') && 'text-app',
+              isActive('/discuss') && 'text-app',
             )}>
             <PenSquare size={24} />
           </Link>

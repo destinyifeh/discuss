@@ -487,7 +487,7 @@ export const ExplorePostList = () => {
   } = useInfiniteQuery({
     queryKey: ['explore-feed-posts', debouncedSearch],
     queryFn: ({pageParam = 1}) =>
-      feedService.getHomePostFeeds(pageParam, 10, debouncedSearch),
+      feedService.getHomePostFeeds(pageParam, 10, undefined, debouncedSearch),
     initialPageParam: 1,
     getNextPageParam: lastPage => {
       const {page, pages} = lastPage.pagination;

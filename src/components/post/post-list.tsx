@@ -192,7 +192,6 @@ export const HomePostList = () => {
   const lastScrollTop = useRef(0);
 
   const [showBottomTab, setShowBottomTab] = useState(true);
-
   const [showMobileNav, setShowMobileNav] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -251,13 +250,14 @@ export const HomePostList = () => {
     // Compare current scrollTop to previous value to determine direction
     if (scrollTop < lastScrollTop.current) {
       // Scrolling up
-      setShowBottomTab(true);
-      setShowMobileNav(true);
+      //setShowBottomTab(true);
     } else if (scrollTop > lastScrollTop.current) {
       // Scrolling down
-      setShowBottomTab(false);
+      //setShowBottomTab(false);
       setShowMobileNav(false);
     }
+    setShowMobileNav(scrollTop < 300);
+    // setShowBottomTab(scrollTop < 100);
     // setShowBottomTab(scrollTop < 300);
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
@@ -290,7 +290,13 @@ export const HomePostList = () => {
 
   return (
     <div className="">
-      {showMobileNav && <MobileNavigation />}
+      <div
+        className={`transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        {showMobileNav && <MobileNavigation />}
+      </div>
+
       <Virtuoso
         className="custom-scrollbar min-h-screen"
         totalCount={totalCount}

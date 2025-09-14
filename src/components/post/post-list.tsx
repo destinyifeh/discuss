@@ -267,16 +267,16 @@ export const HomePostList = () => {
     // Compare current scrollTop to previous value to determine direction
     if (scrollTop > lastScrollTop.current) {
       // Scrolling down
-      setShowBottomTab(false);
+      //setShowBottomTab(false);
       setShowMobileNav(false);
     }
     if (scrollTop < lastScrollTop.current) {
       // Scrolling up
-      setShowBottomTab(true);
+      //setShowBottomTab(true);
       setShowMobileNav(true);
     }
     // Scrolling up → show only if close to the top
-    // if (scrollTop < 300) {
+    // if (scrollTop < 100) {
     //   setShowMobileNav(true);
     // }
     // Show "go up" button if scrolled more than 300px

@@ -178,7 +178,7 @@ export const SectionPostList = ({
             // className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
             size="icon"
             onClick={() => {
-              navigate.push(`/discuss?section=${section}`);
+              navigate.push(`/discuss?section=${section.toLowerCase()}`);
             }}>
             <PenSquare size={24} />
           </Button>
@@ -876,7 +876,9 @@ export const SectionPlaceholder = (props: {section: string}) => {
       <p className="text-app-gray">Be the first to post in this section!</p>
       <Button
         className="mt-4 bg-app hover:bg-app/90"
-        onClick={() => navigate.push(`/create-post?section=${props.section}`)}>
+        onClick={() =>
+          navigate.push(`/discuss?section=${props.section.toLowerCase()}`)
+        }>
         Start Discussion
       </Button>
     </div>

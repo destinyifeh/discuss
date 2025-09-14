@@ -71,7 +71,11 @@ export const CreatePostPage = () => {
 
   useEffect(() => {
     if (theSection) {
-      setSelectedSection(theSection as SectionName);
+      //setSelectedSection(theSection as SectionName);
+      setSelectedSection(
+        (theSection.charAt(0).toUpperCase() +
+          theSection.slice(1)) as SectionName,
+      );
     }
   }, [theSection]);
 

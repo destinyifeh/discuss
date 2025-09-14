@@ -143,7 +143,7 @@ export const ProfilePage = () => {
   console.log('user posts dataa', userData);
 
   const isNotCurrentUser = user !== currentUser?.username?.toLowerCase();
-
+  console.log(user, 'user posts dataa', currentUser?.username);
   if (!mounted) {
     return <ProfileSkeleton />;
   }

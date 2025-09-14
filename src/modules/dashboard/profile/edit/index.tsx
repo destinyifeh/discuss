@@ -30,9 +30,12 @@ import * as z from 'zod';
 import {userService} from '../../actions/user.actions';
 
 const profileSchema = z.object({
-  username: z.string().min(2, {
-    message: 'Username must be at least 2 characters.',
-  }),
+  username: z
+    .string()
+    .min(2, {
+      message: 'Username must be at least 2 characters.',
+    })
+    .max(20, {message: 'Username must not exceed 20 characters.'}),
   bio: z.string().max(160, {
     message: 'Bio must not be longer than 160 characters.',
   }),

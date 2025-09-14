@@ -30,7 +30,8 @@ const formSchema = z
     username: z
       .string()
       .trim()
-      .min(3, {message: 'Username must be at least 3 characters'}),
+      .min(3, {message: 'Username must be at least 3 characters'})
+      .max(20, {message: 'Username must not exceed 20 characters.'}),
     //phone: z.string().min(11, {message: 'Must be 10 or more characters long'}),
     password: z
       .string()

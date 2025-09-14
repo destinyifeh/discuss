@@ -24,12 +24,14 @@ import React, {useState} from 'react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
+import {truncateText} from '@/lib/formatter';
 import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {userService} from '@/modules/dashboard/actions/user.actions';
 import {postService} from '@/modules/posts/actions';
 import {usePostActions} from '@/modules/posts/post-hooks';
 import {UserProps} from '@/types/user.types';
 import {useMutation, useQuery} from '@tanstack/react-query';
+import slugify from 'slugify';
 import ErrorFeedback from '../feedbacks/error-feedback';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
@@ -288,7 +290,11 @@ const PostCard = ({
   const navigateToUserProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(`/user/${post.user.username}`);
+    navigate.push(
+      `/user/${slugify(post.user.username, {
+        lower: true,
+      })}`,
+    );
   };
 
   const shouldTruncate = post?.content.length > 100;
@@ -346,9 +352,11 @@ const PostCard = ({
               <div className="flex items-center gap-1 overflow-hidden">
                 <div className="font-bold hover:underline truncate cursor-pointer active:scale-90 transition-transform duration-150">
                   <Link
-                    href={`/user/${post.user.username}`}
+                    href={`/user/${slugify(post.user.username, {
+                      lower: true,
+                    })}`}
                     className="capitalize active:scale-90 transition-transform duration-150">
-                    {post.user.username}
+                    {truncateText(post.user.username, 20)}
                   </Link>
                 </div>
 

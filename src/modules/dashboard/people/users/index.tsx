@@ -9,6 +9,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {truncateText} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
 import {UserProps} from '@/types/user.types';
 import {useInfiniteQuery, useMutation} from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import {ArrowUp, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
+import slugify from 'slugify';
 import {useDebounce} from 'use-debounce';
 import {userService} from '../../actions/user.actions';
 
@@ -184,7 +186,11 @@ export const Users = () => {
               <div className="flex items-center gap-3 cursor-pointer flex-1">
                 <Avatar
                   className="cursor-pointer active:scale-90 transition-transform duration-150"
-                  onClick={() => navigate.push(`/user/${user.username}`)}>
+                  onClick={() =>
+                    navigate.push(
+                      `/user/${slugify(user.username, {lower: true})}`,
+                    )
+                  }>
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback className="capitalize text-app text-2xl">
                     {user.username.charAt(0)}
@@ -192,7 +198,9 @@ export const Users = () => {
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold capitalize">{user.username}</h3>
+                    <h3 className="font-bold capitalize">
+                      {truncateText(user.username, 20)}
+                    </h3>
                   </div>
 
                   {user.bio && (

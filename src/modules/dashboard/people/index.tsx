@@ -17,16 +17,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import {Label} from '@/components/ui/label';
-import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
-import {normalizeDomain} from '@/lib/formatter';
+import {normalizeDomain, unslugify} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
 import {UserProps} from '@/types/user.types';
 import {useInfiniteQuery, useMutation, useQuery} from '@tanstack/react-query';
@@ -36,8 +33,6 @@ import {
   Calendar,
   Link as LinkIcon,
   Mail,
-  MoreHorizontal,
-  Shield,
 } from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
@@ -95,7 +90,7 @@ export const PostPlaceholder = ({
 
 export const PeoplePage = () => {
   const {user} = useParams<{user: string}>();
-
+  console.log(user, 'usemeee');
   const {currentUser, setUser} = useAuthStore(state => state);
   const [activeTab, setActiveTab] = useState('posts');
   const [showGoUp, setShowGoUp] = useState(false);
@@ -133,7 +128,7 @@ export const PeoplePage = () => {
     refetch,
   } = useQuery({
     queryKey: ['user', user],
-    queryFn: () => userService.getUserByUsername(user),
+    queryFn: () => userService.getUserByUsername(unslugify(user)),
     retry: false,
     enabled: shouldQuery,
   });
@@ -387,13 +382,6 @@ export const PeoplePage = () => {
                           className="rounded-full text-red-500 hover:bg-red-50 hover:text-red-600">
                           <AlertTriangle className="h-4 w-4" />
                         </Button>
-
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setIsReportDialogOpen(true)}>
-                          <MoreHorizontal size={18} />
-                        </Button>
                       </div>
                     )}
                   </div>
@@ -572,97 +560,6 @@ export const PeoplePage = () => {
         </Dialog>
       </div>
 
-      <div>
-        <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="icon">
-              <MoreHorizontal size={18} />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <div className="flex items-center mb-2">
-                <Shield className="h-5 w-5 text-red-500 mr-2" />
-                <DialogTitle>Report @{username}</DialogTitle>
-              </div>
-              <DialogDescription>
-                Your report will be reviewed by our moderation team. We take all
-                reports seriously and will take appropriate action.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex items-center gap-3 mb-4 p-3 bg-forum-hover rounded-lg">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={avatar} alt={username} />
-                <AvatarFallback>{username.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-semibold text-sm">{username}</div>
-                <div className="text-xs text-forum-gray">@{username}</div>
-              </div>
-            </div>
-
-            <form onSubmit={handleReportSubmit} className="space-y-4">
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Reason for report</Label>
-                <RadioGroup
-                  value={reportReason}
-                  onValueChange={setReportReason}>
-                  {reportReasons.map(reason => (
-                    <div
-                      key={reason.id}
-                      className="flex items-center space-x-2">
-                      <RadioGroupItem value={reason.id} id={reason.id} />
-                      <Label htmlFor={reason.id} className="text-sm">
-                        {reason.label}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="details" className="text-sm font-medium">
-                  Additional details (optional)
-                </Label>
-                <Textarea
-                  id="details"
-                  placeholder="Please provide any specific details..."
-                  rows={3}
-                  value={reportDetails}
-                  onChange={e => setReportDetails(e.target.value)}
-                  className="text-sm"
-                />
-              </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
-                <AlertTriangle size={16} className="text-yellow-600 mt-0.5" />
-                <p className="text-xs text-yellow-800">
-                  Filing false reports may result in actions against your
-                  account.
-                </p>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsReportDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                  disabled={isSubmittingReport}>
-                  {isSubmittingReport ? 'Submitting...' : 'Submit Report'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
       {showGoUp && (
         <button
           onClick={() => {

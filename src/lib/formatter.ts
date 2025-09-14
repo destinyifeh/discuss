@@ -303,3 +303,11 @@ export function unCapitalizeFirstLetter(text: string): string {
   if (!text) return text;
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
+
+export function unslugify(slug: string): string {
+  return slug.replace(/-/g, ' ');
+}
+
+export function truncateText(text: string, maxLength: number) {
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+}

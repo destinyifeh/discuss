@@ -5,7 +5,6 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {cn} from '@/lib/utils';
 import {BookmarkIcon, Home, PenSquare, Search, User} from 'lucide-react';
 import Link from 'next/link';
-import slugify from 'slugify';
 export const MobileBottomTab = () => {
   const location = usePathname();
   const {currentUser} = useAuthStore(state => state);
@@ -54,14 +53,10 @@ export const MobileBottomTab = () => {
             <BookmarkIcon size={24} />
           </Link>
           <Link
-            //href={`/profile/${currentUser?.username.toLowerCase()}`}
-            href={`/profile/${slugify(currentUser?.username ?? '', {
-              lower: true,
-            })}`}
+            href={`/profile/${currentUser?.username}`}
             className={cn(
               'p-2 cursor-pointer active:scale-90 transition-transform duration-150',
-              isActive(`/profile/${currentUser?.username.toLowerCase()}`) &&
-                'text-app',
+              isActive(`/profile/${currentUser?.username}`) && 'text-app',
             )}>
             <User size={24} />
           </Link>

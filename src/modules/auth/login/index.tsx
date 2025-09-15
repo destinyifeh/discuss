@@ -30,8 +30,14 @@ import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {loginRequestAction} from '../actions';
 const formSchema = z.object({
-  //username: z.string().trim().min(1, {message: 'Please enter username'}),
-  email: z.string().trim().email({message: 'Invalid email address'}),
+  username: z
+    .string()
+    .trim()
+    .min(1, {message: 'Please enter username'})
+    .regex(/^[a-zA-Z0-9_]+$/, {
+      message: 'Username can only contain letters, numbers, and underscores.',
+    }),
+
   password: z.string().trim().min(1, {message: 'Please enter password'}),
 });
 
@@ -74,15 +80,15 @@ export const LoginPage = () => {
     resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
 
-  const [email = '', password = ''] = watch(['email', 'password']);
+  const [username = '', password = ''] = watch(['username', 'password']);
 
   const resetFormError = () => {
-    clearErrors(['email', 'password']);
+    clearErrors(['username', 'password']);
   };
 
   const handleLogin = async (credentials: loginFormData) => {
@@ -139,7 +145,7 @@ export const LoginPage = () => {
       return;
     }
     if (message === 'User not found' || message.startsWith('Your account')) {
-      setError('email', {
+      setError('username', {
         type: 'server',
         message: message,
       });
@@ -229,7 +235,7 @@ export const LoginPage = () => {
             <CardContent>
               <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
                 <div className="space-y-2">
-                  {/* <InputLabel label="Username" htmlFor="username" />
+                  <InputLabel label="Username" htmlFor="username" />
                   <Input
                     id="username"
                     type="text"
@@ -242,19 +248,7 @@ export const LoginPage = () => {
                     {...register('username')}
                   />
 
-                  <InputMessage field={username} errorField={errors.username} /> */}
-                  <InputLabel label="Email address" htmlFor="email" />
-                  <Input
-                    id="email"
-                    type="email"
-                    disabled={isSubmitting}
-                    value={email}
-                    placeholder="name@example.com"
-                    className="form-input"
-                    required
-                    {...register('email')}
-                  />
-                  <InputMessage field={email} errorField={errors.email} />
+                  <InputMessage field={username} errorField={errors.username} />
                 </div>
 
                 <div className="space-y-2">

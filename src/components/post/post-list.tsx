@@ -231,6 +231,26 @@ export const HomePostList = () => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      const scrollTop = window.scrollY;
+
+      if (scrollTop > lastScrollTop.current) {
+        setShowMobileNav(false); // scrolling down
+      } else if (scrollTop < lastScrollTop.current) {
+        setShowMobileNav(true); // scrolling up
+      }
+
+      lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+    };
+
+    window.addEventListener('scroll', handleWindowScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleWindowScroll);
+    };
+  }, []);
+
   const postsData = useMemo(() => {
     return data?.pages?.flatMap(page => page.posts) || [];
   }, [data]);
@@ -262,7 +282,7 @@ export const HomePostList = () => {
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
-  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+  const handleScroll3: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
     // Compare current scrollTop to previous value to determine direction
     if (scrollTop > lastScrollTop.current) {
@@ -281,6 +301,21 @@ export const HomePostList = () => {
     // }
     // Show "go up" button if scrolled more than 300px
     //setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
+
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+
+    // If scrolling up → show nav
+    if (scrollTop < lastScrollTop.current) {
+      setShowMobileNav(true);
+    }
+    // If scrolling down → hide nav
+    else if (scrollTop > lastScrollTop.current) {
+      setShowMobileNav(false);
+    }
+
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
@@ -310,12 +345,7 @@ export const HomePostList = () => {
 
   return (
     <div className="">
-      <div
-        className={`transition-transform duration-300 ${
-          showMobileNav ? 'translate-y-0' : '-translate-y-full'
-        }`}>
-        {showMobileNav && <MobileNavigation />}
-      </div>
+      {showMobileNav && <MobileNavigation />}
 
       <Virtuoso
         className="custom-scrollbar min-h-screen mb-10 lg:mb-0"

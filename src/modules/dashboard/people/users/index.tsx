@@ -17,7 +17,6 @@ import {ArrowUp, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import {useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
-import slugify from 'slugify';
 import {useDebounce} from 'use-debounce';
 import {userService} from '../../actions/user.actions';
 
@@ -186,11 +185,7 @@ export const Users = () => {
               <div className="flex items-center gap-3 cursor-pointer flex-1">
                 <Avatar
                   className="cursor-pointer active:scale-90 transition-transform duration-150"
-                  onClick={() =>
-                    navigate.push(
-                      `/user/${slugify(user.username, {lower: true})}`,
-                    )
-                  }>
+                  onClick={() => navigate.push(`/user/${user.username}`)}>
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback className="capitalize text-app text-2xl">
                     {user.username.charAt(0)}

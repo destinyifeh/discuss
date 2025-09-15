@@ -31,7 +31,6 @@ import {postService} from '@/modules/posts/actions';
 import {usePostActions} from '@/modules/posts/post-hooks';
 import {UserProps} from '@/types/user.types';
 import {useMutation, useQuery} from '@tanstack/react-query';
-import slugify from 'slugify';
 import ErrorFeedback from '../feedbacks/error-feedback';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
@@ -290,11 +289,7 @@ const PostCard = ({
   const navigateToUserProfile = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate.push(
-      `/user/${slugify(post.user.username, {
-        lower: true,
-      })}`,
-    );
+    navigate.push(`/user/${post.user.username}`);
   };
 
   const shouldTruncate = post?.content.length > 100;
@@ -352,9 +347,7 @@ const PostCard = ({
               <div className="flex items-center gap-1 overflow-hidden">
                 <div className="font-bold hover:underline truncate cursor-pointer active:scale-90 transition-transform duration-150">
                   <Link
-                    href={`/user/${slugify(post.user.username, {
-                      lower: true,
-                    })}`}
+                    href={`/user/${post.user.username}`}
                     className="capitalize active:scale-90 transition-transform duration-150">
                     {truncateText(post.user.username, 20)}
                   </Link>

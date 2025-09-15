@@ -29,7 +29,6 @@ import {
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
 import React, {useState} from 'react';
-import slugify from 'slugify';
 import {toast} from 'sonner';
 
 interface MainLayoutProps {
@@ -87,10 +86,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     {
       icon: <User size={24} />,
       label: 'Profile',
-      // path: `/profile/${currentUser?.username?.toLowerCase()}`,
-      path: `/profile/${slugify(currentUser?.username ?? '', {
-        lower: true,
-      })}`,
+      path: `/profile/${currentUser?.username?.toLowerCase()}`,
     },
     {
       label: 'Ad View',

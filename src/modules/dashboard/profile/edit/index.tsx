@@ -32,10 +32,12 @@ import {userService} from '../../actions/user.actions';
 const profileSchema = z.object({
   username: z
     .string()
-    .min(2, {
-      message: 'Username must be at least 2 characters.',
-    })
-    .max(20, {message: 'Username must not exceed 20 characters.'}),
+    .trim()
+    .min(3, {message: 'Username must be at least 3 characters.'})
+    .max(20, {message: 'Username must not exceed 20 characters.'})
+    .regex(/^[a-zA-Z0-9_]+$/, {
+      message: 'Username can only contain letters, numbers, and underscores.',
+    }),
   bio: z.string().max(160, {
     message: 'Bio must not be longer than 160 characters.',
   }),
@@ -129,7 +131,7 @@ export const EditProfilePage = () => {
 
         setUser(updatedUserData as UserProps);
         toast.success('Profile updated successfully');
-        router.back();
+        router.push(`/profile/${username}`);
       },
       onError(error: any, variables, context) {
         console.log(error, 'error');

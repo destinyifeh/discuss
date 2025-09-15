@@ -18,7 +18,7 @@ export interface RegisterRequestProps {
 }
 
 export interface LoginRequestProps {
-  email: string;
+  username: string;
   password: string;
 }
 

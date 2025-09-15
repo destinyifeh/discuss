@@ -23,7 +23,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
-import {normalizeDomain, unslugify} from '@/lib/formatter';
+import {normalizeDomain} from '@/lib/formatter';
 import {cn} from '@/lib/utils';
 import {UserProps} from '@/types/user.types';
 import {useInfiniteQuery, useMutation, useQuery} from '@tanstack/react-query';
@@ -90,7 +90,6 @@ export const PostPlaceholder = ({
 
 export const PeoplePage = () => {
   const {user} = useParams<{user: string}>();
-  console.log(user, 'usemeee');
   const {currentUser, setUser} = useAuthStore(state => state);
   const [activeTab, setActiveTab] = useState('posts');
   const [showGoUp, setShowGoUp] = useState(false);
@@ -128,7 +127,7 @@ export const PeoplePage = () => {
     refetch,
   } = useQuery({
     queryKey: ['user', user],
-    queryFn: () => userService.getUserByUsername(unslugify(user)),
+    queryFn: () => userService.getUserByUsername(user),
     retry: false,
     enabled: shouldQuery,
   });

@@ -21,7 +21,6 @@ import Link from 'next/link';
 import {useParams, useRouter, useSearchParams} from 'next/navigation';
 import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
-import slugify from 'slugify';
 import {userService} from '../actions/user.actions';
 export const PostPlaceholder = ({
   tab,
@@ -143,7 +142,7 @@ export const ProfilePage = () => {
   console.log('user posts dataa', userData);
 
   const isNotCurrentUser =
-    user !== slugify(currentUser?.username ?? '', {lower: true});
+    user.toLowerCase() !== currentUser?.username.toLowerCase();
 
   console.log(user, 'user posts dataa', currentUser?.username);
   if (!mounted) {
@@ -331,8 +330,16 @@ export const ProfilePage = () => {
                 </Tabs>
               </Fragment>
             ),
-            EmptyPlaceholder: () =>
-              status === 'error' ? null : <PostPlaceholder tab={activeTab} />,
+            EmptyPlaceholder: () => {
+              if (status === 'error') {
+                return null;
+              }
+              if (status === 'pending') {
+                return <PostSkeleton />;
+              }
+
+              return <PostPlaceholder tab={activeTab} />;
+            },
             Footer: () =>
               status === 'error' ? (
                 <ErrorFeedback

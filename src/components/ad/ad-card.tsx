@@ -248,7 +248,7 @@ export const AdCard = ({
                   <img
                     src={ad.imageUrl}
                     alt="Ad attachment"
-                    className="w-full h-auto max-h-96 object-cover"
+                    className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96"
                   />
                 </div>
               )}

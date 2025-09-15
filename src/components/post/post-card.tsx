@@ -464,7 +464,8 @@ const PostCard = ({
                   <img
                     src={post.images[0].secure_url}
                     alt="Post attachment"
-                    className="w-full h-auto max-h-96 object-cover"
+                    // className="w-full h-auto max-h-96 object-cover"
+                    className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96"
                   />
                 </div>
               )}
@@ -476,7 +477,8 @@ const PostCard = ({
                       key={img.public_id || idx}
                       src={img.secure_url}
                       alt={`Post attachment ${idx + 1}`}
-                      className="w-full h-auto max-h-96 object-cover rounded-lg"
+                      // className="w-full h-auto max-h-96 object-cover rounded-lg"
+                      className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96 rounded-lg "
                     />
                   ))}
                 </div>

@@ -310,10 +310,12 @@ export const HomePostList = () => {
     // If scrolling up → show nav
     if (scrollTop < lastScrollTop.current) {
       setShowMobileNav(true);
+      setShowBottomTab(true);
     }
     // If scrolling down → hide nav
     else if (scrollTop > lastScrollTop.current) {
       setShowMobileNav(false);
+      setShowBottomTab(false);
     }
 
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;

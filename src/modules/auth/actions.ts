@@ -107,3 +107,7 @@ export async function getGoogleUser() {
   const response = await api.get(`/auth/google-user`);
   return response.data;
 }
+export async function setGoogleUserUsername(data: object) {
+  const response = await api.patch(`/auth/set-google-username`, data);
+  return response.data;
+}

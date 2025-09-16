@@ -5,6 +5,7 @@ import {toast} from '@/components/ui/toast';
 import {ACCESS_TOKEN, REFRESH_TOKEN} from '@/constants/api-resources';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
+import {AccountStatus} from '@/types/user.types';
 import {useQuery} from '@tanstack/react-query';
 import {useRouter} from 'next/navigation';
 import {useEffect} from 'react';
@@ -31,6 +32,13 @@ export const GoogleCallbackPage = () => {
     if (error) {
       toast.error('Oops! Something went wrong. Please log in again.');
       router.replace('/login');
+      return;
+    }
+    if (
+      googleUser?.status === AccountStatus.PENDING_USERNAME ||
+      googleUser?.requireUsername
+    ) {
+      router.replace(`/set-username/${googleUser.userId}`);
       return;
     }
 

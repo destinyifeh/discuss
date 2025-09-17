@@ -1,6 +1,5 @@
 'use client';
 
-import {SectionHeader} from '@/components/app-headers';
 import {SectionNotFound} from '@/components/app-not-founds';
 import {SectionPostList} from '@/components/post/post-list';
 import CategorySkeleton from '@/components/skeleton/category-skeleton';
@@ -27,14 +26,12 @@ export const SectionPage = () => {
   }
 
   return (
-    <div>
-      <SectionHeader title={section.name} description={section.description} />
-
-      <SectionPostList
-        section={section.name}
-        adSection="home"
-        bannerAd={section.name.toLowerCase()}
-      />
-    </div>
+    <SectionPostList
+      section={section.name}
+      adSection="home"
+      bannerAd={section.name.toLowerCase()}
+      description={section.description as string}
+      title={section.name as string}
+    />
   );
 };

@@ -46,7 +46,7 @@ export const SectionHeader = ({
   const navigate = useRouter();
 
   return (
-    <div className="sticky top-0 bg-white/80 border-app-border dark:bg-background backdrop-blur-sm z-10 border-b">
+    <div className="bg-white/80 border-app-border dark:bg-background backdrop-blur-sm z-10 border-b">
       <div className="px-4 py-3 flex flex-col">
         <div className="flex items-start gap-6">
           <Button
@@ -89,5 +89,36 @@ export const AppHeader = () => {
         </div>
       </div>
     </header>
+  );
+};
+
+export const PostDetailsPageHeader = ({
+  title,
+  description,
+  href,
+}: {
+  title: string | undefined;
+  description?: string | number;
+  href?: string;
+}) => {
+  const navigate = useRouter();
+
+  return (
+    <div className="bg-white/80 dark:bg-background backdrop-blur-sm z-10 border-b md:mt-0 lg:mt-0 border-app-border">
+      <div className="px-4 py-3 flex items-center gap-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => (href ? navigate.push(href) : navigate.back())}>
+          <ChevronLeft />
+        </Button>
+        <div>
+          <h1 className="text-xl font-bold capitalize">{title}</h1>
+          {description && (
+            <p className="text-sm text-app-gray">{description}</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };

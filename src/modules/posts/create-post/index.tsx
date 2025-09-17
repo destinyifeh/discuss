@@ -386,7 +386,9 @@ export const CreatePostPage = () => {
         </div>
       </div>
 
-      <MobileBottomTab />
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50`}>
+        <MobileBottomTab />
+      </div>
     </div>
   );
 };

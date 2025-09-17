@@ -4,7 +4,7 @@ import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
 import {BannerAds} from '@/components/ad/banner';
-import {PageHeader} from '@/components/app-headers';
+import {PageHeader, PostDetailsPageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {AddCommentField} from '@/components/post/add-comment-field';
@@ -49,8 +49,10 @@ type PostDetailPageProps = {
 };
 
 export const PostDetailPage = ({params}: PostDetailPageProps) => {
+  const lastScrollTop = useRef(0);
   const {currentUser} = useAuthStore(state => state);
   const {theme} = useGlobalStore(state => state);
+  const [showMobileNav, setShowMobileNav] = useState(true);
   //  const {slug} = useParams<{slug: string}>();
   //  const {slugId} = useParams<{slugId: string}>();
   const {slug, slugId} = params;
@@ -440,15 +442,40 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
       setFetchNextError('Failed to load more content.');
     }
   };
+
+  // Scroll handler
+  const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
+    const scrollTop = event.currentTarget.scrollTop;
+
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
+
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+
+      setShowMobileNav(true);
+    }
+
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+  };
   return (
     <Fragment>
-      <PageHeader title="Discuss" />
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <PostDetailsPageHeader title="Discuss" />
+      </div>
+      <div className="sm:hidden lg:block">
+        <PageHeader title="Discuss" />
+      </div>
       <div>
         <Virtuoso
           className="custom-scrollbar"
           style={{height: '100vh'}}
           ref={virtuosoRef}
-          // onScroll={handleScroll}
+          onScroll={handleScroll}
           // initialTopMostItemIndex={0}
 
           data={commentsData}
@@ -501,7 +528,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
                 />
               ) : null,
             Header: () => (
-              <Fragment>
+              <div className="mt-15 lg:mt-0">
                 <div>
                   <BannerAds placement="details_feed" />
                 </div>
@@ -627,7 +654,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
                     </form>
                   </div>
                 )}
-              </Fragment>
+              </div>
             ),
 
             EmptyPlaceholder: () => {

@@ -4,15 +4,15 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {feedService} from '@/modules/dashboard/actions/feed.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
-import {ArrowUp, BookmarkIcon, PenSquare, Search} from 'lucide-react';
+import {BookmarkIcon, PenSquare, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
-import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
 import {AdCard} from '../ad/ad-card';
 import {BannerAds} from '../ad/banner';
-import {PageHeader} from '../app-headers';
+import {PageHeader, SectionHeader} from '../app-headers';
 import {LoadingMore, LoadMoreError} from '../feedbacks';
 import ErrorFeedback from '../feedbacks/error-feedback';
 import SearchBarList from '../forms/list-search-bar';
@@ -29,12 +29,17 @@ export const SectionPostList = ({
   adSection,
   bannerAd,
   section,
+  title,
+  description,
 }: {
   adSection: string;
   bannerAd: string;
   section: string;
+  title: string;
+  description: string;
 }) => {
   const lastScrollTop = useRef(0);
+  const [showMobileNav, setShowMobileNav] = useState(true);
   const {setShowBottomTab} = useGlobalStore(state => state);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -75,11 +80,20 @@ export const SectionPostList = ({
 
   console.log(data, 'section dataa');
 
+  // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
 
-    // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
+      setShowBottomTab(false);
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+      setShowBottomTab(true);
+      setShowMobileNav(true);
+    }
+
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
@@ -93,18 +107,26 @@ export const SectionPostList = ({
   };
 
   return (
-    <div className="pb-15 lg:pb-0">
+    <div>
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <SectionHeader title={title} description={description} />
+      </div>
+      <div className="sm:hidden lg:block">
+        <SectionHeader title={title} description={description} />
+      </div>
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        //style={{height: '950px', width: '100%'}}
         totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         data={sectionData}
         components={{
           Header: () => (
-            <div>
+            <div className="mt-25 lg:mt-0">
               <BannerAds section={bannerAd} placement="section_feed" />
             </div>
           ),
@@ -162,28 +184,18 @@ export const SectionPostList = ({
           }
         }}
       />
-      {showGoUp && (
-        <button
+
+      <div>
+        <Button
+          className="fixed bottom-6 h-14 w-14 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition"
+          // className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
+          size="icon"
           onClick={() => {
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-          }}
-          className="fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
-          <ArrowUp size={20} />
-        </button>
-      )}
-      {!showGoUp && (
-        <div>
-          <Button
-            className="fixed bottom-6 h-14 w-14 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition"
-            // className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-app hover:bg-app/90 text-white"
-            size="icon"
-            onClick={() => {
-              navigate.push(`/discuss?section=${section.toLowerCase()}`);
-            }}>
-            <PenSquare size={24} />
-          </Button>
-        </div>
-      )}
+            navigate.push(`/discuss?section=${section.toLowerCase()}`);
+          }}>
+          <PenSquare size={24} />
+        </Button>
+      </div>
     </div>
   );
 };
@@ -307,10 +319,9 @@ export const HomePostList = () => {
   const allowMSearch = false;
 
   return (
-    <div className="">
-      {/* {showMobileNav && <MobileNavigation />} */}
+    <div>
       <div
-        className={`fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+        className={` lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
         <MobileNavigation />
@@ -324,7 +335,7 @@ export const HomePostList = () => {
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <div className="mt-15">
+            <div className="mt-15 lg:mt-0">
               {!allowTab && (
                 <Tabs
                   defaultValue="for-you"
@@ -450,19 +461,9 @@ export const HomePostList = () => {
           }
         }}
       />
-      {/* {showGoUp && (
-        <button
-          onClick={() => {
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-          }}
-          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
-          <ArrowUp size={20} />
-        </button>
-      )} */}
 
-      {/* {showBottomTab && <MobileBottomTab />} */}
       <div
-        className={`fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
           showBottomTab ? 'translate-y-0' : 'translate-y-full'
         }`}>
         <MobileBottomTab />
@@ -475,6 +476,7 @@ export const ExplorePostList = () => {
   const lastScrollTop = useRef(0);
 
   const [showBottomTab, setShowBottomTab] = useState(true);
+  const [showMobileNav, setShowMobileNav] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -530,18 +532,20 @@ export const ExplorePostList = () => {
 
   const exploreData = status === 'pending' ? Array(5).fill(null) : postsData;
 
+  // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    // Compare current scrollTop to previous value to determine direction
-    if (scrollTop < lastScrollTop.current) {
-      // Scrolling up
-      setShowBottomTab(true);
-    } else if (scrollTop > lastScrollTop.current) {
-      // Scrolling down
+
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
       setShowBottomTab(false);
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+      setShowBottomTab(true);
+      setShowMobileNav(true);
     }
-    // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
+
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
@@ -564,13 +568,28 @@ export const ExplorePostList = () => {
 
   return (
     <div className="lg:pb-0">
-      <PageHeader title="Search" />
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <PageHeader title="Search" />
 
-      <SearchBarList
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        ref={searchRef}
-      />
+        <SearchBarList
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          ref={searchRef}
+        />
+      </div>
+
+      <div>
+        <PageHeader title="Search" />
+
+        <SearchBarList
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          ref={searchRef}
+        />
+      </div>
 
       <Virtuoso
         className="custom-scrollbar"
@@ -581,7 +600,7 @@ export const ExplorePostList = () => {
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <Fragment>
+            <div className="mt-27 lg:mt-0">
               <div className="px-4 py-3 border-b lg:hidden md:mt-7 border-app-border">
                 <h2 className="font-semibold my-2">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -603,7 +622,7 @@ export const ExplorePostList = () => {
               <div className="border-b-2 border-b-app p-3 w-30 mb-3 font-bold text-lg">
                 <h1> Trending</h1>
               </div>
-            </Fragment>
+            </div>
           ),
           EmptyPlaceholder: () => {
             if (status === 'error') {
@@ -659,17 +678,12 @@ export const ExplorePostList = () => {
           }
         }}
       />
-      {showGoUp && (
-        <button
-          onClick={() => {
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-          }}
-          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
-          <ArrowUp size={20} />
-        </button>
-      )}
-
-      {showBottomTab && <MobileBottomTab />}
+      <div
+        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+          showBottomTab ? 'translate-y-0' : 'translate-y-full'
+        }`}>
+        <MobileBottomTab />
+      </div>
     </div>
   );
 };
@@ -677,6 +691,7 @@ export const ExplorePostList = () => {
 export const BookmarkPostList = () => {
   const lastScrollTop = useRef(0);
   const [showBottomTab, setShowBottomTab] = useState(true);
+  const [showMobileNav, setShowMobileNav] = useState(true);
   const [activeTab, setActiveTab] = useState('for-you');
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -714,18 +729,20 @@ export const BookmarkPostList = () => {
 
   console.log(data, 'bookmarked dataa');
 
+  // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
-    // Compare current scrollTop to previous value to determine direction
-    if (scrollTop < lastScrollTop.current) {
-      // Scrolling up
-      setShowBottomTab(true);
-    } else if (scrollTop > lastScrollTop.current) {
-      // Scrolling down
+
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
       setShowBottomTab(false);
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+      setShowBottomTab(true);
+      setShowMobileNav(true);
     }
-    // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
+
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
@@ -740,6 +757,15 @@ export const BookmarkPostList = () => {
 
   return (
     <div className="lg:pb-0">
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <PageHeader title="Bookmarks" />
+      </div>
+      <div className="sm:hidden lg:block">
+        <PageHeader title="Bookmarks" />
+      </div>
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -748,7 +774,7 @@ export const BookmarkPostList = () => {
         ref={virtuosoRef}
         data={bookmarkedData}
         components={{
-          Header: () => <PageHeader title="Bookmarks" />,
+          Header: () => <div className="mt-15 lg:mt-0"></div>,
 
           EmptyPlaceholder: () => {
             if (status === 'error') {
@@ -804,17 +830,13 @@ export const BookmarkPostList = () => {
           }
         }}
       />
-      {showGoUp && (
-        <button
-          onClick={() => {
-            virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
-          }}
-          className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
-          <ArrowUp size={20} />
-        </button>
-      )}
 
-      {showBottomTab && <MobileBottomTab />}
+      <div
+        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+          showBottomTab ? 'translate-y-0' : 'translate-y-full'
+        }`}>
+        <MobileBottomTab />
+      </div>
     </div>
   );
 };

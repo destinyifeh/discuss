@@ -1,6 +1,6 @@
 'use client';
 
-import {PageHeader} from '@/components/app-headers';
+import {CustomPageHeader, PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import FollowersSkeleton from '@/components/skeleton/followers-skeleton';
@@ -22,6 +22,8 @@ export const UserFollowersPage = () => {
   const {user} = useParams<{user: string}>();
   const {currentUser, setUser} = useAuthStore(state => state);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(true);
+  const lastScrollTop = useRef(0);
   const [isPending, setIsPending] = useState(false);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const navigate = useRouter();
@@ -109,11 +111,23 @@ export const UserFollowersPage = () => {
     });
   };
 
+  // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
 
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
+
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+
+      setShowMobileNav(true);
+    }
     // Show "go up" button if scrolled more than 300px
     setShowGoUp(scrollTop > 300);
+
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
   const handleFetchNext = async () => {
@@ -127,10 +141,22 @@ export const UserFollowersPage = () => {
 
   return (
     <div>
-      <PageHeader
-        title="Followers"
-        description={user.charAt(0).toUpperCase() + user.slice(1)}
-      />
+      <div className="hidden lg:block">
+        <PageHeader
+          title="Followers"
+          description={user.charAt(0).toUpperCase() + user.slice(1)}
+        />
+      </div>
+
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <CustomPageHeader
+          title="Followers"
+          description={user.charAt(0).toUpperCase() + user.slice(1)}
+        />
+      </div>
 
       <Virtuoso
         className="custom-scrollbar min-h-screen  divide-y divide-app-border"
@@ -151,6 +177,7 @@ export const UserFollowersPage = () => {
                 )}
               </div>
             ),
+          Header: () => <div className="mt-18 lg:mt-0"></div>,
           Footer: () =>
             status === 'error' ? (
               <ErrorFeedback

@@ -21,8 +21,10 @@ import {useDebounce} from 'use-debounce';
 import {userService} from '../../actions/user.actions';
 
 export const Users = () => {
+  const lastScrollTop = useRef(0);
   const {currentUser, setUser} = useAuthStore(state => state);
   const [showGoUp, setShowGoUp] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
 
@@ -103,11 +105,21 @@ export const Users = () => {
     });
   };
 
+  // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
 
-    // Show "go up" button if scrolled more than 300px
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
+
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+
+      setShowMobileNav(true);
+    }
     setShowGoUp(scrollTop > 300);
+    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
 
   const handleFetchNext = async () => {
@@ -120,15 +132,33 @@ export const Users = () => {
   };
   return (
     <div>
-      <PageHeader title="Connect" description="Discover people to follow" />
-      <div className="relative flex-1 px-4">
-        <Search className="absolute left-5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search..."
-          className="pl-8 form-input"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
+      <div className="hidden lg:block">
+        <PageHeader title="Connect" description="Discover people to follow" />
+        <div className="relative flex-1 px-4">
+          <Search className="absolute left-5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            className="pl-8 form-input"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <PageHeader title="Connect" description="Discover people to follow" />
+        <div className="relative flex-1 px-4">
+          <Search className="absolute left-5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            className="pl-8 form-input"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <Virtuoso
@@ -148,6 +178,7 @@ export const Users = () => {
                 </p>
               </div>
             ),
+          Header: () => <div className="mt-27 lg:mt-0"></div>,
 
           Footer: () =>
             status === 'error' ? (

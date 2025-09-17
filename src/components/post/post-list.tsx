@@ -265,57 +265,18 @@ export const HomePostList = () => {
 
   const homeData = status === 'pending' ? Array(5).fill(null) : postsData;
 
-  const handleScroll2: React.UIEventHandler<HTMLDivElement> = event => {
-    const scrollTop = event.currentTarget.scrollTop;
-    // Compare current scrollTop to previous value to determine direction
-    if (scrollTop < lastScrollTop.current) {
-      // Scrolling up
-      setShowBottomTab(true);
-    } else if (scrollTop > lastScrollTop.current) {
-      // Scrolling down
-      setShowBottomTab(false);
-      setShowMobileNav(false);
-    }
-    setShowMobileNav(scrollTop < 300);
-    // Show "go up" button if scrolled more than 300px
-    setShowGoUp(scrollTop > 300);
-    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-  };
-
-  const handleScroll3: React.UIEventHandler<HTMLDivElement> = event => {
-    const scrollTop = event.currentTarget.scrollTop;
-    // Compare current scrollTop to previous value to determine direction
-    if (scrollTop > lastScrollTop.current) {
-      // Scrolling down
-      //setShowBottomTab(false);
-      setShowMobileNav(false);
-    }
-    if (scrollTop < lastScrollTop.current) {
-      // Scrolling up
-      //setShowBottomTab(true);
-      setShowMobileNav(true);
-    }
-    // Scrolling up → show only if close to the top
-    // if (scrollTop < 100) {
-    //   setShowMobileNav(true);
-    // }
-    // Show "go up" button if scrolled more than 300px
-    //setShowGoUp(scrollTop > 300);
-    lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-  };
-
+  // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
 
-    // If scrolling up → show nav
-    if (scrollTop < lastScrollTop.current) {
-      setShowMobileNav(true);
-      setShowBottomTab(true);
-    }
-    // If scrolling down → hide nav
-    else if (scrollTop > lastScrollTop.current) {
-      setShowMobileNav(false);
+    if (scrollTop > lastScrollTop.current) {
+      // Scrolling down → hide
       setShowBottomTab(false);
+      setShowMobileNav(false);
+    } else if (scrollTop < lastScrollTop.current) {
+      // Scrolling up → show
+      setShowBottomTab(true);
+      setShowMobileNav(true);
     }
 
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
@@ -347,17 +308,23 @@ export const HomePostList = () => {
 
   return (
     <div className="">
-      {showMobileNav && <MobileNavigation />}
+      {/* {showMobileNav && <MobileNavigation />} */}
+      <div
+        className={`fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <MobileNavigation />
+      </div>
 
       <Virtuoso
-        className="custom-scrollbar min-h-screen mb-10 lg:mb-0"
+        className="custom-scrollbar min-h-screen mb-0 lg:mb-0"
         totalCount={totalCount}
         data={homeData}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <Fragment>
+            <div className="mt-15">
               {!allowTab && (
                 <Tabs
                   defaultValue="for-you"
@@ -427,7 +394,7 @@ export const HomePostList = () => {
               <div>
                 <BannerAds placement="homepage_feed" />
               </div>
-            </Fragment>
+            </div>
           ),
           EmptyPlaceholder: () => {
             if (status === 'error') {
@@ -483,7 +450,7 @@ export const HomePostList = () => {
           }
         }}
       />
-      {showGoUp && (
+      {/* {showGoUp && (
         <button
           onClick={() => {
             virtuosoRef.current?.scrollTo({top: 0, behavior: 'smooth'});
@@ -491,9 +458,15 @@ export const HomePostList = () => {
           className="fixedBottomBtn z-1 fixed bottom-6 right-5 lg:right-[calc(50%-24rem)] bg-app text-white p-2 rounded-full shadow-lg hover:bg-app/90 transition">
           <ArrowUp size={20} />
         </button>
-      )}
+      )} */}
 
-      {showBottomTab && <MobileBottomTab />}
+      {/* {showBottomTab && <MobileBottomTab />} */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+          showBottomTab ? 'translate-y-0' : 'translate-y-full'
+        }`}>
+        <MobileBottomTab />
+      </div>
     </div>
   );
 };

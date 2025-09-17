@@ -92,7 +92,7 @@ export const AppHeader = () => {
   );
 };
 
-export const PostDetailsPageHeader = ({
+export const CustomPageHeader = ({
   title,
   description,
   href,

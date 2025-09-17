@@ -4,7 +4,7 @@ import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import {AdCard} from '@/components/ad/ad-card';
 import {BannerAds} from '@/components/ad/banner';
-import {PageHeader, PostDetailsPageHeader} from '@/components/app-headers';
+import {CustomPageHeader, PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {AddCommentField} from '@/components/post/add-comment-field';
@@ -465,9 +465,9 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <PostDetailsPageHeader title="Discuss" />
+        <CustomPageHeader title="Discuss" />
       </div>
-      <div className="sm:hidden lg:block">
+      <div className="hidden lg:block">
         <PageHeader title="Discuss" />
       </div>
       <div>

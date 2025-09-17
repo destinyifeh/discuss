@@ -1,6 +1,6 @@
 'use client';
 
-import {PageHeader} from '@/components/app-headers';
+import {CustomPageHeader, PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
@@ -19,7 +19,7 @@ import {Calendar, Link as LinkIcon, Settings} from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
 import {useParams, useRouter, useSearchParams} from 'next/navigation';
-import {Fragment, useEffect, useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {userService} from '../actions/user.actions';
 export const PostPlaceholder = ({
@@ -92,6 +92,7 @@ export const ProfilePage = () => {
   const navigate = useRouter();
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [showBottomTab, setShowBottomTab] = useState(true);
+  const [showMobileNav, setShowMobileNav] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const lastScrollTop = useRef(0);
@@ -160,9 +161,11 @@ export const ProfilePage = () => {
     if (scrollTop > lastScrollTop.current) {
       // Scrolling down → hide
       setShowBottomTab(false);
+      setShowMobileNav(false);
     } else if (scrollTop < lastScrollTop.current) {
       // Scrolling up → show
       setShowBottomTab(true);
+      setShowMobileNav(true);
     }
     // Show "go up" button if scrolled more than 300px
     // setShowGoUp(scrollTop > 300);
@@ -181,6 +184,21 @@ export const ProfilePage = () => {
 
   return (
     <div>
+      <div
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+          showMobileNav ? 'translate-y-0' : '-translate-y-full'
+        }`}>
+        <CustomPageHeader
+          title={currentUser?.username}
+          description={`${totalCount} ${activeTab}`}
+        />
+      </div>
+      <div className="hidden lg:block">
+        <PageHeader
+          title={currentUser?.username}
+          description={`${totalCount} ${activeTab}`}
+        />
+      </div>
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -190,12 +208,7 @@ export const ProfilePage = () => {
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <Fragment>
-              <PageHeader
-                title={currentUser?.username}
-                description={`${totalCount} ${activeTab}`}
-              />
-
+            <div className="mt-15 lg:mt-0">
               <div className="border-b overflow-y-auto border-app-border">
                 <div className="h-40 bg-app/20 relative overflow-hidden">
                   {currentUser?.cover_avatar ? (
@@ -325,7 +338,7 @@ export const ProfilePage = () => {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-            </Fragment>
+            </div>
           ),
           EmptyPlaceholder: () => {
             if (status === 'error') {

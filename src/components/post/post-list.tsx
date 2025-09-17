@@ -114,7 +114,7 @@ export const SectionPostList = ({
         }`}>
         <SectionHeader title={title} description={description} />
       </div>
-      <div className="sm:hidden lg:block">
+      <div className="hidden lg:block">
         <SectionHeader title={title} description={description} />
       </div>
       <Virtuoso
@@ -321,7 +321,7 @@ export const HomePostList = () => {
   return (
     <div>
       <div
-        className={` lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
         <MobileNavigation />
@@ -567,7 +567,7 @@ export const ExplorePostList = () => {
   };
 
   return (
-    <div className="lg:pb-0">
+    <div>
       <div
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
@@ -581,7 +581,7 @@ export const ExplorePostList = () => {
         />
       </div>
 
-      <div>
+      <div className="hidden lg:block">
         <PageHeader title="Search" />
 
         <SearchBarList
@@ -763,7 +763,7 @@ export const BookmarkPostList = () => {
         }`}>
         <PageHeader title="Bookmarks" />
       </div>
-      <div className="sm:hidden lg:block">
+      <div className="hidden lg:block">
         <PageHeader title="Bookmarks" />
       </div>
       <Virtuoso

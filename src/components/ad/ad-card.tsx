@@ -1,6 +1,4 @@
 'use client';
-import {mockAds} from '@/constants/data';
-import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {useAdActions} from '@/modules/dashboard/actions/action-hooks/ad.action-hooks';
 import {adService} from '@/modules/dashboard/actions/ad.actions';
@@ -22,7 +20,7 @@ import {
 import moment from 'moment';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import {Fragment, useState} from 'react';
+import React, {useState} from 'react';
 import {Avatar, AvatarFallback, AvatarImage} from '../ui/avatar';
 import {Button} from '../ui/button';
 import {
@@ -41,13 +39,11 @@ interface AdCardProps {
   isInDetailView?: boolean;
 }
 
-export const AdCard = ({
+const AdCard = ({
   ad,
   showActions = true,
   isInDetailView = false,
 }: AdCardProps) => {
-  const {theme} = useGlobalStore(state => state);
-  const [user] = useState({id: '2', following: ['2']});
   const [expanded, setExpanded] = useState(false);
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
   const {updateAdClicksRequest} = useAdActions();
@@ -68,7 +64,7 @@ export const AdCard = ({
       url = 'https://' + url;
     }
 
-    const clickUrl = `http://localhost:3000/api/ad/${ad._id}/clicks`;
+    const clickUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ad/${ad._id}/clicks`;
     navigator.sendBeacon(clickUrl);
     window.location.href = url;
   };
@@ -152,7 +148,7 @@ export const AdCard = ({
         <Avatar
           className="w-10 h-10 cursor-pointer"
           onClick={navigateToUserProfile}>
-          <AvatarImage src={ad?.owner?.avatar} />
+          <AvatarImage src={ad?.owner?.avatar ?? undefined} />
           <AvatarFallback className="capitalize text-app text-3xl">
             {ad.owner?.username?.charAt(0)}
           </AvatarFallback>
@@ -244,11 +240,20 @@ export const AdCard = ({
               )}
 
               {ad?.imageUrl && (
-                <div className="mt-3 rounded-xl overflow-hidden">
+                // <div className="mt-3 rounded-xl overflow-hidden">
+                //   <img
+                //     src={ad.imageUrl}
+                //     alt="Ad attachment"
+                //     className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96"
+                //   />
+                // </div>
+
+                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:h-96">
                   <img
                     src={ad.imageUrl}
                     alt="Ad attachment"
-                    className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               )}
@@ -385,18 +390,4 @@ export const AdCard = ({
   );
 };
 
-export function AppSponsoredAd({section}: {section: string}) {
-  const sponsoredAds = mockAds.filter(
-    ad => ad.type === 'sponsored' && ad.section === section,
-  );
-  if (sponsoredAds.length === 0) return null;
-  return (
-    <Fragment>
-      {sponsoredAds.map(ad => (
-        <div key={ad._id}>
-          <AdCard ad={ad} />
-        </div>
-      ))}
-    </Fragment>
-  );
-}
+export default React.memo(AdCard);

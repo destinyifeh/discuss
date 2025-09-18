@@ -255,7 +255,6 @@ export const ReportsTab: FC<ReportsProps> = ({searchTerm}) => {
       <div className="space-y-4">
         <Virtuoso
           className="custom-scrollbar min-h-screen"
-          totalCount={totalCount}
           data={reportsData}
           onScroll={handleScroll}
           ref={virtuosoRef}

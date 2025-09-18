@@ -157,10 +157,9 @@ export const UserFollowingPage = () => {
       </div>
 
       <Virtuoso
-        className="custom-scrollbar min-h-screen  divide-y divide-app-border"
+        className="custom-scrollbar min-h-screen divide-y divide-app-border"
         // style={{height: '100vh'}}
         data={following}
-        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{

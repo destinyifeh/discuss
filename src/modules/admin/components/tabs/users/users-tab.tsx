@@ -232,7 +232,6 @@ export const UsersTab: FC<UsersProps> = ({
           className="custom-scrollbar"
           //style={{height: '100vh'}}
           style={{height: 'calc(100vh - 100px)'}}
-          totalCount={totalCount}
           data={users}
           onScroll={handleScroll}
           ref={virtuosoRef}

@@ -281,7 +281,7 @@ const CommentCard = ({
             </DropdownMenu>
           </div>
 
-          <div className="mt-1">
+          {/* <div className="mt-1">
             {renderCommentContent()}
 
             {comment.images &&
@@ -295,6 +295,25 @@ const CommentCard = ({
                     alt={`comment attachment ${idx + 1}`}
                     // className="w-full h-auto max-h-96 object-cover rounded-lg"
                     className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96"
+                  />
+                </div>
+              ))}
+          </div> */}
+
+          <div className="mt-1">
+            {renderCommentContent()}
+
+            {comment.images &&
+              comment.images?.length > 0 &&
+              comment.images.map((img, idx) => (
+                <div
+                  key={img.public_id || idx}
+                  className="mt-3 h-60 sm:h-80 md:h-96 rounded-lg overflow-hidden">
+                  <img
+                    src={img.secure_url}
+                    alt={`comment attachment ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               ))}

@@ -234,7 +234,6 @@ export const ContentTab: FC<ContentProps> = ({
       <div className="space-y-4">
         <Virtuoso
           className="custom-scrollbar min-h-screen"
-          totalCount={totalCount}
           data={postsData}
           onScroll={handleScroll}
           ref={virtuosoRef}

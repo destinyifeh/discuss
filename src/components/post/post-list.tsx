@@ -10,7 +10,7 @@ import List from 'rc-virtual-list';
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
-import {AdCard} from '../ad/ad-card';
+import AdCard from '../ad/ad-card';
 import {BannerAds} from '../ad/banner';
 import {PageHeader, SectionHeader} from '../app-headers';
 import {LoadingMore, LoadMoreError} from '../feedbacks';
@@ -26,13 +26,11 @@ import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import PostCard from './post-card';
 
 export const SectionPostList = ({
-  adSection,
   bannerAd,
   section,
   title,
   description,
 }: {
-  adSection: string;
   bannerAd: string;
   section: string;
   title: string;
@@ -86,11 +84,9 @@ export const SectionPostList = ({
 
     if (scrollTop > lastScrollTop.current) {
       // Scrolling down → hide
-      setShowBottomTab(false);
       setShowMobileNav(false);
     } else if (scrollTop < lastScrollTop.current) {
       // Scrolling up → show
-      setShowBottomTab(true);
       setShowMobileNav(true);
     }
 
@@ -117,10 +113,10 @@ export const SectionPostList = ({
       <div className="hidden lg:block">
         <SectionHeader title={title} description={description} />
       </div>
+
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         data={sectionData}
@@ -329,7 +325,6 @@ export const HomePostList = () => {
 
       <Virtuoso
         className="custom-scrollbar min-h-screen mb-0 lg:mb-0"
-        totalCount={totalCount}
         data={homeData}
         onScroll={handleScroll}
         ref={virtuosoRef}
@@ -594,7 +589,6 @@ export const ExplorePostList = () => {
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        //style={{height: '950px', width: '100%'}}
         data={exploreData}
         onScroll={handleScroll}
         ref={virtuosoRef}
@@ -769,7 +763,6 @@ export const BookmarkPostList = () => {
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         data={bookmarkedData}

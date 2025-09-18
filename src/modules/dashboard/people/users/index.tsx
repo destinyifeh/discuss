@@ -165,7 +165,6 @@ export const Users = () => {
         className="custom-scrollbar min-h-screen divide-y divide-app-border"
         // style={{height: '100vh'}}
         data={users}
-        totalCount={totalCount}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{

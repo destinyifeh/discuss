@@ -2,7 +2,7 @@
 
 import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
-import {AdCard} from '@/components/ad/ad-card';
+import AdCard from '@/components/ad/ad-card';
 import {BannerAds} from '@/components/ad/banner';
 import {CustomPageHeader, PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';

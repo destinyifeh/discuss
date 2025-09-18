@@ -487,8 +487,16 @@ export const PeoplePage = () => {
               </Tabs>
             </div>
           ),
-          EmptyPlaceholder: () =>
-            status === 'error' ? null : <PostPlaceholder tab={activeTab} />,
+          EmptyPlaceholder: () => {
+            if (status === 'error') {
+              return null;
+            }
+            if (status === 'pending') {
+              return <PostSkeleton />;
+            }
+
+            return <PostPlaceholder tab={activeTab} />;
+          },
           Footer: () =>
             status === 'error' ? (
               <ErrorFeedback

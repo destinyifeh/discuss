@@ -26,12 +26,13 @@ export const SectionPage = () => {
   }
 
   return (
-    <SectionPostList
-      section={section.name}
-      adSection="home"
-      bannerAd={section.name.toLowerCase()}
-      description={section.description as string}
-      title={section.name as string}
-    />
+    <div>
+      <SectionPostList
+        section={section.name}
+        bannerAd={section.name.toLowerCase()}
+        description={section.description as string}
+        title={section.name as string}
+      />
+    </div>
   );
 };

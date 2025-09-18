@@ -1,5 +1,5 @@
 'use client';
-import {AdCard} from '@/components/ad/ad-card';
+import AdCard from '@/components/ad/ad-card';
 import {BannerAd} from '@/components/ad/banner';
 import {Button} from '@/components/ui/button';
 import {toast} from '@/components/ui/toast';

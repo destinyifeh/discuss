@@ -130,7 +130,8 @@ const CommentCard = ({
 
         const regularContent = comment.content;
 
-        const {quotedImage, quotedContent} = comment.quotedComment;
+        const {quotedImage, quotedContent, quotedContentCreatedDate} =
+          comment.quotedComment;
         return (
           <>
             <div
@@ -152,6 +153,12 @@ const CommentCard = ({
                 <p className="text-sm font-semibold text-app capitalize">
                   <Link href={`/user/${quoteName}`}>{quoteName}</Link>
                 </p>
+                {quotedContentCreatedDate && (
+                  <span className="text-app-gray">
+                    · replied{' '}
+                    {formatTimeAgo2(quotedContentCreatedDate as string)}
+                  </span>
+                )}
               </div>
               {/* <p className="text-gray-700">{quoteContent}</p> */}
               <PostContent content={quotedContent} />

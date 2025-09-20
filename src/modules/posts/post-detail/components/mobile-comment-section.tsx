@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
+import {formatTimeAgo2} from '@/lib/formatter';
 import {CommentFeedProps} from '@/types/post-item.type';
 import clsx from 'clsx';
 import {ImagePlus, MessageSquare, Reply, Trash2} from 'lucide-react';
@@ -39,6 +40,7 @@ type SectionProps = {
   imagePreview: string | null;
   handleImageUpload: (image: React.ChangeEvent<HTMLInputElement>) => void;
   quotedUserImage: string;
+  quotedContentCreatedDate: string;
 };
 
 export const MobileCommentSection = ({
@@ -68,6 +70,7 @@ export const MobileCommentSection = ({
   quotedImages,
   setQuotedImages,
   quotedUserImage,
+  quotedContentCreatedDate,
 }: SectionProps) => {
   const {currentUser} = useAuthStore(state => state);
 
@@ -152,6 +155,11 @@ export const MobileCommentSection = ({
                   <p className="text-sm font-semibold text-app capitalize">
                     <Link href={`/user/${quotedUser}`}>{quotedUser}</Link>
                   </p>
+
+                  <span className="text-app-gray">
+                    · replied{' '}
+                    {formatTimeAgo2(quotedContentCreatedDate as string)}
+                  </span>
                 </div>
                 <div className="text-sm">
                   <p

@@ -85,6 +85,7 @@ export interface QuotedCommentProps {
   quotedId: string;
   quotedUserId: string;
   quotedImage?: string[];
+  quotedContentCreatedDate?: string;
 }
 
 export interface CommentFeedProps {

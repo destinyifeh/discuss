@@ -78,6 +78,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
   const [quoteId, setQuoteId] = useState('');
   const [quotedUserId, setQuotedUserId] = useState('');
   const [quotedUserImage, setQuotedUserImage] = useState('');
+  const [quotedContentCreatedDate, setQuotedContentCreatedDate] = useState('');
   const [fetchNextError, setFetchNextError] = useState<string | null>(null);
   const {createComment, updateCommentRequest} = usePostActions();
   console.log(slugId, 'slugId', slug);
@@ -221,6 +222,9 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
           setQuoteId(comment.quotedComment.quotedId);
           setQuotedUserImage(comment.quotedComment.quotedUserImage as string);
           setQuotedImages(quotedImg);
+          setQuotedContentCreatedDate(
+            comment.quotedComment.quotedContentCreatedDate as string,
+          );
           setComment(comment.content);
           setShowMobileComment(true);
           setShowWebComment(true);
@@ -256,6 +260,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
         setQuotedUserImage(commentToQuote.commentBy.avatar as string);
         setQuotedUserId(commentToQuote.commentBy._id);
         setQuoteId(commentToQuote._id);
+        setQuotedContentCreatedDate(commentToQuote.createdAt as string);
         setShowMobileComment(true);
         setShowWebComment(true);
         setShowMobileComment(true);
@@ -267,7 +272,6 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
     },
     [
       comments,
-
       setQuoteContent,
       setQuotedUser,
       setShowMobileComment,
@@ -276,6 +280,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
       setQuotedUserId,
       setQuoteId,
       setQuotedUserImage,
+      setQuotedContentCreatedDate,
     ],
   );
 
@@ -297,6 +302,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
           quotedId: quoteId,
           quotedUserId: quotedUserId,
           quotedUserImage: quotedUserImage,
+          quotedContentCreatedDate: quotedContentCreatedDate,
         };
       }
 
@@ -709,6 +715,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
               quotedImages={quotedImages}
               setQuotedImages={setQuotedImages}
               quotedUserImage={quotedUserImage}
+              quotedContentCreatedDate={quotedContentCreatedDate}
             />
           )}
 
@@ -739,6 +746,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
             quotedImages={quotedImages}
             setQuotedImages={setQuotedImages}
             quotedUserImage={quotedUserImage}
+            quotedContentCreatedDate={quotedContentCreatedDate}
           />
         </>
       )}

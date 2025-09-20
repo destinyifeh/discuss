@@ -342,7 +342,7 @@ export const HomePostList = () => {
                       <TabsTrigger
                         value="for-you"
                         className="data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black">
-                        For You
+                        Trending
                       </TabsTrigger>
                       <TabsTrigger
                         value="following"
@@ -614,7 +614,7 @@ export const ExplorePostList = () => {
                 <BannerAds placement="homepage_feed" />
               </div>
               <div className="border-b-2 border-b-app p-3 w-30 mb-3 font-bold text-lg">
-                <h1> Trending</h1>
+                <h1> Explore </h1>
               </div>
             </div>
           ),

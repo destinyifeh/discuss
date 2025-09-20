@@ -119,7 +119,8 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
     },
     placeholderData: previousData => previousData,
     enabled: !!post?._id,
-    refetchInterval: 5000,
+    // refetchInterval: 5000,
+    refetchInterval: 15000,
     refetchIntervalInBackground: false,
   });
 
@@ -477,6 +478,9 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
         <PageHeader title="Discuss" />
       </div>
       <div>
+        <div>
+          <BannerAds placement="details_feed" />
+        </div>
         <Virtuoso
           className="custom-scrollbar"
           style={{height: '100vh'}}
@@ -535,9 +539,9 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
               ) : null,
             Header: () => (
               <div className="mt-15 lg:mt-0">
-                <div>
+                {/* <div>
                   <BannerAds placement="details_feed" />
-                </div>
+                </div> */}
                 {/* <div className="pb-2 border-b border-app-border"> */}
                 <div className="pb-2">
                   <PostCard

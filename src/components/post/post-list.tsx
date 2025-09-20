@@ -66,7 +66,8 @@ export const SectionPostList = ({
     placeholderData: previousData => previousData,
     enabled: shouldQuery,
     retry: 1,
-    refetchInterval: 5000, // Poll every 5s
+    // refetchInterval: 5000, // Poll every 5s
+    refetchInterval: 15000,
     refetchIntervalInBackground: false,
   });
 
@@ -232,7 +233,8 @@ export const HomePostList = () => {
       return page < pages ? page + 1 : undefined;
     },
     placeholderData: previousData => previousData,
-    refetchInterval: 5000, // Poll every 5s
+    //refetchInterval: 5000, // Poll every 5s
+    refetchInterval: 15000, //poll every 15s
     refetchIntervalInBackground: false,
   });
   useEffect(() => {

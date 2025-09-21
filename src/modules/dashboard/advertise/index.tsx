@@ -119,10 +119,17 @@ export const AdvertisePage = () => {
                 Reach users based on interests, categories, and engagement.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-app-hover border border-app-border dark:bg-background">
+            {/* <div className="p-4 rounded-lg bg-app-hover border border-app-border dark:bg-background">
               <h3 className="font-bold mb-1">Multiple Formats</h3>
               <p className="text-sm text-app-gray">
                 Choose from banners and sponsored posts.
+              </p>
+            </div> */}
+            <div className="p-4 rounded-lg bg-app-hover border border-app-border dark:bg-background">
+              <h3 className="font-bold mb-1">Sponsored Posts</h3>
+              <p className="text-sm text-app-gray">
+                Promote your content directly in the forum feed with native
+                sponsored posts.
               </p>
             </div>
           </div>

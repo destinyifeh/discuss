@@ -485,26 +485,27 @@ const PostCard = ({
               )} */}
 
               {!isInDetailView && post.images && post.images.length > 0 && (
-                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:h-96">
+                <div className="mt-3 rounded-xl overflow-hidden">
                   <img
                     src={post.images[0].secure_url}
                     alt="Post attachment"
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto max-h-96 object-cover"
+                    // style={{maxHeight: '24rem'}}
                     loading="lazy"
                   />
                 </div>
               )}
 
               {isInDetailView && post.images && post.images?.length > 0 && (
-                <div className="mt-3 rounded-xl overflow-hidden space-y-3">
+                <div className="mt-3 space-y-3">
                   {post.images.map((img, idx) => (
                     <div
                       key={img.public_id || idx}
-                      className="h-60 sm:h-80 md:h-96 rounded-lg overflow-hidden">
+                      className="rounded-xl overflow-hidden">
                       <img
                         src={img.secure_url}
                         alt={`Post attachment ${idx + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto max-h-96 object-cover"
                         loading="lazy"
                       />
                     </div>

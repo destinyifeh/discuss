@@ -168,7 +168,7 @@ const AdCard = ({
 
                 <span className="text-app-gray">·</span>
 
-                <span className="truncate">{ad?.type}</span>
+                <span className="truncate capitalize">{ad?.type}</span>
 
                 {/* <span className="text-app-gray">·</span>
                 <span className="text-app-gray truncate">
@@ -248,11 +248,11 @@ const AdCard = ({
                 //   />
                 // </div>
 
-                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:h-96">
+                <div className="mt-3 rounded-xl overflow-hidden">
                   <img
                     src={ad.imageUrl}
                     alt="Ad attachment"
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto max-h-96 object-cover"
                     loading="lazy"
                   />
                 </div>
@@ -368,21 +368,25 @@ const AdCard = ({
                 </Popover>
               </div>
             )}
-            <div className="flex justify-between items-center mt-3">
-              <h1 className="font-bold">{ad?.title}</h1>
-              <Button
-                variant="ghost"
-                size="sm"
-                // className="rounded-full border text-white hover:bg-app/90 "
-                className="rounded-full border border-[1.4px] border-app text-app font-bold hover:border-app/90 hover:text-app/90 text-sm "
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onCallToAction();
-                }}>
-                {ad?.callToAction}
-              </Button>
-            </div>
+            {ad.targetUrl && (
+              <div className="flex justify-between items-center mt-3">
+                <h1 className="font-bold">{ad?.title}</h1>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  // className="rounded-full border text-white hover:bg-app/90 "
+                  className="rounded-full border border-[1.4px] border-app text-app font-bold hover:border-app/90 hover:text-app/90 text-sm "
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCallToAction();
+                  }}>
+                  {ad.targetUrl && ad?.callToAction === 'None'
+                    ? 'Learn More'
+                    : ad?.callToAction}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

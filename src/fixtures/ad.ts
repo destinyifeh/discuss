@@ -17,14 +17,9 @@ export const pricingTiers = [
     price: BASIC_AD_PRICE_FOR_7_DAYS,
     unit: 'per week',
     description: 'For small businesses just getting started with advertising',
-    features: [
-      'Section targeting',
-      'All ad formats',
-      'Analytics',
-      'Standard support',
-    ],
+    features: ['Section targeting', 'Analytics', 'Standard support'],
     limitations: [
-      'No homepage placement',
+      'Homepage placement',
       'Post detail page visibility',
       'Multi-section targeting',
     ],
@@ -38,12 +33,10 @@ export const pricingTiers = [
     features: [
       'Section targeting',
       'Post detail page visibility',
-      ,
-      'All ad formats',
       'Analytics',
       'Standard support',
     ],
-    limitations: ['No homepage placement', 'Multi-section targeting'],
+    limitations: ['Homepage placement', 'Multi-section targeting'],
   },
   {
     name: 'Enterprise',
@@ -54,7 +47,6 @@ export const pricingTiers = [
       'Multi-section targeting',
       'Homepage placement',
       'Post detail page visibility',
-      'All ad formats',
       'Analytics',
       'Dedicated support',
     ],

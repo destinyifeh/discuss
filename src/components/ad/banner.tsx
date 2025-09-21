@@ -11,7 +11,7 @@ import {AdPlacementProps, AdProps} from '@/types/ad-types';
 import {useQuery} from '@tanstack/react-query';
 import {ExternalLink} from 'lucide-react';
 import Image from 'next/image';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 export interface BannerAdProps {
   ad: AdProps;
@@ -183,35 +183,34 @@ export function BannerAds2({
 
   console.log(data, 'banner ads');
 
-  // Local rotation every 15s
+  const ads = data?.ads ?? [];
+
+  // 🔄 Rotate locally every 10s (only if ads.length > 0)
   useEffect(() => {
-    if (!data?.ads?.length) return;
+    if (!ads.length) return;
 
     const interval = setInterval(() => {
-      setFade(false); // start fade-out
+      setFade(false);
       setTimeout(() => {
-        setCurrentIndex(prev => (prev + 1) % data.ads.length);
-        setFade(true); // fade-in new ad
-      }, 500); // fade out time
-    }, 15000);
+        setCurrentIndex(prev => (prev + 1) % ads.length);
+        setFade(true);
+      }, 300);
+    }, 10000);
 
     return () => clearInterval(interval);
-  }, [data?.ads]);
+  }, [ads.length]);
 
-  if (isLoading) return null;
-  if (!data?.ads.length) return null;
+  if (isLoading || ads.length === 0) return null;
 
-  const currentAd = data.ads[currentIndex];
+  const currentAd = ads[currentIndex];
 
-  console.log(currentAd, 'currentAdd');
   return (
     <div className="p-4 border-b border-app-border">
       <BannerAd ad={currentAd} key={currentAd._id} animation={fade} />
     </div>
   );
 }
-
-export function BannerAds({
+function BannerAds({
   section,
   placement,
 }: {
@@ -221,30 +220,34 @@ export function BannerAds({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
-  console.log(section, 'settt');
-  const shouldQuery = Boolean(placement);
+  // console.log(section, 'settt');
+  // const shouldQuery = Boolean(placement);
 
-  const {data, isLoading} = useQuery({
-    queryKey: ['bannerAds', placement],
-    queryFn: () => adService.getBannerAds(placement, section),
-    // refetchInterval: 60000,
-    refetchInterval: 15000,
-    enabled: shouldQuery,
-  });
+  // const {data, isLoading} = useQuery({
+  //   queryKey: ['bannerAds', placement],
+  //   queryFn: () => adService.getBannerAds(placement, section),
+  //   // refetchInterval: 60000,
+  //   refetchInterval: 30000,
+  //   enabled: shouldQuery,
+  // });
 
-  console.log(data, 'banner ads');
+  // console.log(data, 'banner ads');
 
-  // Local rotation every 15s
+  // // Local rotation every 15s
 
-  if (isLoading) return null;
-  if (!data?.ads.length) return null;
+  // if (isLoading) return null;
+  // if (!data?.ads.length) return null;
 
-  const currentAd = data.ads[0]; // backend returns one ad at a time
+  // const currentAd = data.ads[0]; // backend returns one ad at a time
 
-  console.log(currentAd, 'currentAdd');
-  return (
-    <div className="p-4 border-b border-app-border">
-      <BannerAd ad={currentAd} key={currentAd._id} animation={fade} />
-    </div>
-  );
+  // console.log(currentAd, 'currentAdd');
+  // return (
+  //   <div className="p-4 border-b border-app-border">
+  //     <BannerAd ad={currentAd} key={currentAd._id} animation={fade} />
+  //   </div>
+  // );
+
+  return null;
 }
+
+export default React.memo(BannerAds);

@@ -7,11 +7,10 @@ import {useInfiniteQuery} from '@tanstack/react-query';
 import {BookmarkIcon, PenSquare, Search} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
 import AdCard from '../ad/ad-card';
-import {BannerAds} from '../ad/banner';
 import {PageHeader, SectionHeader} from '../app-headers';
 import {LoadingMore, LoadMoreError} from '../feedbacks';
 import ErrorFeedback from '../feedbacks/error-feedback';
@@ -26,12 +25,12 @@ import {Tabs, TabsList, TabsTrigger} from '../ui/tabs';
 import PostCard from './post-card';
 
 export const SectionPostList = ({
-  bannerAd,
+  adSection,
   section,
   title,
   description,
 }: {
-  bannerAd: string;
+  adSection: string;
   section: string;
   title: string;
   description: string;
@@ -67,7 +66,7 @@ export const SectionPostList = ({
     enabled: shouldQuery,
     retry: 1,
     // refetchInterval: 5000, // Poll every 5s
-    refetchInterval: 15000,
+    refetchInterval: 30000,
     refetchIntervalInBackground: false,
   });
 
@@ -122,11 +121,7 @@ export const SectionPostList = ({
         ref={virtuosoRef}
         data={sectionData}
         components={{
-          Header: () => (
-            <div className="mt-25 lg:mt-0">
-              <BannerAds section={bannerAd} placement="section_feed" />
-            </div>
-          ),
+          Header: () => <div className="mt-25 lg:mt-0"></div>,
           EmptyPlaceholder: () => {
             if (status === 'error') {
               return null;
@@ -234,7 +229,7 @@ export const HomePostList = () => {
     },
     placeholderData: previousData => previousData,
     //refetchInterval: 5000, // Poll every 5s
-    refetchInterval: 15000, //poll every 15s
+    refetchInterval: 30000, //poll every 15s
     refetchIntervalInBackground: false,
   });
   useEffect(() => {
@@ -399,9 +394,9 @@ export const HomePostList = () => {
                   </div>
                 </div>
               )}
-              <div>
+              {/* <div>
                 <BannerAds placement="homepage_feed" />
-              </div>
+              </div> */}
             </div>
           ),
           EmptyPlaceholder: () => {
@@ -612,9 +607,6 @@ export const ExplorePostList = () => {
                 </div>
               </div>
 
-              <div>
-                <BannerAds placement="homepage_feed" />
-              </div>
               <div className="border-b-2 border-b-app p-3 w-30 mb-3 font-bold text-lg">
                 <h1> Explore </h1>
               </div>

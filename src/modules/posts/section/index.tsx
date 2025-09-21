@@ -29,7 +29,7 @@ export const SectionPage = () => {
     <div>
       <SectionPostList
         section={section.name}
-        bannerAd={section.name.toLowerCase()}
+        adSection={section.name.toLowerCase()}
         description={section.description as string}
         title={section.name as string}
       />

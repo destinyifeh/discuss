@@ -182,14 +182,16 @@ export const AdPreviewPage = ({
                     {previewAdData.duration + ' ' + 'Days'}
                   </p>
                 </div>
-                <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
-                  <span className="text-sm text-app-gray">
-                    Target {previewAdData.plan === 'basic' && 'Section'}
-                  </span>
-                  <p className="font-medium">
-                    {previewAdData.section || 'Multiple sections'}
-                  </p>
-                </div>
+                {previewAdData.section && (
+                  <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
+                    <span className="text-sm text-app-gray">
+                      Target {previewAdData.plan === 'basic' && 'Section'}
+                    </span>
+                    <p className="font-medium">
+                      {previewAdData.section || 'Multiple sections'}
+                    </p>
+                  </div>
+                )}
                 <div className="bg-app-hover p-3 rounded-lg border border-app-border dark:bg-background">
                   <span className="text-sm text-app-gray">Price</span>
                   <p className="font-medium">

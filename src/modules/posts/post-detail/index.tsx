@@ -3,7 +3,6 @@
 import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import AdCard from '@/components/ad/ad-card';
-import {BannerAds} from '@/components/ad/banner';
 import {CustomPageHeader, PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
@@ -466,6 +465,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
 
     lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
   };
+
   return (
     <Fragment>
       <div
@@ -477,209 +477,201 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
       <div className="hidden lg:block">
         <PageHeader title="Discuss" />
       </div>
-      <div>
-        <div>
-          <BannerAds placement="details_feed" />
-        </div>
-        <Virtuoso
-          className="custom-scrollbar"
-          style={{height: '100vh'}}
-          ref={virtuosoRef}
-          onScroll={handleScroll}
-          // initialTopMostItemIndex={0}
 
-          data={commentsData}
-          endReached={() => {
-            if (hasNextPage && !isFetchingNextPage) {
-              handleFetchNext();
+      <Virtuoso
+        className="custom-scrollbar"
+        style={{height: '100vh'}}
+        ref={virtuosoRef}
+        onScroll={handleScroll}
+        // initialTopMostItemIndex={0}
+
+        data={commentsData}
+        endReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            handleFetchNext();
+          }
+        }}
+        itemContent={(index, comment) => {
+          if (status === 'pending') {
+            return <CommentSkeleton />;
+          } else {
+            if (!comment || !comment.data) {
+              return null;
             }
-          }}
-          itemContent={(index, comment) => {
-            if (status === 'pending') {
-              return <CommentSkeleton />;
-            } else {
-              if (!comment || !comment.data) {
-                return null;
-              }
-              if (comment._type === 'ad') {
-                return (
-                  <AdCard
-                    key={comment.data._id || `ad-${index}`}
-                    ad={comment.data}
-                  />
-                );
-              }
+            if (comment._type === 'ad') {
               return (
-                <CommentCard
-                  key={comment.data._id || `comment-${index}`}
-                  comment={comment.data}
-                  onQuote={() => handleQuoteComment(comment.data)}
-                  handleQuoteClick={handleQuoteClick}
-                  onEdit={() => handleEditComment(comment.data)}
+                <AdCard
+                  key={comment.data._id || `ad-${index}`}
+                  ad={comment.data}
                 />
               );
             }
-          }}
-          components={{
-            Footer: () =>
-              status === 'error' ? (
-                <ErrorFeedback
-                  showRetry
-                  onRetry={refetch}
-                  message="We encountered an unexpected error. Please try again"
-                  variant="minimal"
+            return (
+              <CommentCard
+                key={comment.data._id || `comment-${index}`}
+                comment={comment.data}
+                onQuote={() => handleQuoteComment(comment.data)}
+                handleQuoteClick={handleQuoteClick}
+                onEdit={() => handleEditComment(comment.data)}
+              />
+            );
+          }
+        }}
+        components={{
+          Footer: () =>
+            status === 'error' ? (
+              <ErrorFeedback
+                showRetry
+                onRetry={refetch}
+                message="We encountered an unexpected error. Please try again"
+                variant="minimal"
+              />
+            ) : isFetchingNextPage ? (
+              <LoadingMore />
+            ) : fetchNextError ? (
+              <LoadMoreError
+                fetchNextError={fetchNextError}
+                handleFetchNext={handleFetchNext}
+              />
+            ) : null,
+          Header: () => (
+            <div className="mt-15 lg:mt-0">
+              {/* <div className="pb-2 border-b border-app-border"> */}
+              <div className="pb-2">
+                <PostCard
+                  post={post}
+                  showActions={true}
+                  isInDetailView={true}
                 />
-              ) : isFetchingNextPage ? (
-                <LoadingMore />
-              ) : fetchNextError ? (
-                <LoadMoreError
-                  fetchNextError={fetchNextError}
-                  handleFetchNext={handleFetchNext}
-                />
-              ) : null,
-            Header: () => (
-              <div className="mt-15 lg:mt-0">
-                {/* <div>
-                  <BannerAds placement="details_feed" />
-                </div> */}
-                {/* <div className="pb-2 border-b border-app-border"> */}
-                <div className="pb-2">
-                  <PostCard
-                    post={post}
-                    showActions={true}
-                    isInDetailView={true}
-                  />
+              </div>
+
+              {/* All replies header with add comment button for web */}
+              <div className="px-4 py-3 border-b flex justify-between items-center border-app-border">
+                <h2 className="font-bold text-lg">All replies</h2>
+              </div>
+
+              {post?.commentsClosed && (
+                <div className="text-sm text-gray-600 flex items-center gap-2 justify-center my-3">
+                  <LockIcon className="w-4 h-4 text-gray-500" />
+                  This discussion has been locked. No new comments can be added.
                 </div>
+              )}
 
-                {/* All replies header with add comment button for web */}
-                <div className="px-4 py-3 border-b flex justify-between items-center border-app-border">
-                  <h2 className="font-bold text-lg">All replies</h2>
-                </div>
-
-                {post?.commentsClosed && (
-                  <div className="text-sm text-gray-600 flex items-center gap-2 justify-center my-3">
-                    <LockIcon className="w-4 h-4 text-gray-500" />
-                    This discussion has been locked. No new comments can be
-                    added.
-                  </div>
-                )}
-
-                {/* Web view comment input area */}
-                {allowInlineCom && (
-                  <div className="hidden md:block px-4 py-4 border-b border-app-border">
-                    <CommunityGuidelines />
-                    <form
-                      onSubmit={handleSubmitComment}
-                      className="mt-4 space-y-4">
-                      <div className="flex gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={currentUser?.avatar ?? undefined} />
-                          <AvatarFallback className="capitalize text-app text-3xl">
-                            {currentUser?.username.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          {quotedUser && (
-                            <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app flex flex-row justify-between">
-                              <div>
-                                <div className="font-semibold mb-1 text-app">
-                                  @{quotedUser}
-                                </div>
-                                <div className="text-gray-700">
-                                  {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
-                                </div>
+              {/* Web view comment input area */}
+              {allowInlineCom && (
+                <div className="hidden md:block px-4 py-4 border-b border-app-border">
+                  <CommunityGuidelines />
+                  <form
+                    onSubmit={handleSubmitComment}
+                    className="mt-4 space-y-4">
+                    <div className="flex gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={currentUser?.avatar ?? undefined} />
+                        <AvatarFallback className="capitalize text-app text-3xl">
+                          {currentUser?.username.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        {quotedUser && (
+                          <div className="bg-gray-100 p-3 rounded-md mb-3 border-l-4 border-app flex flex-row justify-between">
+                            <div>
+                              <div className="font-semibold mb-1 text-app">
+                                @{quotedUser}
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setQuoteContent('');
-                                  setQuotedUser('');
-                                  setComment('');
-                                  setImagePreview(null);
-                                }}>
-                                <X />
-                              </Button>
+                              <div className="text-gray-700">
+                                {quoteContent.replace(/^>\s[\w]+:\s/gm, '')}
+                              </div>
                             </div>
-                          )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setQuoteContent('');
+                                setQuotedUser('');
+                                setComment('');
+                                setImagePreview(null);
+                              }}>
+                              <X />
+                            </Button>
+                          </div>
+                        )}
 
-                          <Textarea
-                            placeholder="Add your comment..."
-                            value={comment}
-                            onChange={e => setComment(e.target.value)}
-                            className="min-h-[120px] resize-none form-input"
-                            autoFocus
-                          />
+                        <Textarea
+                          placeholder="Add your comment..."
+                          value={comment}
+                          onChange={e => setComment(e.target.value)}
+                          className="min-h-[120px] resize-none form-input"
+                          autoFocus
+                        />
 
-                          {imagePreview && (
-                            <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
-                              <img
-                                src={imagePreview}
-                                alt="Preview"
-                                className="w-full max-h-60 object-contain"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                //onClick={removeImage}
-                                className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
-                                <X size={16} />
-                              </Button>
-                            </div>
-                          )}
-
-                          <div className="mt-3 flex justify-end items-center">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                              ref={fileInputRef}
-                              id="image-upload"
+                        {imagePreview && (
+                          <div className="relative mt-3 rounded-md overflow-hidden border border-gray-200">
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="w-full max-h-60 object-contain"
                             />
-                            <div className="flex gap-3">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="text-app"
-                                onClick={() => fileInputRef.current?.click()}>
-                                <ImagePlus size={18} />
-                              </Button>
-                              <Button
-                                type="submit"
-                                className="bg-app hover:bg-app/90"
-                                disabled={
-                                  isSubmitting ||
-                                  (!comment.trim() && !imagePreview)
-                                }>
-                                <Send size={16} className="mr-2" />
-                                Post Reply
-                              </Button>
-                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              //onClick={removeImage}
+                              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-gray-800/70 hover:bg-gray-900/90">
+                              <X size={16} />
+                            </Button>
+                          </div>
+                        )}
+
+                        <div className="mt-3 flex justify-end items-center">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            ref={fileInputRef}
+                            id="image-upload"
+                          />
+                          <div className="flex gap-3">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="text-app"
+                              onClick={() => fileInputRef.current?.click()}>
+                              <ImagePlus size={18} />
+                            </Button>
+                            <Button
+                              type="submit"
+                              className="bg-app hover:bg-app/90"
+                              disabled={
+                                isSubmitting ||
+                                (!comment.trim() && !imagePreview)
+                              }>
+                              <Send size={16} className="mr-2" />
+                              Post Reply
+                            </Button>
                           </div>
                         </div>
                       </div>
-                    </form>
-                  </div>
-                )}
-              </div>
-            ),
+                    </div>
+                  </form>
+                </div>
+              )}
+            </div>
+          ),
 
-            EmptyPlaceholder: () => {
-              if (status === 'error') {
-                return null;
-              }
-              if (status === 'pending') {
-                return <CommentSkeleton />;
-              }
+          EmptyPlaceholder: () => {
+            if (status === 'error') {
+              return null;
+            }
+            if (status === 'pending') {
+              return <CommentSkeleton />;
+            }
 
-              return <CommentPlaceholder />;
-            },
-          }}
-        />
-      </div>
+            return <CommentPlaceholder />;
+          },
+        }}
+      />
 
       {!post?.commentsClosed && (
         <>

@@ -485,11 +485,11 @@ const PostCard = ({
               )} */}
 
               {!isInDetailView && post.images && post.images.length > 0 && (
-                <div className="mt-3 rounded-xl overflow-hidden">
+                <div className="mt-3 rounded-xl overflow-hidden h-96">
                   <img
                     src={post.images[0].secure_url}
                     alt="Post attachment"
-                    className="w-full h-auto max-h-96 object-cover"
+                    className="w-full h-full object-cover"
                     // style={{maxHeight: '24rem'}}
                     loading="lazy"
                   />
@@ -501,11 +501,11 @@ const PostCard = ({
                   {post.images.map((img, idx) => (
                     <div
                       key={img.public_id || idx}
-                      className="rounded-xl overflow-hidden">
+                      className="rounded-xl overflow-hidden h-96">
                       <img
                         src={img.secure_url}
                         alt={`Post attachment ${idx + 1}`}
-                        className="w-full h-auto max-h-96 object-cover"
+                        className="w-full h-full object-cover"
                         loading="lazy"
                       />
                     </div>

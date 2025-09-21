@@ -155,6 +155,9 @@ export const SectionPostList = ({
             handleFetchNext();
           }
         }}
+        computeItemKey={(index, post) =>
+          post._type === 'ad' ? `ad-${post.data._id}` : `post-${post.data._id}`
+        }
         itemContent={(index, post) => {
           if (status === 'pending') {
             return <PostSkeleton />;
@@ -163,16 +166,9 @@ export const SectionPostList = ({
               return null;
             }
             if (post._type === 'ad') {
-              return (
-                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
-              );
+              return <AdCard ad={post.data} />;
             }
-            return (
-              <PostCard
-                key={post.data._id || `post-${index}`}
-                post={post.data}
-              />
-            );
+            return <PostCard post={post.data} />;
           }
         }}
       />
@@ -230,45 +226,17 @@ export const HomePostList = () => {
     placeholderData: previousData => previousData,
     //refetchInterval: 5000, // Poll every 5s
     //refetchInterval: 30000, //poll every 15s
-    refetchIntervalInBackground: false,
+    // refetchIntervalInBackground: false,
   });
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const handleWindowScroll = () => {
-      const scrollTop = window.scrollY;
-
-      if (scrollTop > lastScrollTop.current) {
-        setShowMobileNav(false); // scrolling down
-      } else if (scrollTop < lastScrollTop.current) {
-        setShowMobileNav(true); // scrolling up
-      }
-
-      lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-    };
-
-    window.addEventListener('scroll', handleWindowScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleWindowScroll);
-    };
   }, []);
 
   const postsData = useMemo(() => {
     return data?.pages?.flatMap(page => page.posts) || [];
   }, [data]);
 
-  const totalCount = data?.pages?.[0]?.pagination.totalItems ?? 0;
-
-  console.log('should query', error);
-
-  console.log(postsData, 'should query dataa', totalCount);
-
   if (!mounted) return <HomeDashboardSkeleton />;
-
-  const homeData = status === 'pending' ? Array(5).fill(null) : postsData;
 
   // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
@@ -309,7 +277,6 @@ export const HomePostList = () => {
   };
 
   const allowTab = false;
-  const allowMSearch = false;
 
   return (
     <div>
@@ -322,7 +289,7 @@ export const HomePostList = () => {
 
       <Virtuoso
         className="custom-scrollbar min-h-screen mb-0 lg:mb-0"
-        data={homeData}
+        data={postsData}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
@@ -379,24 +346,20 @@ export const HomePostList = () => {
                   ))}
                 </div>
               </div>
-              {!allowMSearch && (
-                <div className="pt-4 px-4">
-                  <div className="relative border-1 border-app-border rounded-full py-1">
-                    <Search
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
-                      size={20}
-                    />
-                    <div
-                      onClick={() => navigate.push('/explore')}
-                      className="border-0 rounded-full pl-10 form-input text-gray-500 active:scale-90 transition-transform duration-150">
-                      Search
-                    </div>
+
+              <div className="pt-4 px-4">
+                <div className="relative border-1 border-app-border rounded-full py-1">
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
+                    size={20}
+                  />
+                  <div
+                    onClick={() => navigate.push('/explore')}
+                    className="border-0 rounded-full pl-10 form-input text-gray-500 active:scale-90 transition-transform duration-150">
+                    Search
                   </div>
                 </div>
-              )}
-              {/* <div>
-                <BannerAds placement="homepage_feed" />
-              </div> */}
+              </div>
             </div>
           ),
           EmptyPlaceholder: () => {
@@ -432,6 +395,9 @@ export const HomePostList = () => {
             handleFetchNext();
           }
         }}
+        computeItemKey={(index, post) =>
+          post._type === 'ad' ? `ad-${post.data._id}` : `post-${post.data._id}`
+        }
         itemContent={(index, post) => {
           if (status === 'pending') {
             return <PostSkeleton />;
@@ -440,16 +406,9 @@ export const HomePostList = () => {
               return null;
             }
             if (post._type === 'ad') {
-              return (
-                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
-              );
+              return <AdCard ad={post.data} />;
             }
-            return (
-              <PostCard
-                key={post.data._id || `post-${index}`}
-                post={post.data}
-              />
-            );
+            return <PostCard post={post.data} />;
           }
         }}
       />
@@ -522,8 +481,6 @@ export const ExplorePostList = () => {
 
   if (!mounted) return <HomeDashboardSkeleton />;
 
-  const exploreData = status === 'pending' ? Array(5).fill(null) : postsData;
-
   // Scroll handler
   const handleScroll: React.UIEventHandler<HTMLDivElement> = event => {
     const scrollTop = event.currentTarget.scrollTop;
@@ -586,13 +543,13 @@ export const ExplorePostList = () => {
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
-        data={exploreData}
+        data={postsData}
         onScroll={handleScroll}
         ref={virtuosoRef}
         components={{
           Header: () => (
             <div className="mt-27 lg:mt-0">
-              <div className="px-4 py-3 border-b lg:hidden md:mt-7 border-app-border">
+              <div className="px-4 py-a3 border-b lg:hidden md:mt-7 border-app-border">
                 <h2 className="font-semibold my-2">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {Sections.map(section => (
@@ -645,6 +602,9 @@ export const ExplorePostList = () => {
             handleFetchNext();
           }
         }}
+        computeItemKey={(index, post) =>
+          post._type === 'ad' ? `ad-${post.data._id}` : `post-${post.data._id}`
+        }
         itemContent={(index, post) => {
           if (status === 'pending') {
             return <PostSkeleton />;
@@ -653,16 +613,9 @@ export const ExplorePostList = () => {
               return null;
             }
             if (post._type === 'ad') {
-              return (
-                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
-              );
+              return <AdCard ad={post.data} />;
             }
-            return (
-              <PostCard
-                key={post.data._id || `post-${index}`}
-                post={post.data}
-              />
-            );
+            return <PostCard post={post.data} />;
           }
         }}
       />
@@ -796,6 +749,9 @@ export const BookmarkPostList = () => {
             handleFetchNext();
           }
         }}
+        computeItemKey={(index, post) =>
+          post._type === 'ad' ? `ad-${post.data._id}` : `post-${post.data._id}`
+        }
         itemContent={(index, post) => {
           if (status === 'pending') {
             return <PostSkeleton />;
@@ -804,16 +760,9 @@ export const BookmarkPostList = () => {
               return null;
             }
             if (post._type === 'ad') {
-              return (
-                <AdCard key={post.data._id || `ad-${index}`} ad={post.data} />
-              );
+              return <AdCard ad={post.data} />;
             }
-            return (
-              <PostCard
-                key={post.data._id || `post-${index}`}
-                post={post.data}
-              />
-            );
+            return <PostCard post={post.data} />;
           }
         }}
       />

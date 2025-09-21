@@ -346,13 +346,6 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
     });
   };
 
-  const removeImage2 = () => {
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
   const removeImage = (index: number) => {
     console.log(index, 'remove imageee');
     const urlToRemove = imageUrls[index];
@@ -483,14 +476,17 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
         style={{height: '100vh'}}
         ref={virtuosoRef}
         onScroll={handleScroll}
-        // initialTopMostItemIndex={0}
-
         data={commentsData}
         endReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
             handleFetchNext();
           }
         }}
+        computeItemKey={(index, comment) =>
+          comment._type === 'ad'
+            ? `ad-${comment.data._id}`
+            : `comment-${comment.data._id}`
+        }
         itemContent={(index, comment) => {
           if (status === 'pending') {
             return <CommentSkeleton />;
@@ -499,16 +495,10 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
               return null;
             }
             if (comment._type === 'ad') {
-              return (
-                <AdCard
-                  key={comment.data._id || `ad-${index}`}
-                  ad={comment.data}
-                />
-              );
+              return <AdCard ad={comment.data} />;
             }
             return (
               <CommentCard
-                key={comment.data._id || `comment-${index}`}
                 comment={comment.data}
                 onQuote={() => handleQuoteComment(comment.data)}
                 handleQuoteClick={handleQuoteClick}

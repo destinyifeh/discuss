@@ -229,7 +229,7 @@ export const HomePostList = () => {
     },
     placeholderData: previousData => previousData,
     //refetchInterval: 5000, // Poll every 5s
-    refetchInterval: 30000, //poll every 15s
+    //refetchInterval: 30000, //poll every 15s
     refetchIntervalInBackground: false,
   });
   useEffect(() => {

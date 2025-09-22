@@ -1,28 +1,46 @@
 import {Sections} from '@/constants/data';
 import type {MetadataRoute} from 'next';
+type Post = {slug: string; section: string; slugId: string; updatedAt?: string};
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://discussday.com';
 export const revalidate = 3600; // invalidate every hour
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/sitemap-posts`,
-    {next: {revalidate: 3600}},
-  ).then(res => res.json());
+  let posts: Post[] = [];
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/sitemap-posts`,
+      {next: {revalidate: 3600}},
+    );
+
+    if (res.ok) {
+      posts = await res.json();
+    } else {
+      console.error(
+        'Failed to fetch posts for sitemap:',
+        res.status,
+        await res.text(),
+      );
+    }
+  } catch (err) {
+    console.error('Sitemap fetch error:', err);
+  }
 
   return [
     // Static pages
     {
-      url: process.env.NEXT_PUBLIC_APP_URL,
+      url: APP_URL,
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 1,
     },
     {
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/about`,
+      url: `${APP_URL}/about`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/help-center`,
+      url: `${APP_URL}/help-center`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
@@ -30,11 +48,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Dynamic sections
     ...Sections.map((section: {name: string}) => ({
-      url: `${
-        process.env.NEXT_PUBLIC_APP_URL
-      }/discuss/${section.name.toLowerCase()}`,
+      url: `${APP_URL}/discuss/${section.name.toLowerCase()}`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: 'weekly' as const,
       priority: 0.7,
     })),
 
@@ -46,11 +62,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         slugId: string;
         updatedAt?: string;
       }) => ({
-        url: `${
-          process.env.NEXT_PUBLIC_APP_URL
-        }/discuss/${post.section.toLowerCase()}/${post.slugId}/${post.slug}`,
+        url: `${APP_URL}/discuss/${post.section.toLowerCase()}/${post.slugId}/${
+          post.slug
+        }`,
         lastModified: new Date(post.updatedAt || Date.now()),
-        changeFrequency: 'daily',
+        changeFrequency: 'daily' as const,
         priority: 0.6,
       }),
     ),

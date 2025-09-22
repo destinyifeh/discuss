@@ -187,7 +187,7 @@ const AdCard = ({
 
           <div className="block">
             <div className="mt-1">
-              <p className="whitespace-pre-wrap">{displayContent}</p>
+              <p className="text-base leading-normal">{displayContent}</p>
 
               {shouldTruncate && !isInDetailView && !expanded && (
                 <Button
@@ -226,7 +226,8 @@ const AdCard = ({
                 //   />
                 // </div>
 
-                <div className="mt-3 rounded-xl overflow-hidden h-96">
+                // <div className="mt-3 rounded-xl overflow-hidden h-96">
+                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:96">
                   <img
                     src={ad.imageUrl}
                     alt="Ad attachment"
@@ -348,12 +349,14 @@ const AdCard = ({
             )}
             {ad.targetUrl && (
               <div className="flex justify-between items-center mt-3">
-                <h1 className="font-bold">{ad?.title}</h1>
+                <p className="font-medium text-black leading-normal text-base">
+                  {ad?.title}
+                </p>
                 <Button
                   variant="ghost"
                   size="sm"
-                  // className="rounded-full border text-white hover:bg-app/90 "
-                  className="rounded-full border border-[1.4px] border-app text-app font-bold hover:border-app/90 hover:text-app/90 text-sm "
+                  //className="text-app hover:bg-app/90 "
+                  className="rounded-full border border-[1.4px] border-app text-app font-medium hover:border-app/90 hover:text-app/90 text-sm"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();

@@ -10,7 +10,7 @@ import {
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {CommentFeedProps} from '@/types/post-item.type';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
 import {formatTimeAgo} from '@/lib/formatter';
 import {
@@ -24,7 +24,6 @@ import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {queryClient} from '@/lib/client/query-client';
 import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {usePostActions} from '@/modules/posts/post-hooks';
 import {toast} from '../ui/toast';
@@ -44,69 +43,33 @@ const CommentCard = ({
   handleQuoteClick,
 }: CommentCardProps) => {
   const {theme} = useGlobalStore(state => state);
-  const [liked, setLiked] = useState(false);
+  const [liking, setLiking] = useState(false);
   const navigate = useRouter();
   const {likeCommentRequest, dislikeCommentRequest} = usePostActions();
   const {currentUser} = useAuthStore(state => state);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [commentLiked, setCommentLiked] = useState(
-    currentUser ? (comment?.likedBy || []).includes(currentUser._id) : false,
+    comment.likedBy.includes(currentUser?._id ?? ''),
   );
-  const [commentLikesCount, setCommentLikesCount] = useState(
-    comment?.likedBy.length || 0,
-  );
-
   const [commentDisliked, setCommentDisliked] = useState(
-    currentUser ? (comment?.dislikedBy || []).includes(currentUser._id) : false,
+    comment.dislikedBy.includes(currentUser?._id ?? ''),
   );
-  const [commentDislikesCount, setCommentDislikesCount] = useState(
-    comment?.dislikedBy.length || 0,
-  );
+  const [likesCount, setLikesCount] = useState(comment.likedBy.length);
+  const [dislikesCount, setDislikesCount] = useState(comment.dislikedBy.length);
+
   const {reportComment} = useReportActions();
 
-  useEffect(() => {
-    setCommentLiked(
-      currentUser ? (comment?.likedBy || []).includes(currentUser._id) : false,
-    );
-    setCommentLikesCount(comment?.likedBy.length || 0);
-
-    setCommentDisliked(
-      currentUser
-        ? (comment?.dislikedBy || []).includes(currentUser._id)
-        : false,
-    );
-    setCommentDislikesCount(comment?.dislikedBy.length || 0);
-  }, [comment, currentUser]);
-
   const handleLike = () => {
-    if (commentLiked) {
-      setCommentLiked(false);
-      setCommentLikesCount(count => Math.max(0, count - 1));
-    } else {
-      setCommentLiked(true);
-      setCommentLikesCount(count => count + 1);
-
-      // If previously disliked, remove dislike
-      if (commentDisliked) {
-        setCommentDisliked(false);
-        setCommentDislikesCount(count => Math.max(0, count - 1));
-      }
-    }
+    setLiking(true);
     likeCommentRequest.mutate(comment._id, {
-      onSuccess(data, variables, context) {
-        console.log(data, 'comment like');
-
-        queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
+      onSuccess(data) {
+        setCommentLiked(data.liked);
+        setCommentDisliked(false); // liking removes dislike
+        setLikesCount(data.likesCount);
+        setDislikesCount(data.dislikesCount);
       },
-      onError(error: any, variables, context) {
-        console.log(error, 'err');
-        // rollback
-        setCommentLiked(prev => !prev);
-        setCommentLikesCount(count => (commentLiked ? count - 1 : count + 1));
-
-        if (!commentDisliked && commentLiked === false) {
-          setCommentDisliked(true);
-          setCommentDislikesCount(count => count + 1);
-        }
+      onSettled: () => setLiking(false),
+      onError(error: any) {
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
@@ -115,38 +78,17 @@ const CommentCard = ({
     });
   };
 
-  const handleDisLike = () => {
-    if (commentDisliked) {
-      setCommentDisliked(false);
-      setCommentDislikesCount(count => Math.max(0, count - 1));
-    } else {
-      setCommentDisliked(true);
-      setCommentDislikesCount(count => count + 1);
-
-      // If previously liked, remove like
-      if (commentLiked) {
-        setCommentLiked(false);
-        setCommentLikesCount(count => Math.max(0, count - 1));
-      }
-    }
+  const handleDislike = () => {
+    setLiking(true);
     dislikeCommentRequest.mutate(comment._id, {
-      onSuccess(data, variables, context) {
-        console.log(data, 'comment like');
-
-        queryClient.invalidateQueries({queryKey: ['comment-feed-posts']});
+      onSuccess(data) {
+        setCommentDisliked(data.disliked);
+        setCommentLiked(false);
+        setLikesCount(data.likesCount);
+        setDislikesCount(data.dislikesCount);
       },
-      onError(error: any, variables, context) {
-        console.log(error, 'err');
-        // rollback
-        setCommentDisliked(prev => !prev);
-        setCommentDislikesCount(count =>
-          commentDisliked ? count - 1 : count + 1,
-        );
-
-        if (!commentLiked && commentDisliked === false) {
-          setCommentLiked(true);
-          setCommentLikesCount(count => count + 1);
-        }
+      onSettled: () => setLiking(false),
+      onError(error: any) {
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
@@ -331,9 +273,13 @@ const CommentCard = ({
               </span>
             </div>
 
-            <DropdownMenu>
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8"
+                  onClick={() => setIsMenuOpen(prev => !prev)}>
                   <MoreHorizontal size={16} className="hidden md:block" />
                   <EllipsisVertical size={16} className="md:hidden" />
                   <span className="sr-only">Comment menu</span>
@@ -356,28 +302,15 @@ const CommentCard = ({
                     Edit
                   </DropdownMenuItem>
                 )}
+
+                <DropdownMenuItem
+                  onClick={() => setIsMenuOpen(false)}
+                  className="cursor-pointer text-app justify-center active:scale-90 transition-transform duration-150">
+                  Cancel
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          {/* <div className="mt-1">
-            {renderCommentContent()}
-
-            {comment.images &&
-              comment.images?.length > 0 &&
-              comment.images.map((img, idx) => (
-                <div
-                  className="mt-3 rounded-lg overflow-hidden"
-                  key={img.public_id || idx}>
-                  <img
-                    src={img.secure_url}
-                    alt={`comment attachment ${idx + 1}`}
-                    // className="w-full h-auto max-h-96 object-cover rounded-lg"
-                    className="w-full h-auto object-cover max-h-60 sm:max-h-80 md:max-h-96"
-                  />
-                </div>
-              ))}
-          </div> */}
 
           <div className="mt-1">
             {renderCommentContent()}
@@ -402,8 +335,7 @@ const CommentCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
-              //onClick={() => navigate.push(`/post/${comment.postId}/reply`)}
+              className="cursor-pointer text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
               onClick={handleQuote}>
               <MessageSquare size={16} className="mr-1" />
               <span className="text-xs">Reply</span>
@@ -422,18 +354,18 @@ const CommentCard = ({
               variant="ghost"
               size="sm"
               className={cn(
-                'text-app-gray hover:text-red-500 p-0 h-auto active:scale-90 transition-transform duration-150',
+                'cursor-pointer text-app-gray hover:text-red-500 p-0 h-auto active:scale-90 transition-transform duration-150',
                 commentLiked && 'text-red-500',
               )}
+              disabled={liking}
               onClick={handleLike}>
               <Heart
                 size={16}
                 className="mr-1"
-                // fill={isLiked ? 'currentColor' : 'none'}
                 fill={commentLiked ? 'currentColor' : 'none'}
               />
-              {/* <span className="text-xs">{comment.likedBy.length || 0}</span> */}
-              <span className="text-xs">{commentLikesCount}</span>
+
+              <span className="text-xs">{likesCount}</span>
             </Button>
 
             {/* <Button
@@ -446,20 +378,15 @@ const CommentCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
-              onClick={handleDisLike}>
+              disabled={liking}
+              className="cursor-pointer text-app-gray hover:text-app p-0 h-auto active:scale-90 transition-transform duration-150"
+              onClick={handleDislike}>
               <ThumbsDown
                 size={16}
-                // fill={
-                //   comment.dislikedBy.includes(currentUser?._id as string)
-                //     ? 'currentColor'
-                //     : 'none'
-                // }
-
                 fill={commentDisliked ? 'currentColor' : 'none'}
               />
-              {/* <span className="text-xs">{comment.dislikedBy.length || 0}</span> */}
-              <span className="text-xs">{commentDislikesCount}</span>
+
+              <span className="text-xs">{dislikesCount}</span>
             </Button>
           </div>
         </div>

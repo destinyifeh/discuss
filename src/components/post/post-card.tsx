@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -59,13 +59,15 @@ const PostCard = ({
   const {theme} = useGlobalStore(state => state);
   const {currentUser, setUser} = useAuthStore(state => state);
   const [isPending, setIsPending] = useState(false);
+  const [liking, setLiking] = useState(false);
+  const [bookmarking, setBookmarking] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [likesCount, setLikesCount] = useState<number>(
     post?.likedBy.length || 0,
   );
   const [bookmarked, setBookmarked] = useState(
-    currentUser ? (post?.bookmarkedBy || []).includes(currentUser._id) : false,
+    post.bookmarkedBy.includes(currentUser?._id ?? ''),
   );
 
   const [bookmarksCount, setBookmarksCount] = useState<number>(
@@ -73,7 +75,7 @@ const PostCard = ({
   );
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
   const [liked, setLiked] = useState(
-    currentUser ? (post?.likedBy || []).includes(currentUser._id) : false,
+    post.likedBy.includes(currentUser?._id ?? ''),
   );
   const {likePostRequest, bookmarkPostRequest} = usePostActions();
 
@@ -93,44 +95,22 @@ const PostCard = ({
 
   const navigate = useRouter();
 
-  useEffect(() => {
-    setLikesCount(post?.likedBy.length || 0);
-    setLiked(
-      currentUser ? (post?.likedBy || []).includes(currentUser._id) : false,
-    );
-    setBookmarksCount(post?.bookmarkedBy.length || 0);
-    setBookmarked(
-      currentUser
-        ? (post?.bookmarkedBy || []).includes(currentUser._id)
-        : false,
-    );
-  }, [post, currentUser]);
-
   const handleLike = () => {
-    if (liked) {
-      // currently liked, so unlike
-      setLiked(false);
-      setLikesCount(count => Math.max(0, count - 1));
-    } else {
-      // currently not liked, so like
-      setLiked(true);
-      setLikesCount(count => count + 1);
-    }
+    setLiking(true);
+
     likePostRequest.mutate(post._id, {
-      onSuccess(data, variables, context) {
+      onSuccess(data) {
         console.log(data, 'post like');
 
+        setLiked(data.liked);
+        setLikesCount(data.likesCount);
+
+        // refresh other cached lists
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
         queryClient.invalidateQueries({queryKey: ['bookmarked-feed-posts']});
-        queryClient.invalidateQueries({
-          queryKey: ['section-feed-posts'],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['explore-feed-posts'],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['post-details'],
-        });
+        queryClient.invalidateQueries({queryKey: ['section-feed-posts']});
+        queryClient.invalidateQueries({queryKey: ['explore-feed-posts']});
+        queryClient.invalidateQueries({queryKey: ['post-details']});
         queryClient.invalidateQueries({
           queryKey: ['user-profile-posts', 'posts'],
         });
@@ -144,35 +124,25 @@ const PostCard = ({
           queryKey: ['public-user-posts', 'posts'],
         });
       },
-      onError(error: any, variables, context) {
+      onError(error: any) {
         console.log(error, 'error');
-        // Rollback local state if server fails
-        setLiked(prevLiked => {
-          const rollbackLiked = !prevLiked;
-          setLikesCount(prevCount =>
-            rollbackLiked ? prevCount + 1 : Math.max(0, prevCount - 1),
-          );
-          return rollbackLiked;
-        });
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
         );
       },
+      onSettled: () => setLiking(false),
     });
   };
 
   const handleBookmark = () => {
-    if (bookmarked) {
-      setBookmarked(false);
-      setBookmarksCount(count => Math.max(0, count - 1));
-    } else {
-      setBookmarked(true);
-      setBookmarksCount(count => count + 1);
-    }
+    setBookmarking(true);
+
     bookmarkPostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post bookmark');
+        setBookmarked(data.bookmarked);
+        setBookmarksCount(data.bookmarks);
         queryClient.invalidateQueries({queryKey: ['home-feed-posts']});
 
         queryClient.invalidateQueries({
@@ -209,6 +179,7 @@ const PostCard = ({
           toast.success('Bookmark removed');
         }
       },
+      onSettled: () => setBookmarking(false),
       onError(error: any, variables, context) {
         console.log(error, 'err');
         // rollback safely
@@ -334,8 +305,6 @@ const PostCard = ({
     }
   };
 
-  const isLiked = post?.likedBy.includes(currentUser?._id as string);
-
   if (!post || post === null) {
     return <ErrorFeedback showGoBack message="Post not found" />;
   }
@@ -460,7 +429,7 @@ const PostCard = ({
               {shouldTruncate && !isInDetailView && (
                 <Button
                   variant="link"
-                  className="p-0 h-auto text-app"
+                  className="cursor-pointer p-0 h-auto text-app"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -500,12 +469,11 @@ const PostCard = ({
               )} */}
 
               {!isInDetailView && post.images && post.images.length > 0 && (
-                <div className="mt-3 rounded-xl overflow-hidden h-96">
+                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:96">
                   <img
                     src={post.images[0].secure_url}
                     alt="Post attachment"
                     className="w-full h-full object-cover"
-                    // style={{maxHeight: '24rem'}}
                     loading="lazy"
                   />
                 </div>
@@ -516,7 +484,8 @@ const PostCard = ({
                   {post.images.map((img, idx) => (
                     <div
                       key={img.public_id || idx}
-                      className="rounded-xl overflow-hidden h-96">
+                      // className="rounded-xl overflow-hidden h-96">
+                      className="rounded-xl overflow-hidden h-60 sm:h-80 md:96">
                       <img
                         src={img.secure_url}
                         alt={`Post attachment ${idx + 1}`}
@@ -534,7 +503,7 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
+                  className="cursor-pointer text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
                   onClick={handleCommentClick}>
                   <div className="flex items-center gap-1">
                     <MessageSquare size={18} />
@@ -564,9 +533,10 @@ const PostCard = ({
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    'text-app-gray hover:text-red-500 active:scale-90 transition-transform duration-150',
+                    'cursor-pointer text-app-gray hover:text-red-500 active:scale-90 transition-transform duration-150',
                     liked && 'text-red-500',
                   )}
+                  disabled={liking}
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -574,9 +544,6 @@ const PostCard = ({
                   }}>
                   <div className="flex items-center gap-1">
                     <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
-
-                    {/* <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} /> */}
-                    {/* <span className="text-xs">{post.likedBy.length || 0}</span> */}
 
                     <span className="text-xs">{likesCount}</span>
                   </div>
@@ -599,7 +566,8 @@ const PostCard = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
+                  className="cursor-pointer text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
+                  disabled={bookmarking}
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -608,17 +576,9 @@ const PostCard = ({
                   <div className="flex items-center gap-1">
                     <Bookmark
                       size={18}
-                      // fill={
-                      //   post.bookmarkedBy.includes(currentUser?._id as string)
-                      //     ? 'currentColor'
-                      //     : 'none'
-                      // }
-
                       fill={bookmarked ? 'currentColor' : 'none'}
                     />
-                    {/* <span className="text-xs">
-                      {post.bookmarkedBy.length || 0}
-                    </span> */}
+
                     <span className="text-xs">{bookmarksCount}</span>
                   </div>
                 </Button>
@@ -630,7 +590,7 @@ const PostCard = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
+                      className="cursor-pointer text-app-gray hover:text-app active:scale-90 transition-transform duration-150"
                       onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -644,7 +604,7 @@ const PostCard = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="justify-start active:scale-90 transition-transform duration-150"
+                        className="cursor-pointer justify-start active:scale-90 transition-transform duration-150"
                         onClick={handleCopyLink}>
                         <LinkIcon size={16} className="mr-2" />
                         Copy link

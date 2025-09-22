@@ -227,7 +227,7 @@ const AdCard = ({
                 // </div>
 
                 // <div className="mt-3 rounded-xl overflow-hidden h-96">
-                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:96">
+                <div className="mt-3 rounded-xl overflow-hidden aspect-[16/9]">
                   <img
                     src={ad.imageUrl}
                     alt="Ad attachment"

@@ -469,7 +469,7 @@ const PostCard = ({
               )} */}
 
               {!isInDetailView && post.images && post.images.length > 0 && (
-                <div className="mt-3 rounded-xl overflow-hidden h-60 sm:h-80 md:96">
+                <div className="mt-3 rounded-xl overflow-hidden aspect-[16/9]">
                   <img
                     src={post.images[0].secure_url}
                     alt="Post attachment"
@@ -485,7 +485,7 @@ const PostCard = ({
                     <div
                       key={img.public_id || idx}
                       // className="rounded-xl overflow-hidden h-96">
-                      className="rounded-xl overflow-hidden h-60 sm:h-80 md:96">
+                      className="rounded-xl overflow-hidden aspect-[16/9]">
                       <img
                         src={img.secure_url}
                         alt={`Post attachment ${idx + 1}`}

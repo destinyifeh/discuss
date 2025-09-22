@@ -3,7 +3,6 @@ import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {PostFeedProps, PostStatus} from '@/types/post-item.type';
 import copy from 'copy-to-clipboard';
-import {formatDistanceToNow} from 'date-fns';
 
 import {
   BarChart3,
@@ -17,14 +16,13 @@ import {
   UserCheck,
   UserPlus,
 } from 'lucide-react';
-import moment from 'moment';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
-import {truncateText} from '@/lib/formatter';
+import {formatTimeAgo, truncateText} from '@/lib/formatter';
 import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {userService} from '@/modules/dashboard/actions/user.actions';
 import {postService} from '@/modules/posts/actions';
@@ -66,6 +64,13 @@ const PostCard = ({
   const [likesCount, setLikesCount] = useState<number>(
     post?.likedBy.length || 0,
   );
+  const [bookmarked, setBookmarked] = useState(
+    currentUser ? (post?.bookmarkedBy || []).includes(currentUser._id) : false,
+  );
+
+  const [bookmarksCount, setBookmarksCount] = useState<number>(
+    post?.bookmarkedBy.length || 0,
+  );
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false);
   const [liked, setLiked] = useState(
     currentUser ? (post?.likedBy || []).includes(currentUser._id) : false,
@@ -87,7 +92,30 @@ const PostCard = ({
   });
 
   const navigate = useRouter();
+
+  useEffect(() => {
+    setLikesCount(post?.likedBy.length || 0);
+    setLiked(
+      currentUser ? (post?.likedBy || []).includes(currentUser._id) : false,
+    );
+    setBookmarksCount(post?.bookmarkedBy.length || 0);
+    setBookmarked(
+      currentUser
+        ? (post?.bookmarkedBy || []).includes(currentUser._id)
+        : false,
+    );
+  }, [post, currentUser]);
+
   const handleLike = () => {
+    if (liked) {
+      // currently liked, so unlike
+      setLiked(false);
+      setLikesCount(count => Math.max(0, count - 1));
+    } else {
+      // currently not liked, so like
+      setLiked(true);
+      setLikesCount(count => count + 1);
+    }
     likePostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post like');
@@ -118,6 +146,14 @@ const PostCard = ({
       },
       onError(error: any, variables, context) {
         console.log(error, 'error');
+        // Rollback local state if server fails
+        setLiked(prevLiked => {
+          const rollbackLiked = !prevLiked;
+          setLikesCount(prevCount =>
+            rollbackLiked ? prevCount + 1 : Math.max(0, prevCount - 1),
+          );
+          return rollbackLiked;
+        });
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
@@ -127,6 +163,13 @@ const PostCard = ({
   };
 
   const handleBookmark = () => {
+    if (bookmarked) {
+      setBookmarked(false);
+      setBookmarksCount(count => Math.max(0, count - 1));
+    } else {
+      setBookmarked(true);
+      setBookmarksCount(count => count + 1);
+    }
     bookmarkPostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post bookmark');
@@ -168,41 +211,15 @@ const PostCard = ({
       },
       onError(error: any, variables, context) {
         console.log(error, 'err');
+        // rollback safely
+        setBookmarked(prev => !prev);
+        setBookmarksCount(count => (bookmarked ? count - 1 : count + 1));
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
         );
       },
     });
-  };
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  };
-
-  const formatTimeAgo2 = (date: any): string => {
-    const newDate = moment(date).fromNow();
-    return newDate;
-  };
-
-  const formatTimeAgo = (date: Date | string): string => {
-    const distance = formatDistanceToNow(new Date(date), {addSuffix: false});
-
-    return distance
-      .replace(/about\s/, '')
-      .replace(/less than a minute/, '< 1m')
-      .replace(/minute/, 'm')
-      .replace(/hour/, 'h')
-      .replace(/day/, 'd')
-      .replace(/month/, 'mo')
-      .replace(/year/, 'y')
-      .replace(/\s/g, '');
   };
 
   const handleReport = (postId: string) => {
@@ -318,8 +335,6 @@ const PostCard = ({
   };
 
   const isLiked = post?.likedBy.includes(currentUser?._id as string);
-
-  console.log(post, 'the postss');
 
   if (!post || post === null) {
     return <ErrorFeedback showGoBack message="Post not found" />;
@@ -550,7 +565,7 @@ const PostCard = ({
                   size="icon"
                   className={cn(
                     'text-app-gray hover:text-red-500 active:scale-90 transition-transform duration-150',
-                    isLiked && 'text-red-500',
+                    liked && 'text-red-500',
                   )}
                   onClick={e => {
                     e.preventDefault();
@@ -558,8 +573,12 @@ const PostCard = ({
                     handleLike();
                   }}>
                   <div className="flex items-center gap-1">
-                    <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                    <span className="text-xs">{post.likedBy.length || 0}</span>
+                    <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+
+                    {/* <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} /> */}
+                    {/* <span className="text-xs">{post.likedBy.length || 0}</span> */}
+
+                    <span className="text-xs">{likesCount}</span>
                   </div>
                 </Button>
 
@@ -589,15 +608,18 @@ const PostCard = ({
                   <div className="flex items-center gap-1">
                     <Bookmark
                       size={18}
-                      fill={
-                        post.bookmarkedBy.includes(currentUser?._id as string)
-                          ? 'currentColor'
-                          : 'none'
-                      }
+                      // fill={
+                      //   post.bookmarkedBy.includes(currentUser?._id as string)
+                      //     ? 'currentColor'
+                      //     : 'none'
+                      // }
+
+                      fill={bookmarked ? 'currentColor' : 'none'}
                     />
-                    <span className="text-xs">
+                    {/* <span className="text-xs">
                       {post.bookmarkedBy.length || 0}
-                    </span>
+                    </span> */}
+                    <span className="text-xs">{bookmarksCount}</span>
                   </div>
                 </Button>
 

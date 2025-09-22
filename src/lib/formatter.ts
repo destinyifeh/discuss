@@ -190,32 +190,8 @@ export function extractLinks2(text: string): string {
     .join('');
 }
 
-export const formatTimeAgo = (timestamp: string) => {
-  const seconds = Math.floor(
-    (new Date().getTime() - new Date(timestamp).getTime()) / 1000,
-  );
-
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + ' years ago';
-
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + ' months ago';
-
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + ' days ago';
-
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + ' hours ago';
-
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + ' minutes ago';
-
-  return Math.floor(seconds) + ' seconds ago';
-};
-
-export const formatTimeAgo2 = (date: string): string => {
+export const formatTimeAgo = (date: Date | string): string => {
   const distance = formatDistanceToNow(new Date(date), {addSuffix: false});
-
   // Convert "about 1 hour" to "1h", "2 days" to "2d", etc.
   return distance
     .replace(/about\s/, '')

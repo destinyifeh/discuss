@@ -12,7 +12,7 @@ import {cn} from '@/lib/utils';
 import {CommentFeedProps, PostFeedProps} from '@/types/post-item.type';
 import React, {useState} from 'react';
 
-import {formatTimeAgo2} from '@/lib/formatter';
+import {formatTimeAgo} from '@/lib/formatter';
 import {
   EllipsisVertical,
   Heart,
@@ -292,7 +292,7 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
               </Link>
 
               <span className="text-app-gray">
-                · replied {formatTimeAgo2(comment.createdAt as string)}
+                · replied {formatTimeAgo(comment.createdAt as string)}
               </span>
             </div>
             {checkUser && (

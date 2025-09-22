@@ -6,7 +6,7 @@ import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {toast} from '@/components/ui/toast';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
-import {formatTimeAgo2} from '@/lib/formatter';
+import {formatTimeAgo} from '@/lib/formatter';
 import {CommentFeedProps} from '@/types/post-item.type';
 import clsx from 'clsx';
 import {ImagePlus, MessageSquare, Reply, Trash2} from 'lucide-react';
@@ -155,7 +155,7 @@ export const WebCommentSection = ({
                   </p>
                   <span className="text-app-gray">
                     · replied{' '}
-                    {formatTimeAgo2(quotedContentCreatedDate as string)}
+                    {formatTimeAgo(quotedContentCreatedDate as string)}
                   </span>
                 </div>
                 <div className="text-sm">

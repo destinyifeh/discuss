@@ -10,9 +10,9 @@ import {
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {cn} from '@/lib/utils';
 import {CommentFeedProps} from '@/types/post-item.type';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
-import {formatTimeAgo2} from '@/lib/formatter';
+import {formatTimeAgo} from '@/lib/formatter';
 import {
   EllipsisVertical,
   Heart,
@@ -48,8 +48,49 @@ const CommentCard = ({
   const navigate = useRouter();
   const {likeCommentRequest, dislikeCommentRequest} = usePostActions();
   const {currentUser} = useAuthStore(state => state);
+  const [commentLiked, setCommentLiked] = useState(
+    currentUser ? (comment?.likedBy || []).includes(currentUser._id) : false,
+  );
+  const [commentLikesCount, setCommentLikesCount] = useState(
+    comment?.likedBy.length || 0,
+  );
+
+  const [commentDisliked, setCommentDisliked] = useState(
+    currentUser ? (comment?.dislikedBy || []).includes(currentUser._id) : false,
+  );
+  const [commentDislikesCount, setCommentDislikesCount] = useState(
+    comment?.dislikedBy.length || 0,
+  );
   const {reportComment} = useReportActions();
+
+  useEffect(() => {
+    setCommentLiked(
+      currentUser ? (comment?.likedBy || []).includes(currentUser._id) : false,
+    );
+    setCommentLikesCount(comment?.likedBy.length || 0);
+
+    setCommentDisliked(
+      currentUser
+        ? (comment?.dislikedBy || []).includes(currentUser._id)
+        : false,
+    );
+    setCommentDislikesCount(comment?.dislikedBy.length || 0);
+  }, [comment, currentUser]);
+
   const handleLike = () => {
+    if (commentLiked) {
+      setCommentLiked(false);
+      setCommentLikesCount(count => Math.max(0, count - 1));
+    } else {
+      setCommentLiked(true);
+      setCommentLikesCount(count => count + 1);
+
+      // If previously disliked, remove dislike
+      if (commentDisliked) {
+        setCommentDisliked(false);
+        setCommentDislikesCount(count => Math.max(0, count - 1));
+      }
+    }
     likeCommentRequest.mutate(comment._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'comment like');
@@ -58,6 +99,14 @@ const CommentCard = ({
       },
       onError(error: any, variables, context) {
         console.log(error, 'err');
+        // rollback
+        setCommentLiked(prev => !prev);
+        setCommentLikesCount(count => (commentLiked ? count - 1 : count + 1));
+
+        if (!commentDisliked && commentLiked === false) {
+          setCommentDisliked(true);
+          setCommentDislikesCount(count => count + 1);
+        }
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
@@ -67,6 +116,19 @@ const CommentCard = ({
   };
 
   const handleDisLike = () => {
+    if (commentDisliked) {
+      setCommentDisliked(false);
+      setCommentDislikesCount(count => Math.max(0, count - 1));
+    } else {
+      setCommentDisliked(true);
+      setCommentDislikesCount(count => count + 1);
+
+      // If previously liked, remove like
+      if (commentLiked) {
+        setCommentLiked(false);
+        setCommentLikesCount(count => Math.max(0, count - 1));
+      }
+    }
     dislikeCommentRequest.mutate(comment._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'comment like');
@@ -75,6 +137,16 @@ const CommentCard = ({
       },
       onError(error: any, variables, context) {
         console.log(error, 'err');
+        // rollback
+        setCommentDisliked(prev => !prev);
+        setCommentDislikesCount(count =>
+          commentDisliked ? count - 1 : count + 1,
+        );
+
+        if (!commentLiked && commentDisliked === false) {
+          setCommentLiked(true);
+          setCommentLikesCount(count => count + 1);
+        }
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
@@ -156,7 +228,7 @@ const CommentCard = ({
                 {quotedContentCreatedDate && (
                   <span className="text-app-gray">
                     · replied{' '}
-                    {formatTimeAgo2(quotedContentCreatedDate as string)}
+                    {formatTimeAgo(quotedContentCreatedDate as string)}
                   </span>
                 )}
               </div>
@@ -255,7 +327,7 @@ const CommentCard = ({
               </Link>
 
               <span className="text-app-gray">
-                · replied {formatTimeAgo2(comment.createdAt as string)}
+                · replied {formatTimeAgo(comment.createdAt as string)}
               </span>
             </div>
 
@@ -351,15 +423,17 @@ const CommentCard = ({
               size="sm"
               className={cn(
                 'text-app-gray hover:text-red-500 p-0 h-auto active:scale-90 transition-transform duration-150',
-                isLiked && 'text-red-500',
+                commentLiked && 'text-red-500',
               )}
               onClick={handleLike}>
               <Heart
                 size={16}
                 className="mr-1"
-                fill={isLiked ? 'currentColor' : 'none'}
+                // fill={isLiked ? 'currentColor' : 'none'}
+                fill={commentLiked ? 'currentColor' : 'none'}
               />
-              <span className="text-xs">{comment.likedBy.length || 0}</span>
+              {/* <span className="text-xs">{comment.likedBy.length || 0}</span> */}
+              <span className="text-xs">{commentLikesCount}</span>
             </Button>
 
             {/* <Button
@@ -376,13 +450,16 @@ const CommentCard = ({
               onClick={handleDisLike}>
               <ThumbsDown
                 size={16}
-                fill={
-                  comment.dislikedBy.includes(currentUser?._id as string)
-                    ? 'currentColor'
-                    : 'none'
-                }
+                // fill={
+                //   comment.dislikedBy.includes(currentUser?._id as string)
+                //     ? 'currentColor'
+                //     : 'none'
+                // }
+
+                fill={commentDisliked ? 'currentColor' : 'none'}
               />
-              <span className="text-xs">{comment.dislikedBy.length || 0}</span>
+              {/* <span className="text-xs">{comment.dislikedBy.length || 0}</span> */}
+              <span className="text-xs">{commentDislikesCount}</span>
             </Button>
           </div>
         </div>

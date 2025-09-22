@@ -548,7 +548,7 @@ export const ExplorePostList = () => {
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <div className="mt-27 lg:mt-0">
+            <div className="mt-30 lg:mt-0">
               <div className="px-4 py-a3 border-b lg:hidden md:mt-7 border-app-border">
                 <h2 className="font-semibold my-2">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">

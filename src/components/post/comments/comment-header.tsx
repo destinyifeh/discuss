@@ -5,10 +5,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {formatDistanceToNow} from 'date-fns';
 import {Edit, Flag, MoreHorizontal} from 'lucide-react';
 
-import {formatTimeAgo2} from '@/lib/formatter';
+import {formatTimeAgo} from '@/lib/formatter';
 import {CommentFeedProps} from '@/types/post-item.type';
 import Link from 'next/link';
 
@@ -25,20 +24,6 @@ const CommentHeader = ({
   onEdit,
   onReport,
 }: CommentHeaderProps) => {
-  const formatTimeAgo = (date: Date): string => {
-    const distance = formatDistanceToNow(new Date(date), {addSuffix: false});
-
-    return distance
-      .replace(/about\s/, '')
-      .replace(/less than a minute/, '< 1m')
-      .replace(/minute/, 'm')
-      .replace(/hour/, 'h')
-      .replace(/day/, 'd')
-      .replace(/month/, 'mo')
-      .replace(/year/, 'y')
-      .replace(/\s/g, '');
-  };
-
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
@@ -49,7 +34,7 @@ const CommentHeader = ({
         </Link>
 
         <span className="text-app-gray">
-          · replied {formatTimeAgo2(comment.createdAt as string)}
+          · replied {formatTimeAgo(comment.createdAt as string)}
         </span>
       </div>
 

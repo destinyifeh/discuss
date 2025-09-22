@@ -17,7 +17,6 @@ import {
   Pencil,
   Share2,
 } from 'lucide-react';
-import moment from 'moment';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import React, {useState} from 'react';
@@ -70,21 +69,6 @@ const AdCard = ({
   };
   const liked = true;
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  };
-
-  const formatTimeAgo2 = (date: any): string => {
-    const newDate = moment(date).fromNow();
-    return newDate;
-  };
-
   const handleReport = () => {
     toast.success('Post Reported', {
       description:
@@ -111,11 +95,6 @@ const AdCard = ({
     navigate.push(`/profile/`);
   };
 
-  //   const displayContent =
-  //     shouldTruncate && !expanded && !isInDetailView
-  //       ? post.content.slice(0, 100) + '...'
-  //       : post.content;
-
   const handleCopyLink = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -137,7 +116,6 @@ const AdCard = ({
 
   const shouldTruncate = ad && ad.content && ad.content.length > 100;
   const sliceContent = ad && ad.content && ad.content.slice(0, 100) + '...';
-  //const shouldTruncate = ad && ad.content
 
   const displayContent =
     shouldTruncate && !expanded && !isInDetailView ? sliceContent : ad?.content;

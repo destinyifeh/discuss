@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
@@ -95,8 +95,25 @@ const PostCard = ({
 
   const navigate = useRouter();
 
+  useEffect(() => {
+    setLikesCount(post?.likedBy.length || 0);
+    setLiked(post.likedBy.includes(currentUser?._id ?? ''));
+
+    setBookmarksCount(post?.bookmarkedBy.length || 0);
+    setBookmarked(post.bookmarkedBy.includes(currentUser?._id ?? ''));
+  }, [post, currentUser]);
+
   const handleLike = () => {
+    if (liking) return;
     setLiking(true);
+
+    if (liked) {
+      setLiked(false);
+      setLikesCount(count => Math.max(0, count - 1));
+    } else {
+      setLiked(true);
+      setLikesCount(count => count + 1);
+    }
 
     likePostRequest.mutate(post._id, {
       onSuccess(data) {
@@ -126,6 +143,15 @@ const PostCard = ({
       },
       onError(error: any) {
         console.log(error, 'error');
+
+        // rollback safely
+        setLiked(prevLiked => {
+          const rollbackLiked = !prevLiked;
+          setLikesCount(prevCount =>
+            rollbackLiked ? prevCount + 1 : Math.max(0, prevCount - 1),
+          );
+          return rollbackLiked;
+        });
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',
@@ -136,8 +162,15 @@ const PostCard = ({
   };
 
   const handleBookmark = () => {
+    if (bookmarking) return;
     setBookmarking(true);
-
+    if (bookmarked) {
+      setBookmarked(false);
+      setBookmarksCount(count => Math.max(0, count - 1));
+    } else {
+      setBookmarked(true);
+      setBookmarksCount(count => count + 1);
+    }
     bookmarkPostRequest.mutate(post._id, {
       onSuccess(data, variables, context) {
         console.log(data, 'post bookmark');
@@ -183,8 +216,13 @@ const PostCard = ({
       onError(error: any, variables, context) {
         console.log(error, 'err');
         // rollback safely
-        setBookmarked(prev => !prev);
-        setBookmarksCount(count => (bookmarked ? count - 1 : count + 1));
+        setBookmarked(prev => {
+          const newState = !prev;
+          setBookmarksCount(count =>
+            newState ? count + 1 : Math.max(0, count - 1),
+          );
+          return newState;
+        });
         toast.error(
           error?.response?.data?.message ??
             'Oops! Something went wrong, try again',

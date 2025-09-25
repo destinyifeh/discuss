@@ -50,7 +50,7 @@ export const SectionHeader = ({
   const navigate = useRouter();
 
   return (
-    <div className="bg-white/80 border-app-border dark:bg-background backdrop-blur-sm z-10 border-b">
+    <div className="sticky top-0 bg-white/80 border-app-border dark:bg-background backdrop-blur-sm z-10 border-b">
       <div className="px-4 py-3 flex flex-col">
         <div className="flex items-start gap-6">
           <Button

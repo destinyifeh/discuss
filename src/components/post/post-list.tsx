@@ -104,13 +104,13 @@ export const SectionPostList = ({
 
   return (
     <div>
-      <div
+      {/* <div
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
         <SectionHeader title={title} description={description} />
-      </div>
-      <div className="hidden lg:block">
+      </div> */}
+      <div className="">
         <SectionHeader title={title} description={description} />
       </div>
 
@@ -121,7 +121,7 @@ export const SectionPostList = ({
         ref={virtuosoRef}
         data={sectionData}
         components={{
-          Header: () => <div className="mt-25 lg:mt-0"></div>,
+          Header: () => <div className="lg:mt-0"></div>,
           EmptyPlaceholder: () => {
             if (status === 'error') {
               return null;
@@ -301,8 +301,8 @@ export const HomePostList = () => {
                   value={activeTab}
                   onValueChange={setActiveTab}
                   className="w-full">
-                  <div className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
-                    <TabsList className="w-full grid grid-cols-2 border-b rounded-none border-app-border">
+                  {/* <div className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                    <TabsList className="w-full grid grid-cols-2 border-b rounded-none border-app-border bg-white">
                       <TabsTrigger
                         value="for-you"
                         className="data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black">
@@ -311,6 +311,21 @@ export const HomePostList = () => {
                       <TabsTrigger
                         value="following"
                         className="data-[state=active]:font-bold rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3 data-[state=active]:text-black">
+                        Following
+                      </TabsTrigger>
+                    </TabsList>
+                  </div> */}
+
+                  <div className="sticky top-0 bg-white/90 backdrop-blur-sm z-10">
+                    <TabsList className="w-full grid grid-cols-2 border-b border-app-border rounded-none bg-background">
+                      <TabsTrigger
+                        value="for-you"
+                        className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3">
+                        Trending
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="following"
+                        className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-b-app data-[state=active]:shadow-none px-6 py-3">
                         Following
                       </TabsTrigger>
                     </TabsList>
@@ -325,9 +340,8 @@ export const HomePostList = () => {
                       <Badge
                         key={section.id}
                         variant="outline"
-                        // className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border active:scale-90 transition-transform duration-150"
-
-                        className="py-1 px-3 cursor-pointer hover:bg-app-hover"
+                        className="py-1 px-3 cursor-pointer hover:bg-app-hover text-app active:scale-90 transition-transform duration-150"
+                        // className="py-1 px-3 cursor-pointer hover:bg-app-hover"
                         onClick={() => onSectionNavigate(section.name)}>
                         {section.name}
                       </Badge>
@@ -339,8 +353,8 @@ export const HomePostList = () => {
                     <Badge
                       key={section.id}
                       variant="outline"
-                      //className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold border-app-border text-app active:scale-90 transition-transform duration-150"
-                      className="py-1 px-3 cursor-pointer hover:bg-app-hover"
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover text-app active:scale-90 transition-transform duration-150"
+                      //className="py-1 px-3 cursor-pointer hover:bg-app-hover"
                       onClick={() =>
                         onSectionOptionsNavigate(section.description as string)
                       }>
@@ -542,7 +556,7 @@ export const ExplorePostList = () => {
                     <Badge
                       key={section.id}
                       variant="outline"
-                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border"
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover text-app active:scale-90 transition-transform duration-150"
                       onClick={() => onSectionNavigate(section.name)}>
                       {section.name}
                     </Badge>

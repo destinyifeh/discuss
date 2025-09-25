@@ -10,11 +10,19 @@ export type SectionName =
   | 'Jobs'
   | 'News'
   | 'Entertainment'
-  | 'Celebrity';
+  | 'Celebrity'
+  | 'Health'
+  | 'Properties'
+  | 'Family'
+  | 'Autos'
+  | 'Business'
+  | 'Science'
+  | 'Finance'
+  | 'Culture';
 
 export interface Section {
   id: string;
   name: SectionName;
   description?: string;
-  ch?: string;
+  slug?: string;
 }

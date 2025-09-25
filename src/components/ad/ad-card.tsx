@@ -349,7 +349,7 @@ const AdCard = ({
             )}
             {ad.targetUrl && (
               <div className="flex justify-between items-center mt-3">
-                <p className="font-bold text-black leading-normal text-base">
+                <p className="font-bold text-background leading-normal text-base">
                   {ad?.title}
                 </p>
                 <Button

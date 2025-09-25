@@ -24,6 +24,7 @@ import {
   Home,
   LogOut,
   Search,
+  Settings,
   User,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -83,10 +84,17 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
     {icon: <Bell size={24} />, label: 'Notifications', path: '/notifications'},
     // {icon: <Mail size={24} />, label: 'Messages', path: '/messages'},
     {icon: <BookmarkIcon size={24} />, label: 'Bookmarks', path: '/bookmarks'},
+
     {
       icon: <User size={24} />,
       label: 'Profile',
       path: `/profile/${currentUser?.username?.toLowerCase()}`,
+    },
+
+    {
+      label: 'Settings',
+      icon: <Settings size={24} />,
+      path: '/settings',
     },
     {
       label: 'Ad View',

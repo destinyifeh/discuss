@@ -13,7 +13,7 @@ type Props = {
 const SearchBarList = forwardRef<HTMLInputElement, Props>(
   ({searchTerm, setSearchTerm}, ref) => {
     return (
-      <div className="pt-4 px-4 bg-white sticky top-0 z-10">
+      <div className="pt-4 px-4 bg-backgrounnd sticky top-0 z-10">
         <div className="relative border-1 border-app-border rounded-full">
           <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"

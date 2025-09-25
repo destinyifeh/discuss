@@ -22,7 +22,11 @@ import React, {useEffect, useState} from 'react';
 
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {queryClient} from '@/lib/client/query-client';
-import {formatTimeAgo, truncateText} from '@/lib/formatter';
+import {
+  capitalizeFirstLetter,
+  formatTimeAgo,
+  truncateText,
+} from '@/lib/formatter';
 import {useReportActions} from '@/modules/dashboard/actions/action-hooks/report.action-hooks';
 import {userService} from '@/modules/dashboard/actions/user.actions';
 import {postService} from '@/modules/posts/actions';
@@ -381,7 +385,7 @@ const PostCard = ({
                   href={`/discuss/${post.section.toLowerCase()}`}
                   className="text-app hover:underline truncate active:scale-90 transition-transform duration-150"
                   onClick={e => e.stopPropagation()}>
-                  {post.section.toLowerCase()}
+                  {capitalizeFirstLetter(post.section)}
                 </Link>
 
                 <span className="text-app-gray">·</span>

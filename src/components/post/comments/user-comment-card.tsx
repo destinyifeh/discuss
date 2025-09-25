@@ -340,12 +340,12 @@ const UserCommentCard = ({comment, isFrom}: CommentCardProps) => {
               comment.images?.length > 0 &&
               comment.images.map((img, idx) => (
                 <div
-                  className="mt-3 rounded-lg overflow-hidden"
+                  className="mt-3 rounded-lg overflow-hidden aspect-[4/3]"
                   key={img.public_id || idx}>
                   <img
                     src={img.secure_url}
                     alt={`comment attachment ${idx + 1}`}
-                    className="w-full h-auto max-h-96 object-cover rounded-lg"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               ))}

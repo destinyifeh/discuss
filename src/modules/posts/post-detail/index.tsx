@@ -3,9 +3,10 @@
 import React, {Fragment, useCallback, useMemo, useRef, useState} from 'react';
 
 import AdCard from '@/components/ad/ad-card';
-import {CustomPageHeader, PageHeader} from '@/components/app-headers';
+import {PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
+import MobileNavigation from '@/components/layouts/dashboard/mobile-navigation';
 import {AddCommentField} from '@/components/post/add-comment-field';
 import CommentCard from '@/components/post/comment-card';
 import CommunityGuidelines from '@/components/post/community-guidelines';
@@ -465,10 +466,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <CustomPageHeader title="Discuss" />
-      </div>
-      <div className="hidden lg:block">
-        <PageHeader title="Discuss" />
+        <MobileNavigation />
       </div>
 
       <Virtuoso
@@ -526,6 +524,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
             ) : null,
           Header: () => (
             <div className="mt-15 lg:mt-0">
+              <PageHeader title="Discuss" />
               {/* <div className="pb-2 border-b border-app-border"> */}
               <div className="pb-2">
                 <PostCard

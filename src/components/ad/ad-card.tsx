@@ -349,14 +349,14 @@ const AdCard = ({
             )}
             {ad.targetUrl && (
               <div className="flex justify-between items-center mt-3">
-                <p className="font-medium text-black leading-normal text-base">
+                <p className="font-bold text-black leading-normal text-base">
                   {ad?.title}
                 </p>
                 <Button
                   variant="ghost"
                   size="sm"
                   //className="text-app hover:bg-app/90 "
-                  className="rounded-full border border-[1.4px] border-app text-app font-medium hover:border-app/90 hover:text-app/90 text-sm"
+                  className="rounded-full border border-[1.4px] border-app text-app font-bold hover:border-app/90 hover:text-app/90 text-sm"
                   onClick={e => {
                     e.preventDefault();
                     e.stopPropagation();

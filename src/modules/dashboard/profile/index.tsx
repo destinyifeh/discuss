@@ -1,9 +1,10 @@
 'use client';
 
-import {CustomPageHeader, PageHeader} from '@/components/app-headers';
+import {PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
+import MobileNavigation from '@/components/layouts/dashboard/mobile-navigation';
 import UserCommentCard from '@/components/post/comments/user-comment-card';
 import PostCard from '@/components/post/post-card';
 import PostSkeleton from '@/components/skeleton/post-skeleton';
@@ -188,17 +189,13 @@ export const ProfilePage = () => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <CustomPageHeader
+        {/* <CustomPageHeader
           title={currentUser?.username}
           description={`${totalCount} ${activeTab}`}
-        />
+        /> */}
+        <MobileNavigation />
       </div>
-      <div className="hidden lg:block">
-        <PageHeader
-          title={currentUser?.username}
-          description={`${totalCount} ${activeTab}`}
-        />
-      </div>
+
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -208,6 +205,11 @@ export const ProfilePage = () => {
         components={{
           Header: () => (
             <div className="mt-15 lg:mt-0">
+              <PageHeader
+                title={currentUser?.username}
+                description={`${totalCount} ${activeTab}`}
+              />
+
               <div className="border-b overflow-y-auto border-app-border">
                 <div className="h-40 bg-app/20 relative overflow-hidden">
                   {currentUser?.cover_avatar ? (

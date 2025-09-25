@@ -390,13 +390,17 @@ const PostCard = ({
                 </span>
               </div>
               {!hideMenu && (
-                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <DropdownMenu
+                  // open={isMenuOpen}
+                  // onOpenChange={setIsMenuOpen}
+                  modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8"
-                      onClick={() => setIsMenuOpen(prev => !prev)}>
+                      // onClick={() => setIsMenuOpen(prev => !prev)}
+                    >
                       <MoreHorizontal size={16} className="hidden md:block" />
                       <EllipsisVertical size={16} className="md:hidden" />
                       <span className="sr-only">Post menu</span>

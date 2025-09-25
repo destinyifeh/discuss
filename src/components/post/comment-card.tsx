@@ -328,13 +328,9 @@ const CommentCard = ({
               </span>
             </div>
 
-            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8"
-                  onClick={() => setIsMenuOpen(prev => !prev)}>
+                <Button variant="ghost" size="sm" className="h-8 w-8">
                   <MoreHorizontal size={16} className="hidden md:block" />
                   <EllipsisVertical size={16} className="md:hidden" />
                   <span className="sr-only">Comment menu</span>
@@ -358,9 +354,7 @@ const CommentCard = ({
                   </DropdownMenuItem>
                 )}
 
-                <DropdownMenuItem
-                  onClick={() => setIsMenuOpen(false)}
-                  className="cursor-pointer text-app justify-center active:scale-90 transition-transform duration-150">
+                <DropdownMenuItem className="cursor-pointer text-app justify-center active:scale-90 transition-transform duration-150">
                   Cancel
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -375,7 +369,7 @@ const CommentCard = ({
               comment.images.map((img, idx) => (
                 <div
                   key={img.public_id || idx}
-                  className="mt-3 h-60 sm:h-80 md:h-96 rounded-lg overflow-hidden">
+                  className="mt-3 aspect-[4/3] rounded-lg overflow-hidden">
                   <img
                     src={img.secure_url}
                     alt={`comment attachment ${idx + 1}`}

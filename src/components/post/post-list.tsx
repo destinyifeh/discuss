@@ -4,7 +4,7 @@ import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {feedService} from '@/modules/dashboard/actions/feed.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
-import {BookmarkIcon, PenSquare, Search} from 'lucide-react';
+import {BookmarkIcon, PenSquare} from 'lucide-react';
 import {useRouter} from 'next/navigation';
 import List from 'rc-virtual-list';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
@@ -325,7 +325,9 @@ export const HomePostList = () => {
                       <Badge
                         key={section.id}
                         variant="outline"
-                        className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border active:scale-90 transition-transform duration-150"
+                        // className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold text-app border-app-border active:scale-90 transition-transform duration-150"
+
+                        className="py-1 px-3 cursor-pointer hover:bg-app-hover"
                         onClick={() => onSectionNavigate(section.name)}>
                         {section.name}
                       </Badge>
@@ -337,27 +339,14 @@ export const HomePostList = () => {
                     <Badge
                       key={section.id}
                       variant="outline"
-                      className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold border-app-border text-app active:scale-90 transition-transform duration-150"
+                      //className="py-1 px-3 cursor-pointer hover:bg-app-hover font-bold border-app-border text-app active:scale-90 transition-transform duration-150"
+                      className="py-1 px-3 cursor-pointer hover:bg-app-hover"
                       onClick={() =>
                         onSectionOptionsNavigate(section.description as string)
                       }>
                       {section.name}
                     </Badge>
                   ))}
-                </div>
-              </div>
-
-              <div className="pt-4 px-4">
-                <div className="relative border-1 border-app-border rounded-full py-1">
-                  <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-app-gray"
-                    size={20}
-                  />
-                  <div
-                    onClick={() => navigate.push('/explore')}
-                    className="border-0 rounded-full pl-10 form-input text-gray-500 active:scale-90 transition-transform duration-150">
-                    Search
-                  </div>
                 </div>
               </div>
             </div>
@@ -521,8 +510,7 @@ export const ExplorePostList = () => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <PageHeader title="Search" />
-
+        <MobileNavigation />
         <SearchBarList
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -531,8 +519,6 @@ export const ExplorePostList = () => {
       </div>
 
       <div className="hidden lg:block">
-        <PageHeader title="Search" />
-
         <SearchBarList
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -562,10 +548,6 @@ export const ExplorePostList = () => {
                     </Badge>
                   ))}
                 </div>
-              </div>
-
-              <div className="border-b-2 border-b-app p-3 w-30 mb-3 font-bold text-lg">
-                <h1> Explore </h1>
               </div>
             </div>
           ),
@@ -702,11 +684,9 @@ export const BookmarkPostList = () => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <PageHeader title="Bookmarks" />
+        <MobileNavigation />
       </div>
-      <div className="hidden lg:block">
-        <PageHeader title="Bookmarks" />
-      </div>
+
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -714,7 +694,11 @@ export const BookmarkPostList = () => {
         ref={virtuosoRef}
         data={bookmarkedData}
         components={{
-          Header: () => <div className="mt-15 lg:mt-0"></div>,
+          Header: () => (
+            <div className="mt-15 lg:mt-0">
+              <PageHeader title="Bookmarks" showBackIcon={false} />
+            </div>
+          ),
 
           EmptyPlaceholder: () => {
             if (status === 'error') {

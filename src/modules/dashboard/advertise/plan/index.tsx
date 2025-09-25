@@ -47,6 +47,8 @@ export const AdPlanPage = () => {
     price: '',
     imageUrl: '',
     image: null,
+    targetType: '',
+    whatsappNumber: '',
   });
 
   console.log(plan, 'planno');
@@ -207,52 +209,92 @@ export const AdPlanPage = () => {
                   </Select>
                 </div>
               )}
+
               <div className="mb-5 w-full md:w-[300px] md:mb-0">
                 <h2 className="text-lg font-bold mb-4">
-                  Destination URL (Optional)
+                  Destination (Optional)
                 </h2>
-                <input
-                  type="url"
-                  className="w-full p-2 border rounded-md form-input"
-                  value={previewData.targetUrl}
-                  onChange={e =>
-                    setPreviewData(prev => ({
-                      ...prev,
-                      targetUrl: e.target.value,
-                    }))
-                  }
-                  placeholder="https://example.com"
-                />
+                <Select
+                  value={previewData.targetType}
+                  onValueChange={value => {
+                    setPreviewData(prev => ({...prev, targetType: value}));
+                  }}>
+                  <SelectTrigger className="w-full md:w-[300px] form-input">
+                    <SelectValue placeholder="Choose destination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="website">Website</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="text-xs text-muted-foreground mt-2">
                   Where users will go when they click your ad.
                 </p>
               </div>
 
-              <div className="mb-5 w-full md:w-[300px] md:mb-0">
-                <h2 className="text-lg font-bold mb-4">
-                  Call to Action Button (Optional)
-                </h2>
-                <Select
-                  value={previewData.callToAction}
-                  onValueChange={value => {
-                    setPreviewData(prev => ({
-                      ...prev,
-                      callToAction: value as AdCTA,
-                    }));
-                  }}>
-                  <SelectTrigger className="w-full md:w-[300px] form-input">
-                    <SelectValue placeholder="Select section" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ctaBtn.map(cta => (
-                      <SelectItem key={cta.name} value={cta.name}>
-                        {cta.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {previewData.targetType === 'website' && (
+                <div className="mb-5 w-full md:w-[300px] md:mb-0">
+                  <input
+                    type="url"
+                    className="w-full p-2 border rounded-md mt-2 form-input"
+                    placeholder="https://example.com"
+                    value={previewData.targetUrl}
+                    onChange={e =>
+                      setPreviewData(prev => ({
+                        ...prev,
+                        targetUrl: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              )}
 
+              {previewData.targetType === 'whatsapp' && (
+                <div className="mb-5 w-full md:w-[300px] md:mb-0">
+                  <input
+                    type="tel"
+                    className="w-full p-2 border rounded-md mt-2 form-input"
+                    placeholder=" Enter (e.g. 2348012345678)"
+                    value={previewData.whatsappNumber}
+                    onChange={e =>
+                      setPreviewData(prev => ({
+                        ...prev,
+                        whatsappNumber: e.target.value,
+                        targetUrl: `https://wa.me/${e.target.value}`,
+                      }))
+                    }
+                  />
+                </div>
+              )}
+
+              {previewData.targetType !== 'none' &&
+                previewData.targetType !== '' && (
+                  <div className="mb-5 w-full md:w-[300px] md:mb-0">
+                    <h2 className="text-lg font-bold mb-4">
+                      Call to Action Button
+                    </h2>
+                    <Select
+                      value={previewData.callToAction}
+                      onValueChange={value => {
+                        setPreviewData(prev => ({
+                          ...prev,
+                          callToAction: value as AdCTA,
+                        }));
+                      }}>
+                      <SelectTrigger className="w-full md:w-[300px] form-input">
+                        <SelectValue placeholder="Select section" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ctaBtn.map(cta => (
+                          <SelectItem key={cta.name} value={cta.name}>
+                            {cta.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               <div className="mb-5 w-full md:w-[300px] md:mb-0">
                 <h2 className="text-lg font-bold mb-4">
                   {previewData.type === 'sponsored'

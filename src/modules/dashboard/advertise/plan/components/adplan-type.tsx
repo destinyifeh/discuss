@@ -53,6 +53,7 @@ export const AdPlanPageAlternative = () => {
     price: '',
     imageUrl: '',
     image: null,
+    targetType: '',
   });
 
   console.log(plan, 'planno');

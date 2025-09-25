@@ -24,4 +24,8 @@ export interface CreateAdDto {
   image?: File | null;
 
   imageUrl?: string;
+
+  targetType?: string;
+
+  whatsappNumber?: string;
 }

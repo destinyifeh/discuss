@@ -8,26 +8,6 @@ export type AdStatus =
   | 'paused';
 
 export type AdPlan = 'basic' | 'professional' | 'enterprise';
-// export type AdCTA =
-//   | 'Learn More'
-//   | 'Sign Up'
-//   | 'Get Started'
-//   | 'Shop Now'
-//   | 'Download'
-//   | 'Register Now'
-//   | 'Buy Now'
-//   | 'Discover More'
-//   | 'Install App'
-//   | 'Pre-Order Now'
-//   | 'Join Now'
-//   | 'Explore Features'
-//   | 'See How It Works'
-//   | 'View Demo'
-//   | 'Subscribe Now'
-//   | 'Claim Offer'
-//   | 'Contact Us'
-//   | 'Request Access'
-//   | 'Start Now';
 
 export type AdPlacementProps =
   | 'homepage_feed'
@@ -45,6 +25,7 @@ export enum AdCTA {
   BuyNow = 'Buy Now',
   DiscoverMore = 'Discover More',
   InstallApp = 'Install App',
+  Whatsapp = 'Whatsapp',
   PreOrderNow = 'Pre-Order Now',
   JoinNow = 'Join Now',
   ExploreFeatures = 'Explore Features',

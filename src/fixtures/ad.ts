@@ -62,7 +62,7 @@ export const ctaBtn = [
   {name: 'Download Now'},
 
   {name: 'Register Now'},
-
+  {name: 'Whatsapp'},
   {name: 'Buy Now'},
   {name: 'Discover More'},
   {name: 'Install App'},
@@ -77,6 +77,7 @@ export const ctaBtn = [
   {name: 'Contact Us'},
   {name: 'Request Access'},
   {name: 'Start Now'},
+  {name: 'None'},
 ];
 
 export const enterPriseAdTypes = [

@@ -65,8 +65,11 @@ const AdCard = ({
 
     const clickUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ad/${ad._id}/clicks`;
     navigator.sendBeacon(clickUrl);
-    window.location.href = url;
+
+    // open in new tab
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
+
   const liked = true;
 
   const handleReport = () => {

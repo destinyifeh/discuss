@@ -1,6 +1,7 @@
 'use client';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
 import {MobileBottomTab} from '@/components/layouts/dashboard/mobile-bottom-tab';
+import MobileNavigation from '@/components/layouts/dashboard/mobile-navigation';
 import {AddPostField} from '@/components/post/add-post-field';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import CreatePostSkeleton from '@/components/skeleton/create-post-skeleton';
@@ -21,7 +22,7 @@ import {queryClient} from '@/lib/client/query-client';
 import {capitalizeName} from '@/lib/formatter';
 import {SectionName} from '@/types/section';
 import {useQuery} from '@tanstack/react-query';
-import {FileImage, Trash2, X} from 'lucide-react';
+import {ChevronLeft, FileImage, Trash2, X} from 'lucide-react';
 import {useParams, useRouter, useSearchParams} from 'next/navigation';
 import {useEffect, useRef, useState} from 'react';
 import {postService} from '../actions';
@@ -242,15 +243,16 @@ export const CreatePostPage = () => {
   };
   return (
     <div className="pb-25">
+      <MobileNavigation title={isEditing ? 'Edit' : 'Discuss'} />
       <div className="sticky top-0 backdrop-blur-sm border-b z-10 bg-white/80 border-app-border dark:bg-background">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
+            <Button variant="ghost" size="icon" onClick={() => navigate.back()}>
               <ChevronLeft />
-            </Button> */}
-            <h1 className="text-xl font-bold">
+            </Button>
+            {/* <h1 className="text-xl font-bold">
               {isEditing ? 'Edit' : 'Discuss'}
-            </h1>
+            </h1> */}
           </div>
           <Button
             className="rounded-full bg-app hover:bg-app/90 md:hidden text-white"

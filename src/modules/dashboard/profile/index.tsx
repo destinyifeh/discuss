@@ -193,7 +193,7 @@ export const ProfilePage = () => {
           title={currentUser?.username}
           description={`${totalCount} ${activeTab}`}
         /> */}
-        <MobileNavigation />
+        <MobileNavigation title="Profile" />
       </div>
 
       <Virtuoso

@@ -6,13 +6,13 @@ import AdCard from '@/components/ad/ad-card';
 import {PageHeader} from '@/components/app-headers';
 import {LoadingMore, LoadMoreError} from '@/components/feedbacks';
 import ErrorFeedback from '@/components/feedbacks/error-feedback';
-import MobileNavigation from '@/components/layouts/dashboard/mobile-navigation';
 import {AddCommentField} from '@/components/post/add-comment-field';
 import CommentCard from '@/components/post/comment-card';
 import CommunityGuidelines from '@/components/post/community-guidelines';
 import PostCard from '@/components/post/post-card';
 import {PostContent2} from '@/components/post/post-content';
 import {CommentPlaceholder} from '@/components/post/post-list';
+import {RelatedPosts} from '@/components/post/related-posts';
 import CommentSkeleton from '@/components/skeleton/comment-skeleton';
 import PostDetailSkeleton from '@/components/skeleton/post-detail-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -462,13 +462,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
 
   return (
     <Fragment>
-      <div
-        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
-          showMobileNav ? 'translate-y-0' : '-translate-y-full'
-        }`}>
-        <MobileNavigation />
-      </div>
-
+      <PageHeader title="Discuss" />
       <Virtuoso
         className="custom-scrollbar"
         style={{height: '100vh'}}
@@ -506,25 +500,46 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
           }
         }}
         components={{
-          Footer: () =>
-            status === 'error' ? (
-              <ErrorFeedback
-                showRetry
-                onRetry={refetch}
-                message="We encountered an unexpected error. Please try again"
-                variant="minimal"
-              />
-            ) : isFetchingNextPage ? (
-              <LoadingMore />
-            ) : fetchNextError ? (
-              <LoadMoreError
-                fetchNextError={fetchNextError}
-                handleFetchNext={handleFetchNext}
-              />
-            ) : null,
+          Footer: () => {
+            if (status === 'error') {
+              return (
+                <ErrorFeedback
+                  showRetry
+                  onRetry={refetch}
+                  message="We encountered an unexpected error. Please try again"
+                  variant="minimal"
+                />
+              );
+            }
+
+            if (isFetchingNextPage) {
+              return <LoadingMore />;
+            }
+
+            if (fetchNextError) {
+              return (
+                <LoadMoreError
+                  fetchNextError={fetchNextError}
+                  handleFetchNext={handleFetchNext}
+                />
+              );
+            }
+
+            // ✅ Show RelatedPosts only when there are no more pages
+            if (!hasNextPage) {
+              return (
+                <div className="p-4 border-t border-app-border mt-6">
+                  <h2 className="text-lg font-bold mb-3">Related Posts</h2>
+                  <RelatedPosts postId={post._id} />
+                </div>
+              );
+            }
+
+            return null;
+          },
+
           Header: () => (
-            <div className="mt-15 lg:mt-0">
-              <PageHeader title="Discuss" />
+            <div className="">
               {/* <div className="pb-2 border-b border-app-border"> */}
               <div className="pb-2">
                 <PostCard

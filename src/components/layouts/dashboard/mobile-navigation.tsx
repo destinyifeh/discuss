@@ -34,9 +34,10 @@ import {toast} from 'sonner';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
+  title?: string;
 }
 
-const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
+const MobileNavigation: React.FC<MainLayoutProps> = ({children, title}) => {
   const router = useRouter();
   const location = usePathname();
   const {logout, currentUser} = useAuthStore(state => state);
@@ -180,7 +181,7 @@ const MobileNavigation: React.FC<MainLayoutProps> = ({children}) => {
           </SheetContent>
         </Sheet>
 
-        <h1 className="text-xl font-bold">Discussday</h1>
+        <h1 className="text-xl font-bold">{title ? title : ' Discussday'}</h1>
 
         <Button
           variant="ghost"

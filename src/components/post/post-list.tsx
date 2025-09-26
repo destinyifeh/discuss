@@ -11,7 +11,7 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
 import AdCard from '../ad/ad-card';
-import {PageHeader, SectionHeader} from '../app-headers';
+import {SectionHeader} from '../app-headers';
 import {LoadingMore, LoadMoreError} from '../feedbacks';
 import ErrorFeedback from '../feedbacks/error-feedback';
 import SearchBarList from '../forms/list-search-bar';
@@ -524,7 +524,7 @@ export const ExplorePostList = () => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <MobileNavigation />
+        <MobileNavigation title="Search" />
         <SearchBarList
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -698,7 +698,7 @@ export const BookmarkPostList = () => {
         className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
-        <MobileNavigation />
+        <MobileNavigation title="Bookmarks" />
       </div>
 
       <Virtuoso
@@ -710,7 +710,7 @@ export const BookmarkPostList = () => {
         components={{
           Header: () => (
             <div className="mt-15 lg:mt-0">
-              <PageHeader title="Bookmarks" showBackIcon={false} />
+              {/* <PageHeader title="Bookmarks" showBackIcon={false} /> */}
             </div>
           ),
 

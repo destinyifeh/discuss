@@ -110,6 +110,11 @@ class PostService {
     return response.data;
   }
 
+  async getRelatedPostRequestAction(postId: string) {
+    const response = await api.get(`/posts/${postId}/related`);
+    return response.data;
+  }
+
   //comments
 
   async createCommentRequestAction(comment: CommentDto) {

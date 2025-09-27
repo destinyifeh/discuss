@@ -1,12 +1,11 @@
 'use client';
-import {Posts, SectionOptions, Sections} from '@/constants/data';
+import {SectionOptions, Sections} from '@/constants/data';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {feedService} from '@/modules/dashboard/actions/feed.actions';
 import {useInfiniteQuery} from '@tanstack/react-query';
 import {BookmarkIcon, PenSquare} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import List from 'rc-virtual-list';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Virtuoso, VirtuosoHandle} from 'react-virtuoso';
 import {useDebounce} from 'use-debounce';
@@ -857,23 +856,5 @@ export const CommentPlaceholder = () => {
       <h2 className="text-xl font-bold mb-2">No replies yet</h2>
       <p className="text-app-gray">Be the first to reply!</p>
     </div>
-  );
-};
-
-export const PostList11 = () => {
-  const sortedPosts = [...Posts].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
-
-  const itemHeight = 180; // Adjust to match your PostCard height (including padding/margin)
-  const containerHeight = 800;
-  return (
-    <List
-      data={sortedPosts}
-      height={containerHeight}
-      itemHeight={itemHeight}
-      itemKey="id">
-      {post => <div>{/* <PostCard post={post} /> */}</div>}
-    </List>
   );
 };

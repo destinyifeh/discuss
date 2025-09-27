@@ -60,10 +60,10 @@ export const AdPlanPage = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload2 = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         toast.error('Image size should be less than 5MB');
         return;
       }
@@ -86,7 +86,7 @@ export const AdPlanPage = () => {
     }
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload2 = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -106,6 +106,8 @@ export const AdPlanPage = () => {
     const img = new Image();
     img.onload = () => {
       const {width, height} = img;
+
+      console.log(width, height, 'w-hh');
 
       if (width < MIN_AD_IMAGE_WIDTH || height < MIN_AD_IMAGE_HEIGHT) {
         toast.error(

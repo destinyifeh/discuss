@@ -11,6 +11,7 @@ import ProfileSkeleton from '@/components/skeleton/profile-skeleton';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {ALLOW_FIXED_MOBILE_BOTTOM_TAB} from '@/constants/settings';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {usePostStore} from '@/hooks/stores/use-post-store';
 import {normalizeDomain, urlFormatter} from '@/lib/formatter';
@@ -407,13 +408,18 @@ export const ProfilePage = () => {
             <ArrowUp size={20} />
           </button>
         )} */}
-
-      <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
-          showBottomTab ? 'translate-y-0' : 'translate-y-full'
-        }`}>
-        <MobileBottomTab />
-      </div>
+      {ALLOW_FIXED_MOBILE_BOTTOM_TAB ? (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50">
+          <MobileBottomTab />
+        </div>
+      ) : (
+        <div
+          className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+            showBottomTab ? 'translate-y-0' : 'translate-y-full'
+          }`}>
+          <MobileBottomTab />
+        </div>
+      )}
     </div>
   );
 };

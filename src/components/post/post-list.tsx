@@ -1,5 +1,6 @@
 'use client';
 import {SectionOptions, Sections} from '@/constants/data';
+import {ALLOW_FIXED_MOBILE_BOTTOM_TAB} from '@/constants/settings';
 import {useAuthStore} from '@/hooks/stores/use-auth-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
 import {feedService} from '@/modules/dashboard/actions/feed.actions';
@@ -414,13 +415,18 @@ export const HomePostList = () => {
           }
         }}
       />
-
-      <div
-        className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
-          showBottomTab ? 'translate-y-0' : 'translate-y-full'
-        }`}>
-        <MobileBottomTab />
-      </div>
+      {ALLOW_FIXED_MOBILE_BOTTOM_TAB ? (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50">
+          <MobileBottomTab />
+        </div>
+      ) : (
+        <div
+          className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+            showBottomTab ? 'translate-y-0' : 'translate-y-full'
+          }`}>
+          <MobileBottomTab />
+        </div>
+      )}
     </div>
   );
 };
@@ -614,12 +620,18 @@ export const ExplorePostList = () => {
           }
         }}
       />
-      <div
-        className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
-          showBottomTab ? 'translate-y-0' : 'translate-y-full'
-        }`}>
-        <MobileBottomTab />
-      </div>
+      {ALLOW_FIXED_MOBILE_BOTTOM_TAB ? (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50">
+          <MobileBottomTab />
+        </div>
+      ) : (
+        <div
+          className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+            showBottomTab ? 'translate-y-0' : 'translate-y-full'
+          }`}>
+          <MobileBottomTab />
+        </div>
+      )}
     </div>
   );
 };
@@ -763,13 +775,18 @@ export const BookmarkPostList = () => {
           }
         }}
       />
-
-      <div
-        className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
-          showBottomTab ? 'translate-y-0' : 'translate-y-full'
-        }`}>
-        <MobileBottomTab />
-      </div>
+      {ALLOW_FIXED_MOBILE_BOTTOM_TAB ? (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50">
+          <MobileBottomTab />
+        </div>
+      ) : (
+        <div
+          className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+            showBottomTab ? 'translate-y-0' : 'translate-y-full'
+          }`}>
+          <MobileBottomTab />
+        </div>
+      )}
     </div>
   );
 };

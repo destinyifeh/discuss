@@ -293,7 +293,7 @@ export const HomePostList = () => {
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <div className="mt-15 lg:mt-0">
+            <div className="mt-15 md:mt-0">
               {!allowTab && (
                 <Tabs
                   defaultValue="for-you"
@@ -416,7 +416,7 @@ export const HomePostList = () => {
       />
 
       <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+        className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
           showBottomTab ? 'translate-y-0' : 'translate-y-full'
         }`}>
         <MobileBottomTab />
@@ -547,7 +547,7 @@ export const ExplorePostList = () => {
         ref={virtuosoRef}
         components={{
           Header: () => (
-            <div className="mt-30 lg:mt-0">
+            <div className="mt-30 md:mt-0">
               <div className="px-4 py-a3 border-b lg:hidden md:mt-7 border-app-border">
                 <h2 className="font-semibold my-2">Discuss</h2>
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -615,7 +615,7 @@ export const ExplorePostList = () => {
         }}
       />
       <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+        className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
           showBottomTab ? 'translate-y-0' : 'translate-y-full'
         }`}>
         <MobileBottomTab />
@@ -708,7 +708,7 @@ export const BookmarkPostList = () => {
         data={bookmarkedData}
         components={{
           Header: () => (
-            <div className="mt-15 lg:mt-0">
+            <div className="mt-15 md:mt-0">
               {/* <PageHeader title="Bookmarks" showBackIcon={false} /> */}
             </div>
           ),
@@ -765,7 +765,7 @@ export const BookmarkPostList = () => {
       />
 
       <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
+        className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
           showBottomTab ? 'translate-y-0' : 'translate-y-full'
         }`}>
         <MobileBottomTab />

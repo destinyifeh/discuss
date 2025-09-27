@@ -274,3 +274,8 @@
    right: 24%;
   }
   }
+
+  html, body {
+  height: 100%;
+  margin: 0;
+}

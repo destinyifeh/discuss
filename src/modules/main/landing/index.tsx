@@ -8,7 +8,7 @@ export const LandingPage = () => {
   const navigate = useRouter();
 
   return (
-    <div className="flex flex-col md:min-h-screen">
+    <div className="flex flex-col min-h-screen">
       {/* <div className="flex-1 flex flex-col items-center justify-center p-8"> */}
       <div className="flex flex-1 flex-col md:flex-row">
         <div className="hidden md:flex flex-1 flex items-center justify-center p-6 bg-app/90 dark:bg-app">

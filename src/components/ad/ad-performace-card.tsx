@@ -48,8 +48,12 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
   };
 
   const getCtr = (ad: any) => {
-    if (!ad.impressions || ad.impressions === 0) return 0; // avoid division by zero
-    const adCtr = (ad.clicks / ad.impressions) * 100;
+    const clicks = ad.clicks ?? 0; // default to 0 if undefined/null
+    const impressions = ad.impressions ?? 0;
+
+    if (impressions === 0) return 0; // avoid division by zero
+
+    const adCtr = (clicks / impressions) * 100;
     return Number(adCtr.toFixed(2)); // round to 2 decimal places
   };
 

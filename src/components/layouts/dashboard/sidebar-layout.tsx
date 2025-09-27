@@ -191,7 +191,7 @@ export const SidebarLayoutLeft = () => {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 border-r p-4 border-app-border">
+    <aside className="hidden md:flex flex-col w-64 border-r p-4 border-app-border">
       <div className="flex-1 space-y-4">
         {/* <div className="mb-6">
           <img src="/logo.svg" alt="Logo" className="h-8 w-8" />

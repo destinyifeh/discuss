@@ -79,8 +79,15 @@ const AdCard = ({
     const clickUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ad/${ad._id}/clicks`;
     navigator.sendBeacon(clickUrl);
 
-    // ✅ Redirect in the same tab
-    window.location.href = url;
+    const isInternal = url.startsWith(window.location.origin);
+
+    if (isInternal) {
+      // ✅ Use Next.js router for internal links
+      navigate.push(url.replace(window.location.origin, ''));
+    } else {
+      // ✅ External → full redirect
+      window.location.href = url;
+    }
   };
 
   const liked = true;

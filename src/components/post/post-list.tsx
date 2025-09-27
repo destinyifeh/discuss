@@ -417,7 +417,7 @@ export const HomePostList = () => {
 
       <div
         className={`md:hidden fixed bottom-0 left-0 right-0 w-full z-50 transition-transform duration-300 ${
-          showBottomTab ? 'sstranslate-y-0' : 'sstranslate-y-full'
+          showBottomTab ? 'translate-y-0' : 'translate-y-full'
         }`}>
         <MobileBottomTab />
       </div>

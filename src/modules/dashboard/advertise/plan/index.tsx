@@ -10,6 +10,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {toast} from '@/components/ui/toast';
+import {
+  MAX_FILE_SIZE,
+  MIN_AD_IMAGE_HEIGHT,
+  MIN_AD_IMAGE_WIDTH,
+} from '@/constants/api-resources';
 import {Sections} from '@/constants/data';
 import {
   BASIC_PLAN_DESCRIPTION,
@@ -55,7 +60,7 @@ export const AdPlanPage = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload2 = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -79,6 +84,50 @@ export const AdPlanPage = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // ✅ File size check
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    // ✅ File type check
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // ✅ Validate minimum dimensions
+    const img = new Image();
+    img.onload = () => {
+      const {width, height} = img;
+
+      if (width < MIN_AD_IMAGE_WIDTH || height < MIN_AD_IMAGE_HEIGHT) {
+        toast.error(
+          `Image must be at least ${MIN_AD_IMAGE_WIDTH}x${MIN_AD_IMAGE_HEIGHT}px`,
+        );
+        return;
+      }
+
+      // ✅ Passed all checks → set preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewData(prev => ({
+          ...prev,
+          image: file,
+          imageUrl: reader.result as string,
+          useTextOnly: false,
+        }));
+      };
+      reader.readAsDataURL(file);
+    };
+
+    img.src = URL.createObjectURL(file);
   };
 
   const handleSubmitForApproval = () => {
@@ -345,7 +394,7 @@ export const AdPlanPage = () => {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground mt-2">
-                  Recommended size: 1200 x 120 pixels.
+                  Recommended size: 1200 x 900 pixels.
                 </p>
               </div>
 

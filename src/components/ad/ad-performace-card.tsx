@@ -94,7 +94,7 @@ export const AdPerformanceCard = ({ad}: {ad: AdPerformanceData}) => {
         </div>
 
         {ad.imageUrl && (
-          <div className="mb-3 rounded-lg overflow-hidden h-32 bg-gray-100 flex items-center justify-center">
+          <div className="mb-3 rounded-lg overflow-hidden aspect-[4/3] bg-gray-100 flex items-center justify-center">
             <img
               src={ad.imageUrl}
               alt={ad.title}

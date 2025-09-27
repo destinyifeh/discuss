@@ -94,7 +94,7 @@ export const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-dvh flex items-center justify-center p-4">
       <div className="flex w-full md:max-w-4xl">
         <div className="hidden md:flex flex-1 items-center justify-center rounded-l-lg p-8 text-white bg-app/90 dark:bg-app">
           <div>

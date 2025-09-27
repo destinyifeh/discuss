@@ -280,7 +280,7 @@ export const HomePostList = () => {
   return (
     <div>
       <div
-        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+        className={`md:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
         <MobileNavigation />
@@ -520,7 +520,7 @@ export const ExplorePostList = () => {
   return (
     <div>
       <div
-        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+        className={`md:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
         <MobileNavigation title="Search" />
@@ -694,7 +694,7 @@ export const BookmarkPostList = () => {
   return (
     <div className="lg:pb-0">
       <div
-        className={`lg:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
+        className={`md:hidden fixed top-0 left-0 right-0 bg-background w-full z-50 transition-transform duration-300 ${
           showMobileNav ? 'translate-y-0' : '-translate-y-full'
         }`}>
         <MobileNavigation title="Bookmarks" />

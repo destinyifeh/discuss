@@ -162,7 +162,7 @@ export const AdsInfoPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Your Ad Controls
@@ -188,7 +188,7 @@ export const AdsInfoPage = () => {
                   </li>
                 </ul>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card>
               <CardHeader>
@@ -216,8 +216,8 @@ export const AdsInfoPage = () => {
               </CardHeader>
               <CardContent className="prose max-w-none">
                 <p>
-                  If you have questions about advertising on Discuss or want to
-                  report an ad, we're here to help.
+                  If you have questions about advertising on Discussday or want
+                  to report an ad, we're here to help.
                 </p>
                 <div className="flex flex-wrap gap-4 mt-4">
                   <Button

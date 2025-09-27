@@ -57,7 +57,7 @@ const AdCard = ({
   });
   console.log(impressionData, 'ad impressionData');
 
-  const onCallToAction = () => {
+  const onCallToAction2 = () => {
     let url = ad.targetUrl;
     if (!/^https?:\/\//i.test(url)) {
       url = 'https://' + url;
@@ -68,6 +68,19 @@ const AdCard = ({
 
     // open in new tab
     window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const onCallToAction = () => {
+    let url = ad.targetUrl;
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    const clickUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ad/${ad._id}/clicks`;
+    navigator.sendBeacon(clickUrl);
+
+    // ✅ Redirect in the same tab
+    window.location.href = url;
   };
 
   const liked = true;

@@ -13,8 +13,8 @@ export const AdsInfoPage = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">Advertising Information</h1>
             <p className="text-xl max-w-2xl mx-auto">
-              Learn about how advertising works on Discuss and our commitment to
-              user experience.
+              Learn about how advertising works on Discussday and our commitment
+              to user experience.
             </p>
           </div>
 
@@ -162,7 +162,7 @@ export const AdsInfoPage = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle className="font-bold text-2xl">
                   Your Ad Controls
@@ -188,7 +188,7 @@ export const AdsInfoPage = () => {
                   </li>
                 </ul>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card>
               <CardHeader>
@@ -216,17 +216,17 @@ export const AdsInfoPage = () => {
               </CardHeader>
               <CardContent className="prose max-w-none">
                 <p>
-                  If you have questions about advertising on Discuss or want to
-                  report an ad, we're here to help.
+                  If you have questions about advertising on Discussday or want
+                  to report an ad, we're here to help.
                 </p>
                 <div className="flex flex-wrap gap-4 mt-4">
                   <Button
                     asChild
                     className="text-white bg-app hover:bg-app/90 dark:bg-app/90 dark:hover:bg-app">
-                    <Link href="/help-center">Ask a Question</Link>
+                    <Link href="/help">Ask a Question</Link>
                   </Button>
                   <Button variant="outline" asChild className="">
-                    <Link href="/register" className="">
+                    <Link href="/advertise" className="">
                       Advertise With Us
                     </Link>
                   </Button>

@@ -1,5 +1,6 @@
 'use client';
 
+import moment from 'moment';
 import Link from 'next/link';
 
 export const AppFooter = () => {
@@ -23,7 +24,9 @@ export const AppFooter = () => {
           Ads info
         </Link>
       </div>
-      <p className="text-sm">© 2025 Discussday. All rights reserved.</p>
+      <p className="text-sm">
+        © {moment().format('YYYY')} Discussday. All rights reserved.
+      </p>
     </footer>
   );
 };

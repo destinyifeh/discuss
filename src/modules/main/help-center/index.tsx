@@ -145,7 +145,7 @@ export const PublicHelpCenterPage = () => {
                       review the report.
                     </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="item-3">
+                  {/* <AccordionItem value="item-3">
                     <AccordionTrigger>
                       How do I block another user?
                     </AccordionTrigger>
@@ -154,7 +154,7 @@ export const PublicHelpCenterPage = () => {
                       menu, and select "Block". Blocked users won't be able to
                       see your posts or interact with you.
                     </AccordionContent>
-                  </AccordionItem>
+                  </AccordionItem> */}
                   <AccordionItem value="item-4">
                     <AccordionTrigger>Who can see my posts?</AccordionTrigger>
                     <AccordionContent>
@@ -202,7 +202,7 @@ export const PublicHelpCenterPage = () => {
                     Click the "Post" button in the sidebar or the pen icon in
                     mobile navigation
                   </li>
-                  <li>Select a category for your post</li>
+                  <li>Select a section for your post</li>
                   <li>Write your content and add any images or links</li>
                   <li>Click "Post" to publish</li>
                 </ol>
@@ -211,7 +211,7 @@ export const PublicHelpCenterPage = () => {
           </div>
 
           {/* Privacy & Safety Section */}
-          <div id="privacy" className="mb-12 pt-8 border-t border-app-border">
+          {/* <div id="privacy" className="mb-12 pt-8 border-t border-app-border">
             <h2 className="text-xl font-semibold mb-6">Privacy & Safety</h2>
             <div className="space-y-6 max-w-3xl">
               <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
@@ -246,15 +246,16 @@ export const PublicHelpCenterPage = () => {
                 </ul>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Community Guidelines Section */}
           <div id="community" className="mb-12 pt-8 border-t border-app-border">
             <h2 className="text-xl font-semibold mb-6">Community Guidelines</h2>
             <div className="p-6 rounded-lg max-w-3xl bg-muted/30">
               <p className=" mb-6">
-                Our community guidelines are designed to ensure Discuss remains
-                a respectful, inclusive, and constructive platform for everyone.
+                Our community guidelines are designed to ensure Discussday
+                remains a respectful, inclusive, and constructive platform for
+                everyone.
               </p>
               <div className="space-y-4">
                 <div>
@@ -307,9 +308,9 @@ export const PublicHelpCenterPage = () => {
                   <p className="">
                     For general inquiries and non-urgent issues, email us at{' '}
                     <a
-                      href="mailto:support@discuss.com"
+                      href="mailto:support@discussday.com"
                       className="text-[#0A66C2] hover:underline">
-                      support@discuss.com
+                      support@discussday.com
                     </a>
                   </p>
                   <p className=" mt-1">

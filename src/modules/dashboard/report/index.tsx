@@ -16,7 +16,7 @@ import {useSearchParams} from 'next/navigation';
 import {useState} from 'react';
 import {useReportActions} from '../actions/action-hooks/report.action-hooks';
 
-export default function ReportAbusePage() {
+export default function ReportPage() {
   const searchParams = useSearchParams();
   const {theme} = useGlobalStore(state => state);
   const contentId = searchParams.get('contentId');
@@ -69,7 +69,7 @@ export default function ReportAbusePage() {
 
   return (
     <div className="pb-20">
-      <PageHeader title="Report Abuse" />
+      <PageHeader title="Report" />
 
       <div className="p-4 max-w-2xl mx-auto">
         {!submitted ? (

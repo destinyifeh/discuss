@@ -146,6 +146,7 @@ export const AdPerformancePage = () => {
       <PageHeader
         title="Ad Performance"
         description="Manage and track your advertisements"
+        href="/home"
       />
 
       <AdPerformanceNav

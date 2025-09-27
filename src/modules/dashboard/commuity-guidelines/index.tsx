@@ -53,7 +53,7 @@ export const CommunityGuidelines = () => {
                 everyone.
               </p>
               <div className="space-x-4">
-                <Link href="/report-abuse">
+                <Link href="/report">
                   <Button
                     variant="secondary"
                     className="dark:bg-white dark:text-black dark:hover:bg-white">

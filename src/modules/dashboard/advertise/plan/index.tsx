@@ -157,12 +157,16 @@ export const AdPlanPage = () => {
       type,
     } = previewData;
 
-    // Only the basic plan requires section
+    // Only the basic & professional plans require section
     const requiresSection = plan === 'basic' || plan === 'professional';
+
     const isCommonInvalid =
       title.length < 5 || !duration || (requiresSection && !section);
 
-    if ((content && content?.length < 50) || isCommonInvalid) {
+    // ✅ Fix: Ensure content is not empty and has min length
+    const isContentInvalid = !content || content.trim().length < 50;
+
+    if (isContentInvalid || isCommonInvalid) {
       return true; // disable button
     }
 

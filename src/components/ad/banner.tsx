@@ -1,10 +1,6 @@
 'use client';
 
-import {mockAds} from '@/constants/data';
-import {useAdStore} from '@/hooks/stores/use-ad-store';
 import {useGlobalStore} from '@/hooks/stores/use-global-store';
-import {useAdManger} from '@/hooks/use-ad-manager';
-import {shuffleArray} from '@/lib/helpers';
 import {cn} from '@/lib/utils';
 import {adService} from '@/modules/dashboard/actions/ad.actions';
 import {AdPlacementProps, AdProps} from '@/types/ad-types';
@@ -89,74 +85,6 @@ export function BannerAd({
           </div>
         )}
       </a>
-    </div>
-  );
-}
-
-export function AppBannerAd3({section}: {section: string}) {
-  const bannerAds = shuffleArray(
-    mockAds.filter(ad => ad.type === 'banner' && ad.section === section),
-  );
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % bannerAds.length);
-    }, 10000); // every 10 seconds
-
-    return () => clearInterval(interval);
-  }, [bannerAds.length]);
-
-  if (bannerAds.length === 0) return null;
-
-  const currentAd = bannerAds[currentIndex];
-
-  return (
-    <div className="p-4 border-b border-app-border">
-      <BannerAd ad={currentAd} />
-    </div>
-  );
-}
-
-export function AppBannerAd({section}: {section: string}) {
-  const bannerAds = mockAds.filter(
-    ad => ad.type === 'banner' && ad.section === section,
-  );
-
-  const currentIndex = useAdStore(
-    state => state.currentBannerIndex[section] || 0,
-  );
-  const startBannerRotation = useAdStore(state => state.startBannerRotation);
-
-  useEffect(() => {
-    if (bannerAds.length > 0) {
-      startBannerRotation(section, bannerAds.length);
-    }
-  }, [bannerAds.length, section, startBannerRotation]);
-
-  if (bannerAds.length === 0) return null;
-
-  const currentAd = bannerAds[currentIndex];
-
-  return (
-    <div className="p-4 border-b border-app-border">
-      <BannerAd ad={currentAd} />
-    </div>
-  );
-}
-
-export function AppBannerAd4({section}: {section: string}) {
-  const ad = useAdManger(
-    mockAds,
-    ad => ad.type === 'banner' && ad.section === section,
-    10000, // 10s interval
-  );
-
-  if (!ad) return null;
-
-  return (
-    <div className="p-4 border-b border-app-border">
-      <BannerAd ad={ad} />
     </div>
   );
 }

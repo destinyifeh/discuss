@@ -345,7 +345,8 @@ export const SidebarLayoutLeft = () => {
 
 export const SidebarLayoutRight = () => {
   const [mounted, setMounted] = useState(false);
-
+  const location = usePathname();
+  const isActive = (path: string) => location === path;
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -357,7 +358,7 @@ export const SidebarLayoutRight = () => {
     <aside className="hidden lg:flex flex-col w-80 h-screen border-0 p-4 border-app-border ">
       <div className="sticky top-4 space-y-4">
         <div className="rounded-lg p-4 bg-app-hover dark:bg-background border border-app-border">
-          <h2 className="font-bold text-xl mb-4">Discuss</h2>
+          <h2 className="font-bold text-xl mb-4">Discussday</h2>
           <div className="flex flex-row flex-wrap items-center">
             {Sections.map(section => (
               <Link
@@ -403,7 +404,12 @@ export const SidebarLayoutRight = () => {
               <Link
                 key={resource.label}
                 href={`${resource.path}`}
-                className="flex items-center justify-between p-2 hover:bg-white rounded-md dark:hover:bg-app-dark-bg/10 active:scale-90 transition-transform duration-150">
+                className={cn(
+                  'flex items-center justify-between p-2 hover:bg-white rounded-md dark:hover:bg-app-dark-bg/10 active:scale-90 transition-transform duration-150',
+                  isActive(resource.path)
+                    ? 'font-bold bg-white dark:bg-app-dark-bg/10'
+                    : 'font-normal',
+                )}>
                 <span className="text-app font-semibold">{resource.label}</span>
               </Link>
             ))}

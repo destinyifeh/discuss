@@ -12,7 +12,7 @@ export const AboutPage = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">About Discussday</h1>
+            <h1 className="text-3xl font-bold mb-4">About Discussday</h1>
             <p className="text-xl max-w-2xl mx-auto">
               Building the future of online discussions with meaningful
               conversations and authentic connections.
@@ -102,15 +102,15 @@ export const AboutPage = () => {
           </div>
 
           {/* Team Section */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Our Team</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-6">
-                Discuss is built by a passionate team of developers, designers,
-                and community managers who are committed to creating the best
-                possible experience for our users.
+                Discussday is built by a passionate team of developers,
+                designers, and community managers who are committed to creating
+                the best possible experience for our users.
               </p>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
@@ -130,7 +130,7 @@ export const AboutPage = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Contact Section */}
           <Card className="mt-5">

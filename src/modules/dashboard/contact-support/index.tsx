@@ -138,7 +138,7 @@ export const ContactSupportPage = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-app" />
-                  <span>support@discuss.com</span>
+                  <span>support@discussday.com</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <PhoneCall className="h-5 w-5 text-app" />

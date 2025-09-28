@@ -529,7 +529,7 @@ export const PostDetailPage = ({params}: PostDetailPageProps) => {
             if (!hasNextPage) {
               return (
                 <div className="p-4 border-t border-app-border mt-6">
-                  <h2 className="text-lg font-bold mb-3">Related Posts</h2>
+                  <h2 className="text-lg font-bold mb-3">More Discussions</h2>
                   <RelatedPosts postId={post._id} />
                 </div>
               );
